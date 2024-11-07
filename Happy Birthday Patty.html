@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Happy Birthday Patty!!!</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+            overflow: hidden;
+            transition: background 2s ease-in-out; 
+        }
+
+        .panda {
+            text-align: center;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-size: 2.5em;
+            color: white;
+            opacity: 1;
+            transition: opacity 2s ease-in-out;
+        }
+
+        h1 {
+            margin: 0;
+            position: relative;
+            animation: bounce 2s infinite;
+        }
+
+        h1 span {
+            display: inline-block;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        h1 span:nth-child(odd) {
+            animation-delay: 0.2s;
+        }
+
+        h1 span:nth-child(even) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .balloon {
+            position: absolute;
+            bottom: -200px;
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(to bottom, #ff9a9e, #fad0c4);
+            border-radius: 50% 50% 45% 45%;
+            animation: floatUp 5s ease-in-out forwards;
+            cursor: pointer;
+        }
+
+        .balloon:before {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            width: 2px;
+            height: 30px;
+            background: white;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); }
+            95% { transform: translateY(-90vh); }
+            100% { transform: translateY(-90vh); opacity: 0; }
+        }
+
+        .explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, yellow, red, transparent);
+            opacity: 1;
+            pointer-events: none;
+            animation: explode 1s forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="panda">
+        <h1>
+            <span>H</span>
+            <span>A</span>
+            <span>P</span>
+            <span>P</span>
+            <span>Y</span>
+            <br>
+            <span>B</span>
+            <span>I</span>
+            <span>R</span>
+            <span>T</span>
+            <span>H</span>
+            <span>D</span>
+            <span>A</span>
+            <span>Y</span>
+            <br>
+            <span>P</span>
+            <span>A</span>
+            <span>T</span>
+            <span>T</span>
+            <span>Y</span>
+            <span>!</span>
+            <span>!</span>
+            <span>!</span>
+            <br>
+            <span>LOVE:</span>
+            <span>P</span>
+            <span>A</span>
+            <span>N</span>
+            <span>D</span>
+            <span>A</span>
+        </h1>
+    </div>
+
+    <script>
+        let allow_spawn = true
+        function spawn_balloon() {
+            if (!allow_spawn){
+              return;
+            }
+            const balloon = document.createElement('div');
+            balloon.classList.add('balloon');
+            const random_location = Math.random() * 80 + 10;
+            const random_size = Math.random() * 20 + 40;
+            balloon.style.left = `${random_location}%`;
+            balloon.style.width = `${random_size}px`;
+            balloon.style.height = `${random_size * 1.4}px`;
+            document.body.appendChild(balloon);
+
+            balloon.addEventListener('animationend', function() {
+                create_boomboom(this);
+                this.remove();
+                spawn_balloon(); 
+            });
+        }
+
+        function create_boomboom(balloon) {
+            const explosion = document.createElement('div');
+            explosion.classList.add('explosion');
+            
+            const balloonRect = balloon.getBoundingClientRect();
+            explosion.style.left = `${balloonRect.left + balloonRect.width / 2 - 50}px`; 
+            explosion.style.top = `${balloonRect.top - 50}px`; 
+            
+            document.body.appendChild(explosion);
+
+            setTimeout(() => explosion.remove(), 1000);         
+        }
+
+        for (let i = 0; i < 8; i++) {
+            spawn_balloon();
+        }
+
+        function change_background() {
+            document.body.style.background = "linear-gradient(to right, #f7797d, #fbd786, #c6ffdd)";
+           
+        }
+
+        function hideText() {
+            allow_spawn = false;
+            const pandaText = document.querySelector('.panda');
+            pandaText.style.opacity = 0; 
+            setTimeout(() => {
+                const newMessage = document.createElement('div');
+                newMessage.style.position = 'absolute';
+                newMessage.style.top = '50%';
+                newMessage.style.left = '50%';
+                newMessage.style.transform = 'translate(-50%, -50%)';
+                newMessage.textContent = "Thank you so much for being so patient and kind with this big grizzly cuddly panda!!! I love patty so much!!! Pattys already pretty, smart, kind, patty is perfect the way she is and there is nothing panda wishes for more, keep being patty and remember tony is always here to support you!!!";
+                newMessage.style.fontSize = '2em'
+                document.body.appendChild(newMessage);
+
+                setTimeout(() => {
+                    newMessage.style.opacity = 1;
+                }, 100); 
+            }, 2000); 
+        }
+
+
+        setTimeout(() => {
+            hideText();
+            change_background();
+        }, 5000); 
+        
+    </script>
+</body>
+</html>
