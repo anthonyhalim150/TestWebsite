@@ -1,0 +1,4 @@
+[[redirects]]
+from = "/*"
+to = "/Happy.html"
+status = 200
