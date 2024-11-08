@@ -5,20 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anniversary Celebration - [Couple's Names]</title>
   <style>
+    /* General Styles */
     body {
       font-family: Arial, sans-serif;
       color: #333;
-      background-color: #ffe6e9; /* Soft pink background */
+      background: linear-gradient(135deg, #ff5c8d, #ff6fb5); /* Vibrant pink gradient */
       margin: 0;
       padding: 0;
+      overflow: hidden; /* Prevents scrolling due to floating hearts */
     }
     header {
       text-align: center;
       padding: 20px;
-      background-color: #ffccd5; /* Slightly darker pink for header */
+      background-color: rgba(255, 204, 213, 0.8); /* Semi-transparent pink */
+      border-bottom: 2px solid #ff6fb5;
     }
     header h1 {
-      color: #d9534f;
+      color: #ff3366;
       margin: 0;
     }
     nav {
@@ -28,7 +31,7 @@
     }
     nav a {
       margin: 0 10px;
-      color: #d9534f;
+      color: #ff3366;
       text-decoration: none;
       font-weight: bold;
     }
@@ -47,9 +50,67 @@
       border-radius: 10px;
       margin: 10px;
     }
+    footer {
+      background-color: rgba(255, 204, 213, 0.8);
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* Floating Hearts */
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #ff3366;
+      transform: rotate(45deg);
+      animation: float 5s infinite ease-in-out;
+      opacity: 0.8;
+    }
+    .heart::before,
+    .heart::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #ff3366;
+      border-radius: 50%;
+    }
+    .heart::before {
+      top: -10px;
+      left: 0;
+    }
+    .heart::after {
+      left: 10px;
+      top: 0;
+    }
+    /* Heart Animation */
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(45deg);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-20vh) rotate(45deg);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
+
+<!-- Floating Hearts -->
+<div class="heart" style="left: 10%; animation-delay: 0s;"></div>
+<div class="heart" style="left: 20%; animation-delay: 1s;"></div>
+<div class="heart" style="left: 30%; animation-delay: 2s;"></div>
+<div class="heart" style="left: 40%; animation-delay: 3s;"></div>
+<div class="heart" style="left: 50%; animation-delay: 4s;"></div>
+<div class="heart" style="left: 60%; animation-delay: 1.5s;"></div>
+<div class="heart" style="left: 70%; animation-delay: 2.5s;"></div>
+<div class="heart" style="left: 80%; animation-delay: 3.5s;"></div>
+<div class="heart" style="left: 90%; animation-delay: 0.5s;"></div>
 
 <header>
   <h1>Happy Anniversary, [Names]!</h1>
@@ -92,7 +153,7 @@
   <!-- Optionally add a form for people to submit messages -->
 </section>
 
-<footer style="background-color: #ffccd5; padding: 20px; text-align: center;">
+<footer>
   <p>&copy; [Year] Anniversary Celebration | Created with love for [Names]</p>
 </footer>
 
