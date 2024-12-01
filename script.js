@@ -1,9 +1,3 @@
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/loaders/GLTFLoader.js';
-
-
-const loader = new GLTFLoader();//For loading
-
-
 // Sets up the scene, camera, and renderer
 scene = new THREE.Scene();
 camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -25,14 +19,12 @@ finalGround = new THREE.Mesh(ground, ground_color);
 finalGround.rotation.x = -Math.PI / 2; // Make the ground horizontal
 scene.add(finalGround);
 
-let car;
-// Load custom car model
-loader.load('car.glb', (gltf) => {
-    car = gltf.scene;
-    car.position.set(0, 0.25, 0); // Position the car
-    scene.add(car); // Add to scene
-});
+car_shape= new THREE.BoxGeometry(2, 1, 4); // Main body
+car_color = new THREE.MeshStandardMaterial({ color: 0x000000 }); // Black color
+car= new THREE.Mesh(car_shape, car_color);
+car.position.set(0, 0.5, 0); // Position the car body
 
+scene.add(car);
 
 camera.position.set(0, 10, 20); // Position camera above and behind the ground
 camera.lookAt(0, 0, 0); // Make the camera look at the scene center
