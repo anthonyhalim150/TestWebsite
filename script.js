@@ -14,7 +14,7 @@ camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight,
 renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 
-// Ensure container exists
+
 const container = document.getElementById('container');
 if (container) {
     container.appendChild(renderer.domElement);
@@ -89,9 +89,7 @@ function check_collision(object1, object2) {
     return box1.intersectsBox(box2); // Check if the boxes intersect
 }
 let keys = car_movement();
-function animate() {
-    // Move car based on input
-    
+function check_car_movement(){
     if (keys.ArrowUp) {
         car.position.z -= movement_speed * Math.cos(car.rotation.y);
         car.position.x -= movement_speed * Math.sin(car.rotation.y);
@@ -106,6 +104,11 @@ function animate() {
     if (keys.ArrowRight) {
         car.rotation.y -= rotation_movement_speed;
     }
+}
+function animate() {
+    // Move car based on input
+    check_car_movement();
+    
     if (check_collision(car, door)) {
         map2(scene, car)
     }
