@@ -1,10 +1,18 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
-export function map2(scene, car, light, ambientLight) {
+export function map2(scene, car) {
+    let light, ambientLight;
+    let ground, ground_color, final_ground;
+    let door_shape, door_color, door;
     // Clear the current scene
     while (scene.children.length > 0) {
         scene.remove(scene.children[0]);
     }
-    
+    light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
 
     // Add a new ground
     const newGround = new THREE.PlaneGeometry(50, 50);

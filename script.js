@@ -55,29 +55,43 @@ let movement_speed = 0.1; // Movement speed
 let rotation_movement_speed = 0.05; // Rotation speed
 
 // Handle keyboard input for car movement
-let keys = {
-    ArrowUp: false,
-    ArrowDown: false,
-    ArrowLeft: false,
-    ArrowRight: false,
-};
+// Function to track keyboard input
+function car_movement() {
+    const keys = {
+        ArrowUp: false,
+        ArrowDown: false,
+        ArrowLeft: false,
+        ArrowRight: false,
+    };
 
-document.addEventListener('keydown', (event) => {
-    if (keys.hasOwnProperty(event.key)) keys[event.key] = true;
-});
+    // Listen for keydown event
+    document.addEventListener('keydown', (event) => {
+        if (keys.hasOwnProperty(event.key)) {
+            keys[event.key] = true;
+        }
+    });
 
-document.addEventListener('keyup', (event) => {
-    if (keys.hasOwnProperty(event.key)) keys[event.key] = false;
-});
+    // Listen for keyup event
+    document.addEventListener('keyup', (event) => {
+        if (keys.hasOwnProperty(event.key)) {
+            keys[event.key] = false;
+        }
+    });
+
+    // Return the keys object to allow access from outside the function
+    return keys;
+}
+
 
 function check_collision(object1, object2) {
     const box1 = new THREE.Box3().setFromObject(object1); // Bounding box for object 1
     const box2 = new THREE.Box3().setFromObject(object2); // Bounding box for object 2
     return box1.intersectsBox(box2); // Check if the boxes intersect
 }
-
+let keys = car_movement();
 function animate() {
     // Move car based on input
+    
     if (keys.ArrowUp) {
         car.position.z -= movement_speed * Math.cos(car.rotation.y);
         car.position.x -= movement_speed * Math.sin(car.rotation.y);
@@ -93,7 +107,7 @@ function animate() {
         car.rotation.y -= rotation_movement_speed;
     }
     if (check_collision(car, door)) {
-        map2(scene, car, light, ambientLight)
+        map2(scene, car)
     }
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
