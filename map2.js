@@ -4,6 +4,7 @@ export function map2(scene, car, light, ambientLight) {
     while (scene.children.length > 0) {
         scene.remove(scene.children[0]);
     }
+    
 
     // Add a new ground
     const newGround = new THREE.PlaneGeometry(50, 50);
