@@ -1,38 +1,92 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
-export function map2(scene, car) {
-    let light, ambientLight;
-    let ground, ground_color, final_ground;
-    let door_shape, door_color, door;
-    // Clear the current scene
-    while (scene.children.length > 0) {
-        scene.remove(scene.children[0]);
+import { map1 } from './map1.js';
+import { create_camera, create_car, create_light, create_ground, create_door, check_collision } from './create.js'; // Import utilities
+
+export function map2(scene = null, car = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
+    let camera, renderer, door;
+
+    if (!scene) {
+        scene = new THREE.Scene();
     }
-    light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 10, 10);
+
+    if (!car) {
+        car = create_car();
+    }
+
+    camera = create_camera(0, 10, 20);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const container = document.getElementById('container');
+    container.innerHTML = '';
+    container.appendChild(renderer.domElement);
+
+    scene.clear();
+
+    const light = create_light('directional', 0xffffff, 1, [10, 10, 10]);
     scene.add(light);
 
-    ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const ambientLight = create_light('ambient', 0xffffff, 0.5);
     scene.add(ambientLight);
 
-    // Add a new ground
-    const newGround = new THREE.PlaneGeometry(50, 50);
-    const newGroundMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa }); // Gray color for new ground
-    const finalNewGround = new THREE.Mesh(newGround, newGroundMaterial);
-    finalNewGround.rotation.x = -Math.PI / 2;
-    scene.add(finalNewGround);
+    const ground = create_ground(50, 50, 0xaaaaaa);
+    scene.add(ground);
 
-    // Add a new object (e.g., trees, obstacles)
-    const treeGeometry = new THREE.CylinderGeometry(0.5, 0.5, 5);
-    const treeMaterial = new THREE.MeshStandardMaterial({ color: 0x228b22 }); // Green for trees
-    const tree = new THREE.Mesh(treeGeometry, treeMaterial);
-    tree.position.set(0, 2.5, 0); // Place the tree on the ground
-    scene.add(tree);
-
-    // Re-add the car to the new map
-    car.position.set(0, 0.25, 0); // Reset car position
+    car.position.set(0, 0.5, 0);
     scene.add(car);
 
-    // Re-add lighting
-    scene.add(light);
-    scene.add(ambientLight);
+    door = create_door([5, 5, 0.4], 0xff0000, [10, 0.25, 10]);
+    scene.add(door);
+
+    const keys = {
+        ArrowUp: false,
+        ArrowDown: false,
+        ArrowLeft: false,
+        ArrowRight: false,
+    };
+
+    function handleKeyDown(event) {
+        if (keys.hasOwnProperty(event.key)) keys[event.key] = true;
+    }
+
+    function handleKeyUp(event) {
+        if (keys.hasOwnProperty(event.key)) keys[event.key] = false;
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    
+    function animate_map2() {
+        if (keys.ArrowUp) {
+            car.position.z += movementSpeed * Math.cos(car.rotation.y);
+            car.position.x += movementSpeed * Math.sin(car.rotation.y);
+        }
+        if (keys.ArrowDown) {
+            car.position.z -= movementSpeed * Math.cos(car.rotation.y);
+            car.position.x -= movementSpeed * Math.sin(car.rotation.y);
+        }
+        if (keys.ArrowLeft) {
+            car.rotation.y += rotationSpeed;
+        }
+        if (keys.ArrowRight) {
+            car.rotation.y -= rotationSpeed;
+        }
+        camera.position.set(
+            car.position.x - 10 * Math.sin(car.rotation.y),
+            car.position.y + 5,
+            car.position.z - 10 * Math.cos(car.rotation.y)
+        );
+        camera.lookAt(car.position);
+
+        if (check_collision(car, door)) {
+            scene.clear();
+            map1(scene, car, movementSpeed, rotationSpeed);
+            return;
+        }
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate_map2);
+    }
+
+    animate_map2();
 }

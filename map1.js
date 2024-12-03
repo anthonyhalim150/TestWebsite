@@ -1,62 +1,49 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
 import { map2 } from './map2.js';
+import { create_camera, create_car, create_light, create_ground, create_door, check_collision } from './create.js'; // Import utilities
 
+export function map1(scene = null, car = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
+    let camera, renderer, door;
 
-// Variable declarations
-let scene, camera, renderer;
-let light, ambientLight;
-let ground, ground_color, final_ground;
-let car_shape, car_color, car;
-let door_shape, door_color, door;
+    if (!scene) {
+        scene = new THREE.Scene();
+    }
 
-scene = new THREE.Scene();
-camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
+    if (!car) {
+        car = create_car();
+    }
 
+    camera = create_camera(0, 10, 20);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-const container = document.getElementById('container');
-if (container) {
+    const container = document.getElementById('container');
+    container.innerHTML = ''; // Clear the container DOM
     container.appendChild(renderer.domElement);
-} else {
-    console.error("Container element not found");
-}
 
-light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(10, 10, 10);
-scene.add(light);
+    // Clear any existing scene
+    scene.clear();
 
-ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
+    // Lighting
+    const light = create_light('directional', 0xffffff, 1, [10, 10, 10]);
+    scene.add(light);
 
-ground = new THREE.PlaneGeometry(50, 50);
-ground_color = new THREE.MeshStandardMaterial({ color: 0x007700 });
-final_ground = new THREE.Mesh(ground, ground_color);
-final_ground.rotation.x = -Math.PI / 2; // Make the ground horizontal
-scene.add(final_ground);
+    const ambientLight = create_light('ambient', 0xffffff, 0.5);
+    scene.add(ambientLight);
 
-car_shape = new THREE.BoxGeometry(2, 1, 4); // Main body
-car_color = new THREE.MeshStandardMaterial({ color: 0x000000 }); // Black color
-car = new THREE.Mesh(car_shape, car_color);
-car.position.set(0, 0.5, 0); // Position the car body
-scene.add(car);
+    // Ground
+    const ground = create_ground();
+    scene.add(ground);
 
-camera.position.set(0, 10, 20); // Position camera above and behind the ground
-camera.lookAt(0, 0, 0); // Make the camera look at the scene center
+    // Car
+    car.position.set(0, 0.5, 0); // Reset car position
+    scene.add(car);
 
-door_shape = new THREE.BoxGeometry(5, 5, 0.4);
-door_color = new THREE.MeshStandardMaterial({ color: 0x0000ff });
-door = new THREE.Mesh(door_shape, door_color);
-door.position.set(3, 0.25, 10);
-scene.add(door);
+    // Door
+    door = create_door([5, 5, 0.4], 0x0000ff, [3, 0.25, 10]);
+    scene.add(door);
 
-// Movement variables
-let movement_speed = 0.1; // Movement speed
-let rotation_movement_speed = 0.05; // Rotation speed
-
-// Handle keyboard input for car movement
-// Function to track keyboard input
-function car_movement() {
+    // Movement logic
     const keys = {
         ArrowUp: false,
         ArrowDown: false,
@@ -64,56 +51,53 @@ function car_movement() {
         ArrowRight: false,
     };
 
-    // Listen for keydown event
-    document.addEventListener('keydown', (event) => {
-        if (keys.hasOwnProperty(event.key)) {
-            keys[event.key] = true;
+    function handleKeyDown(event) {
+        if (keys.hasOwnProperty(event.key)) keys[event.key] = true;
+    }
+
+    function handleKeyUp(event) {
+        if (keys.hasOwnProperty(event.key)) keys[event.key] = false;
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    function animate_map1() {
+        if (keys.ArrowUp) {
+            car.position.z += movementSpeed * Math.cos(car.rotation.y);
+            car.position.x += movementSpeed * Math.sin(car.rotation.y);
         }
-    });
-
-    // Listen for keyup event
-    document.addEventListener('keyup', (event) => {
-        if (keys.hasOwnProperty(event.key)) {
-            keys[event.key] = false;
+        if (keys.ArrowDown) {
+            car.position.z -= movementSpeed * Math.cos(car.rotation.y);
+            car.position.x -= movementSpeed * Math.sin(car.rotation.y);
         }
-    });
+        if (keys.ArrowLeft) {
+            car.rotation.y += rotationSpeed;
+        }
+        if (keys.ArrowRight) {
+            car.rotation.y -= rotationSpeed;
+        }
 
-    // Return the keys object to allow access from outside the function
-    return keys;
-}
+        camera.position.set(
+            car.position.x - 10 * Math.sin(car.rotation.y),
+            car.position.y + 8, // Higher for top-down view
+            car.position.z - 10 * Math.cos(car.rotation.y)
+        );
+        camera.lookAt(car.position);
 
+        if (check_collision(car, door)) {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
 
-function check_collision(object1, object2) {
-    const box1 = new THREE.Box3().setFromObject(object1); // Bounding box for object 1
-    const box2 = new THREE.Box3().setFromObject(object2); // Bounding box for object 2
-    return box1.intersectsBox(box2); // Check if the boxes intersect
-}
-let keys = car_movement();
-function check_car_movement(){
-    if (keys.ArrowUp) {
-        car.position.z -= movement_speed * Math.cos(car.rotation.y);
-        car.position.x -= movement_speed * Math.sin(car.rotation.y);
-    }
-    if (keys.ArrowDown) {
-        car.position.z += movement_speed * Math.cos(car.rotation.y);
-        car.position.x += movement_speed * Math.sin(car.rotation.y);
-    }
-    if (keys.ArrowLeft) {
-        car.rotation.y += rotation_movement_speed;
-    }
-    if (keys.ArrowRight) {
-        car.rotation.y -= rotation_movement_speed;
-    }
-}
-function animate() {
-    // Move car based on input
-    check_car_movement();
-    
-    if (check_collision(car, door)) {
-        map2(scene, car)
-    }
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-}
+            scene.clear(); // Clear the scene fully
+            map2(scene, car, movementSpeed, rotationSpeed); // Switch to map2
+            return;
+        }
 
-animate(); // Start the animation loop
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate_map1);
+    }
+
+    animate_map1();
+}
+map1();
