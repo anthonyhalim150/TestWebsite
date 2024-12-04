@@ -9,7 +9,7 @@ export function map1(scene = null, object_path = null, movementSpeed = 0.1, rota
     if (!scene) {
         scene = new THREE.Scene();
     }
-    object = create_object(object_path);
+    object = create_object();
 
     camera = create_camera(0, 10, 20);
     renderer = new THREE.WebGLRenderer();

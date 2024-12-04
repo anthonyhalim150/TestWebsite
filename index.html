@@ -10,6 +10,12 @@
 </head>
 
 <body>
+  <div id="start-screen">
+    <h1>🐼 Welcome to my portfolio website! 🐼</h1>
+    <button id="start-button">Start</button>
+  </div>
+  <!-- Container for Three.js canvas (initially hidden) -->
+  <div id="container" style="display: none;"></div> 
   <!-- An empty `div` where the Three.js renderer will attach the 3D canvas -->
   <div id="container"></div> 
   <script type="importmap">
@@ -22,6 +28,15 @@
   </script>
   <!-- Loads the Three.js library from a CDN to use its functionality -->
   <!-- Loads your custom JavaScript code for the 3D map and car -->
-  <script type = "module" src="/map1.js"></script> 
+  <script type="module">
+    document.getElementById('start-button').addEventListener('click', () => {
+      // Hide start screen and show the container
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('container').style.display = 'block';
+      
+      // Dynamically import and run map1.js
+      import('./map1.js');
+    });
+  </script>
 </body>
 </html>
