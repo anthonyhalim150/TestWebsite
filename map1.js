@@ -3,16 +3,13 @@ import { map2 } from './map2.js';
 import { create_camera, create_car, create_light, create_ground, create_door, check_collision } from './create.js'; 
 
 
-export function map1(scene = null, car = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
-    let camera, renderer, door;
+export function map1(scene = null,car_path = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
+    let camera, renderer, door, car;
 
     if (!scene) {
         scene = new THREE.Scene();
     }
-
-    if (!car) {
-        car = create_car();
-    }
+    car = create_car(car_path);
 
     camera = create_camera(0, 10, 20);
     renderer = new THREE.WebGLRenderer();

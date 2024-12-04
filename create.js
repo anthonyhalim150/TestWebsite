@@ -1,17 +1,40 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+
+export function create_car(path = null, body_shape = [2, 1, 4], body_color = 0x000000) {
+    let car;
+    if (path) {
+        // Using GLTFLoader to load the model
+        const loader = new GLTFLoader();
+        loader.load(
+            path,  // Path to the model file
+            function (gltf) {
+                car = gltf.scene;  // Get the model's scene
+                car.position.set(0, 0.5, 0);  // Set the position of the car
+            },
+            undefined, // Progress callback (optional)
+            function (error) {  // Error handling
+                console.error('Error loading model: ', error);
+            }
+        );
+        
+    } else {
+        // If no model path is provided:
+        const car_shape = new THREE.BoxGeometry(...body_shape);
+        const car_color = new THREE.MeshStandardMaterial({ color: body_color });
+        car = new THREE.Mesh(car_shape, car_color);
+    }
+    return car;
+}
+
+
 
 
 export function create_camera(x = 0, y = 0, z = 0, aspectRatio = window.innerWidth / window.innerHeight) {
     const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
     camera.position.set(x, y, z);
     return camera;
-}
-
-export function create_car(body_shape = [2, 1, 4], body_color = 0x000000) {
-    const car_shape = new THREE.BoxGeometry(...body_shape);
-    const car_color = new THREE.MeshStandardMaterial({ color: body_color });
-    const car = new THREE.Mesh(car_shape, car_color);
-    return car;
 }
 
 export function create_light(type = 'directional', color = 0xffffff, intensity = 1, position = [10, 10, 10]) {

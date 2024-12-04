@@ -80,7 +80,7 @@ export function map2(scene = null, car = null, movementSpeed = 0.1, rotationSpee
 
         if (check_collision(car, door)) {
             scene.clear();
-            map1(scene, car, movementSpeed, rotationSpeed);
+            map1();
             return;
         }
 
