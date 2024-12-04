@@ -1,17 +1,15 @@
 import * as THREE from 'three';
 import { map1 } from './map1.js';
-import { create_camera, create_car, create_light, create_ground, create_door, check_collision } from './create.js'; // Import utilities
+import { create_camera, create_object, create_light, create_ground, create_door, check_collision } from './create.js'; // Import utilities
 
-export function map2(scene = null, car = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
-    let camera, renderer, door;
+export function map2(scene = null, object_path = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
+    let camera, renderer, door, object;
 
     if (!scene) {
         scene = new THREE.Scene();
     }
 
-    if (!car) {
-        car = create_car();
-    }
+    object = create_object(object_path);
 
     camera = create_camera(0, 10, 20);
     renderer = new THREE.WebGLRenderer();
@@ -32,8 +30,8 @@ export function map2(scene = null, car = null, movementSpeed = 0.1, rotationSpee
     const ground = create_ground(50, 50, 0xaaaaaa);
     scene.add(ground);
 
-    car.position.set(0, 0.5, 0);
-    scene.add(car);
+    object.position.set(0, 0.5, 0);
+    scene.add(object);
 
     door = create_door([5, 5, 0.4], 0xff0000, [10, 0.25, 10]);
     scene.add(door);
@@ -62,27 +60,27 @@ export function map2(scene = null, car = null, movementSpeed = 0.1, rotationSpee
     
     function animate_map2() {
         if (keys.ArrowUp || keys.w) {
-            car.position.z += movementSpeed * Math.cos(car.rotation.y);
-            car.position.x += movementSpeed * Math.sin(car.rotation.y);
+            object.position.z += movementSpeed * Math.cos(object.rotation.y);
+            object.position.x += movementSpeed * Math.sin(object.rotation.y);
         }
         if (keys.ArrowDown || keys.s) {
-            car.position.z -= movementSpeed * Math.cos(car.rotation.y);
-            car.position.x -= movementSpeed * Math.sin(car.rotation.y);
+            object.position.z -= movementSpeed * Math.cos(object.rotation.y);
+            object.position.x -= movementSpeed * Math.sin(object.rotation.y);
         }
         if (keys.ArrowLeft || keys.a) {
-            car.rotation.y += rotationSpeed;
+            object.rotation.y += rotationSpeed;
         }
         if (keys.ArrowRight || keys.d) {
-            car.rotation.y -= rotationSpeed;
+            object.rotation.y -= rotationSpeed;
         }
         camera.position.set(
-            car.position.x - 10 * Math.sin(car.rotation.y),
-            car.position.y + 5,
-            car.position.z - 10 * Math.cos(car.rotation.y)
+            object.position.x - 10 * Math.sin(object.rotation.y),
+            object.position.y + 5,
+            object.position.z - 10 * Math.cos(object.rotation.y)
         );
-        camera.lookAt(car.position);
+        camera.lookAt(object.position);
 
-        if (check_collision(car, door)) {
+        if (check_collision(object, door)) {
             scene.clear();
             map1();
             return;

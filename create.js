@@ -3,16 +3,16 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 
 
-export function create_car(path = null, body_shape = [2, 1, 4], body_color = 0x000000) {
-    let car;
+export function create_object(path = null, body_shape = [2, 1, 4], body_color = 0x000000) {
+    let object;
     if (path) {
         // Using GLTFLoader to load the model
         const loader = new GLTFLoader();
         loader.load(
             path,  // Path to the model file
             function (gltf) {
-                car = gltf.scene;  // Get the model's scene
-                car.position.set(0, 0.5, 0);  // Set the position of the car
+                object = gltf.scene;  // Get the model's scene
+                object.position.set(0, 0.5, 0);  // Set the position of the object
             },
             undefined, // Progress callback (optional)
             function (error) {  // Error handling
@@ -24,9 +24,9 @@ export function create_car(path = null, body_shape = [2, 1, 4], body_color = 0x0
         // If no model path is provided:
         const car_shape = new THREE.BoxGeometry(...body_shape);
         const car_color = new THREE.MeshStandardMaterial({ color: body_color });
-        car = new THREE.Mesh(car_shape, car_color);
+        object = new THREE.Mesh(car_shape, car_color);
     }
-    return car;
+    return object;
 }
 
 

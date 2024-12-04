@@ -1,15 +1,15 @@
 import * as THREE from 'three';
 import { map2 } from './map2.js';
-import { create_camera, create_car, create_light, create_ground, create_door, check_collision } from './create.js'; 
+import { create_camera, create_object, create_light, create_ground, create_door, check_collision } from './create.js'; 
 
 
-export function map1(scene = null,car_path = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
-    let camera, renderer, door, car;
+export function map1(scene = null, object_path = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
+    let camera, renderer, door, object;
 
     if (!scene) {
         scene = new THREE.Scene();
     }
-    car = create_car(car_path);
+    object = create_object(object_path);
 
     camera = create_camera(0, 10, 20);
     renderer = new THREE.WebGLRenderer();
@@ -33,9 +33,9 @@ export function map1(scene = null,car_path = null, movementSpeed = 0.1, rotation
     const ground = create_ground();
     scene.add(ground);
 
-    // Car
-    car.position.set(0, 0.5, 0); // Reset car position
-    scene.add(car);
+    // object
+    object.position.set(0, 0.5, 0); // Reset object position
+    scene.add(object);
 
     // Door
     door = create_door([5, 5, 0.4], 0x0000ff, [3, 0.25, 10]);
@@ -66,33 +66,33 @@ export function map1(scene = null,car_path = null, movementSpeed = 0.1, rotation
 
     function animate_map1() {
         if (keys.ArrowUp || keys.w) {
-            car.position.z += movementSpeed * Math.cos(car.rotation.y);
-            car.position.x += movementSpeed * Math.sin(car.rotation.y);
+            object.position.z += movementSpeed * Math.cos(object.rotation.y);
+            object.position.x += movementSpeed * Math.sin(object.rotation.y);
         }
         if (keys.ArrowDown || keys.s) {
-            car.position.z -= movementSpeed * Math.cos(car.rotation.y);
-            car.position.x -= movementSpeed * Math.sin(car.rotation.y);
+            object.position.z -= movementSpeed * Math.cos(object.rotation.y);
+            object.position.x -= movementSpeed * Math.sin(object.rotation.y);
         }
         if (keys.ArrowLeft || keys.a) {
-            car.rotation.y += rotationSpeed;
+            object.rotation.y += rotationSpeed;
         }
         if (keys.ArrowRight || keys.d) {
-            car.rotation.y -= rotationSpeed;
+            object.rotation.y -= rotationSpeed;
         }
 
         camera.position.set(
-            car.position.x - 10 * Math.sin(car.rotation.y),
-            car.position.y + 8, // Higher for top-down view
-            car.position.z - 10 * Math.cos(car.rotation.y)
+            object.position.x - 10 * Math.sin(object.rotation.y),
+            object.position.y + 8, // Higher for top-down view
+            object.position.z - 10 * Math.cos(object.rotation.y)
         );
-        camera.lookAt(car.position);
+        camera.lookAt(object.position);
 
-        if (check_collision(car, door)) {
+        if (check_collision(object, door)) {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('keyup', handleKeyUp);
 
             scene.clear(); // Clear the scene fully
-            map2(scene, car, movementSpeed, rotationSpeed); // Switch to map2
+            map2(); // Switch to map2
             return;
         }
 
