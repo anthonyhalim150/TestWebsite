@@ -3,14 +3,14 @@ import { map2 } from './map2.js';
 import { create_camera, create_object, create_light, create_ground, create_door, check_collision } from './create.js'; 
 
 
-export function map1(scene = null, object_path = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
+export async function map1(scene = null, object_path = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
     let camera, renderer, door, object;
 
     if (!scene) {
         scene = new THREE.Scene();
     }
-    object = create_object();
-
+    object = await create_object(object_path);
+    
     camera = create_camera(0, 10, 20);
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -34,11 +34,10 @@ export function map1(scene = null, object_path = null, movementSpeed = 0.1, rota
     scene.add(ground);
 
     // object
-    object.position.set(0, 0.5, 0); // Reset object position
     scene.add(object);
 
     // Door
-    door = create_door([5, 5, 0.4], 0x0000ff, [3, 0.25, 10]);
+    door = create_door([5, 5, 0.4], 0x0000ff, [3, 0.25, 100]);
     scene.add(door);
 
     // Movement logic
@@ -102,4 +101,4 @@ export function map1(scene = null, object_path = null, movementSpeed = 0.1, rota
 
     animate_map1();
 }
-map1();
+map1(null, 'panda1.glb');

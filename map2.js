@@ -2,14 +2,14 @@ import * as THREE from 'three';
 import { map1 } from './map1.js';
 import { create_camera, create_object, create_light, create_ground, create_door, check_collision } from './create.js'; // Import utilities
 
-export function map2(scene = null, object_path = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
+export async function map2(scene = null, object_path = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
     let camera, renderer, door, object;
 
     if (!scene) {
         scene = new THREE.Scene();
     }
 
-    object = create_object(object_path);
+    object = await create_object(object_path);
 
     camera = create_camera(0, 10, 20);
     renderer = new THREE.WebGLRenderer();

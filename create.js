@@ -3,31 +3,37 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 
 
-export function create_object(path = null, body_shape = [2, 1, 4], body_color = 0x000000) {
-    let object;
-    if (path) {
-        // Using GLTFLoader to load the model
-        const loader = new GLTFLoader();
-        loader.load(
-            path,  // Path to the model file
-            function (gltf) {
-                object = gltf.scene;  // Get the model's scene
-                object.position.set(0, 0.5, 0);  // Set the position of the object
-            },
-            undefined, // Progress callback (optional)
-            function (error) {  // Error handling
-                console.error('Error loading model: ', error);
-            }
-        );
-        
-    } else {
-        // If no model path is provided:
-        const car_shape = new THREE.BoxGeometry(...body_shape);
-        const car_color = new THREE.MeshStandardMaterial({ color: body_color });
-        object = new THREE.Mesh(car_shape, car_color);
-    }
-    return object;
+export function create_object(path = null, scale_factor = 0.5, body_shape = [2, 1, 4], body_color = 0x000000) {
+    return new Promise((resolve, reject) => {
+        if (path) {
+            console.log(`Attempting to load: ${path}`);
+            const loader = new GLTFLoader();
+            loader.load(
+                path,
+                function (gltf) {
+                    const object = gltf.scene;
+                    object.scale.set(scale_factor, scale_factor, scale_factor);
+                    object.position.set(0, 0.5, 5);
+                    console.log('GLTF loaded successfully:', gltf);
+                    resolve(object);
+                },
+                undefined,
+                function (error) {
+                    console.error('Error loading model:', error);
+                    reject(error);
+                }
+            );
+        } else {
+            const shape = new THREE.BoxGeometry(...body_shape);
+            const material = new THREE.MeshStandardMaterial({ color: body_color });
+            const object = new THREE.Mesh(shape, material);
+            console.log('Default object created:', object);
+            resolve(object);
+        }
+    });
 }
+
+
 
 
 
