@@ -12,8 +12,16 @@
 <body>
   <!-- An empty `div` where the Three.js renderer will attach the 3D canvas -->
   <div id="container"></div> 
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/"
+      }
+    }
+  </script>
   <!-- Loads the Three.js library from a CDN to use its functionality -->
   <!-- Loads your custom JavaScript code for the 3D map and car -->
-  <script type = "module" src="map1.js"></script> 
+  <script type = "module" src="/map1.js"></script> 
 </body>
 </html>

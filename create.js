@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
+import * as THREE from 'three';
 
 
 export function create_camera(x = 0, y = 0, z = 0, aspectRatio = window.innerWidth / window.innerHeight) {
