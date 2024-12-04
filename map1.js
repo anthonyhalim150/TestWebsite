@@ -47,6 +47,10 @@ export function map1(scene = null,car_path = null, movementSpeed = 0.1, rotation
         ArrowDown: false,
         ArrowLeft: false,
         ArrowRight: false,
+        w: false, 
+        a: false,  
+        s: false,  
+        d: false   
     };
 
     function handleKeyDown(event) {
@@ -61,18 +65,18 @@ export function map1(scene = null,car_path = null, movementSpeed = 0.1, rotation
     document.addEventListener('keyup', handleKeyUp);
 
     function animate_map1() {
-        if (keys.ArrowUp) {
+        if (keys.ArrowUp || keys.w) {
             car.position.z += movementSpeed * Math.cos(car.rotation.y);
             car.position.x += movementSpeed * Math.sin(car.rotation.y);
         }
-        if (keys.ArrowDown) {
+        if (keys.ArrowDown || keys.s) {
             car.position.z -= movementSpeed * Math.cos(car.rotation.y);
             car.position.x -= movementSpeed * Math.sin(car.rotation.y);
         }
-        if (keys.ArrowLeft) {
+        if (keys.ArrowLeft || keys.a) {
             car.rotation.y += rotationSpeed;
         }
-        if (keys.ArrowRight) {
+        if (keys.ArrowRight || keys.d) {
             car.rotation.y -= rotationSpeed;
         }
 

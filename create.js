@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 
+
 export function create_car(path = null, body_shape = [2, 1, 4], body_color = 0x000000) {
     let car;
     if (path) {
