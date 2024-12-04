@@ -1,6 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
 import { map2 } from './map2.js';
-import { create_camera, create_car, create_light, create_ground, create_door, check_collision } from './create.js'; // Import utilities
+import { create_camera, create_car, create_light, create_ground, create_door, check_collision } from './create.js'; 
+
 
 export function map1(scene = null, car = null, movementSpeed = 0.1, rotationSpeed = 0.05) {
     let camera, renderer, door;

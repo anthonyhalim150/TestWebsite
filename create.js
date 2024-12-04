@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
 
+
 export function create_camera(x = 0, y = 0, z = 0, aspectRatio = window.innerWidth / window.innerHeight) {
     const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 1000);
     camera.position.set(x, y, z);
