@@ -14,6 +14,9 @@
     <h1>🐼 Welcome to my portfolio website! 🐼</h1>
     <button id="start-button">Start</button>
   </div>
+  <audio id="background-music" loop autoplay>
+    <source src="background_music1.mp3" type="audio/mp3">
+  </audio>
   <!-- Container for Three.js canvas (initially hidden) -->
   <div id="container" style="display: none;"></div> 
   <!-- An empty `div` where the Three.js renderer will attach the 3D canvas -->
@@ -29,10 +32,31 @@
   <!-- Loads the Three.js library from a CDN to use its functionality -->
   <!-- Loads your custom JavaScript code for the 3D map and car -->
   <script type="module">
+    let panda_falling_interval;
+  
+    // Start falling pandas when the page loads
+    window.onload = () => {
+      panda_falling_interval = setInterval(() => {
+        const panda = document.createElement('div');
+        panda.className = 'panda-emoji';
+        panda.innerText = '🐼';
+        panda.style.left = `${Math.random() * 100}vw`;
+        panda.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        document.body.appendChild(panda);
+        
+        // Remove the emoji after animation ends
+        setTimeout(() => panda.remove(), 5000);
+      }, 200);
+    };
+  
     document.getElementById('start-button').addEventListener('click', () => {
       // Hide start screen and show the container
       document.getElementById('start-screen').style.display = 'none';
       document.getElementById('container').style.display = 'block';
+      
+      // Stop falling pandas
+      clearInterval(panda_falling_interval);
+      document.querySelectorAll('.panda-emoji').forEach(panda => panda.remove());
       
       // Dynamically import and run map1.js
       import('./map1.js');

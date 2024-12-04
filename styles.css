@@ -8,15 +8,24 @@ body {
   align-items: center;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 #start-screen {
   text-align: center;
+  z-index: 2;
+  position: absolute;
+}
+
+h1 {
+  font-size: 48px;
+  color: #333;
+  margin-bottom: 20px;
 }
 
 #start-button {
-  padding: 15px 30px;
-  font-size: 20px;
+  padding: 20px 40px;
+  font-size: 24px;
   color: white;
   background-color: #4caf50;
   border: none;
@@ -32,4 +41,19 @@ body {
 #container {
   width: 100%;
   height: 100vh;
+}
+
+.panda-emoji {
+  position: absolute;
+  top: -50px;
+  font-size: 40px;
+  opacity: 0.8;
+  pointer-events: none;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh);
+  }
 }
