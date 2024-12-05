@@ -1,9 +1,10 @@
 /* Colors */
 :root {
+    
     --primary-color: #f8a488; /* Vibrant Orange */
-    --secondary-color: #fff8f0; /* Soft White */
-    --text-color: #2c3e50; /* Dark Text */
-    --highlight-color: #ffefd5; /* Highlight */
+    --secondary-color: #fff8f0; /* Pastel Cream */
+    --text-color: #2c3e50;
+    --highlight-color: #ffefd5;
     --success-color: #60c657; /* Success Green */
 }
 
@@ -15,9 +16,16 @@ body {
     color: var(--text-color);
 }
 
-a {
-    text-decoration: none;
-    color: inherit;
+.nav-item a {
+    font-size: 1rem;
+    color: white;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+h2, h3 {
+    text-align: center;
+    color: var(--primary-color);
 }
 
 .navbar {
@@ -133,3 +141,4 @@ footer {
     font-weight: bold;
     color: var(--success-color);
 }
+
