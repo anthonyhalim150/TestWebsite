@@ -1,0 +1,135 @@
+/* Colors */
+:root {
+    --primary-color: #f8a488; /* Vibrant Orange */
+    --secondary-color: #fff8f0; /* Soft White */
+    --text-color: #2c3e50; /* Dark Text */
+    --highlight-color: #ffefd5; /* Highlight */
+    --success-color: #60c657; /* Success Green */
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--secondary-color);
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navbar {
+    background-color: var(--primary-color);
+    border-bottom: 3px solid var(--highlight-color);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.nav-item a {
+    font-size: 1rem;
+    color: white;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+.nav-item a:hover {
+    color: var(--highlight-color);
+}
+
+h2 {
+    text-align: center;
+    margin: 20px 0;
+    color: var(--primary-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card img {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-body {
+    background-color: white;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    padding: 15px;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.card-text {
+    color: var(--text-color);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 25px;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: var(--highlight-color);
+    color: var(--text-color);
+}
+
+footer {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* Cart Page */
+.empty-cart {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.empty-cart img {
+    max-width: 300px;
+    margin-bottom: 20px;
+}
+
+.list-group-item {
+    border: none;
+    font-size: 1rem;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background-color: var(--highlight-color);
+}
+
+.list-group-item span {
+    font-weight: bold;
+    color: var(--success-color);
+}
