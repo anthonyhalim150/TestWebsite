@@ -3,7 +3,16 @@ const items = [
     { id: 2, name: 'Phone', price: 800.00, image: 'https://via.placeholder.com/300' },
 ];
 
-const cart = JSON.parse(localStorage.getItem('cart')) || [];
+// Updated cart initialization with a try-catch block for safety
+const cart = (() => {
+    const storedCart = localStorage.getItem('cart');
+    try {
+        return storedCart ? JSON.parse(storedCart) : [];
+    } catch (e) {
+        console.error('Error parsing cart data from localStorage:', e);
+        return [];
+    }
+})();
 
 function renderItems() {
     const itemsContainer = document.getElementById('items');
@@ -27,10 +36,13 @@ function renderCart() {
     const cartContent = document.getElementById('cart-content');
     if (!cartContent) return;
 
-    if (cart.length === 0) {
+    // Filter out invalid items (e.g., missing name or price)
+    const validCart = cart.filter(item => item && item.name && item.price);
+
+    if (validCart.length === 0) {
         cartContent.innerHTML = `
-            <div class="empty-cart">
-                <img src="https://via.placeholder.com/200" alt="Empty Cart">
+            <div class="empty-cart text-center">
+                <img src="https://via.placeholder.com/200" alt="Empty Cart" class="mb-3">
                 <p>Your cart is empty.</p>
             </div>
         `;
@@ -39,7 +51,7 @@ function renderCart() {
 
     cartContent.innerHTML = `
         <ul class="list-group">
-            ${cart.map(item => `
+            ${validCart.map(item => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     ${item.name} 
                     <span>$${item.price.toFixed(2)}</span>
@@ -47,7 +59,7 @@ function renderCart() {
             `).join('')}
         </ul>
         <div class="mt-3">
-            <h4>Total: $${cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}</h4>
+            <h4>Total: $${validCart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}</h4>
             <button class="btn btn-success" onclick="checkout()">Checkout</button>
         </div>
     `;
@@ -55,6 +67,10 @@ function renderCart() {
 
 function addToCart(id) {
     const item = items.find(i => i.id === id);
+    if (!item) {
+        console.error(`Item with id ${id} not found`);
+        return;
+    }
     cart.push(item);
     localStorage.setItem('cart', JSON.stringify(cart));
     alert(`${item.name} added to cart.`);
@@ -62,10 +78,11 @@ function addToCart(id) {
 
 function checkout() {
     alert('Thank you for your purchase!');
-    localStorage.setItem('cart', JSON.stringify([]));
-    location.reload();
+    localStorage.setItem('cart', JSON.stringify([]));  // Clear the cart after checkout
+    location.reload();  // Reload the page
 }
 
+// Example login form handling (if needed in your app)
 document.getElementById('loginForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const username = document.getElementById('username').value;
@@ -80,5 +97,6 @@ document.getElementById('loginForm')?.addEventListener('submit', (e) => {
     }
 });
 
+// Initial rendering of items and cart
 renderItems();
 renderCart();
