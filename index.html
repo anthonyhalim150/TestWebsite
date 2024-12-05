@@ -2,25 +2,32 @@
 <html lang="en"> 
 <head>
   <meta charset="UTF-8"> 
-<!-- Makes the website responsive to fit different screen sizes -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <title>3D Car Driving Map</title> 
-  <!-- Links to an external CSS file for styling -->
   <link rel="stylesheet" href="styles.css"> 
 </head>
 
 <body>
+  <!-- Start Screen -->
   <div id="start-screen">
     <h1>🐼 Welcome to my portfolio website! 🐼</h1>
     <button id="start-button">Start</button>
+    <button id="portfolio-button">Portfolio</button> <!-- New Portfolio Button -->
   </div>
+  <!-- Loading Screen-->
+  <div id="loading-screen" style="display: none;">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+  
+  <!-- Background Music -->
   <audio id="background-music" loop autoplay>
     <source src="background_music1.mp3" type="audio/mp3">
   </audio>
-  <!-- Container for Three.js canvas (initially hidden) -->
+  
+  <!-- Container for Three.js canvas (initially hidden) ???-->
   <div id="container" style="display: none;"></div> 
-  <!-- An empty `div` where the Three.js renderer will attach the 3D canvas -->
-  <div id="container"></div> 
+
   <script type="importmap">
     {
       "imports": {
@@ -29,11 +36,10 @@
       }
     }
   </script>
-  <!-- Loads the Three.js library from a CDN to use its functionality -->
-  <!-- Loads your custom JavaScript code for the 3D map and car -->
+  
   <script type="module">
     let panda_falling_interval;
-  
+
     // Start falling pandas when the page loads
     window.onload = () => {
       panda_falling_interval = setInterval(() => {
@@ -48,7 +54,7 @@
         setTimeout(() => panda.remove(), 5000);
       }, 200);
     };
-  
+
     document.getElementById('start-button').addEventListener('click', () => {
       // Hide start screen and show the container
       document.getElementById('start-screen').style.display = 'none';
@@ -60,6 +66,11 @@
       
       // Dynamically import and run map1.js
       import('./map1.js');
+    });
+
+    // Portfolio button functionality
+    document.getElementById('portfolio-button').addEventListener('click', () => {
+      window.location.href = 'portfolio.html';  // Navigate to portfolio page
     });
   </script>
 </body>

@@ -37,7 +37,7 @@ export async function map1(scene = null, object_path = null, movementSpeed = 0.1
     scene.add(object);
 
     // Door
-    door = create_door([5, 5, 0.4], 0x0000ff, [3, 0.25, 100]);
+    door = await create_object('door1.glb',  0.5,  [2, 1, 4], 0x000000, [0, 0.5, 10])
     scene.add(door);
 
     // Movement logic
@@ -101,4 +101,4 @@ export async function map1(scene = null, object_path = null, movementSpeed = 0.1
 
     animate_map1();
 }
-map1(null, 'panda1.glb');
+map1(null);

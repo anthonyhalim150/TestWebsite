@@ -3,18 +3,19 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 
 
-export function create_object(path = null, scale_factor = 0.5, body_shape = [2, 1, 4], body_color = 0x000000) {
+export function create_object(path = null, scale_factor = 0.5, body_shape = [2, 1, 4], body_color = 0x000000, position = [0, 0.5, 5]) {
     return new Promise((resolve, reject) => {
+        const loading = document.getElementById('loading-screen');
+        loading.style.display = 'flex';  // Show loading screen
         if (path) {
-            console.log(`Attempting to load: ${path}`);
             const loader = new GLTFLoader();
             loader.load(
                 path,
                 function (gltf) {
                     const object = gltf.scene;
                     object.scale.set(scale_factor, scale_factor, scale_factor);
-                    object.position.set(0, 0.5, 5);
-                    console.log('GLTF loaded successfully:', gltf);
+                    object.position.set(...position);
+                    loading.style.display = 'none';
                     resolve(object);
                 },
                 undefined,
@@ -27,7 +28,7 @@ export function create_object(path = null, scale_factor = 0.5, body_shape = [2, 
             const shape = new THREE.BoxGeometry(...body_shape);
             const material = new THREE.MeshStandardMaterial({ color: body_color });
             const object = new THREE.Mesh(shape, material);
-            console.log('Default object created:', object);
+            loading.style.display = 'none';
             resolve(object);
         }
     });
