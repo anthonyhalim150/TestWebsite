@@ -3,7 +3,7 @@ const items = [
     { id: 2, name: 'Phone', price: 800.00, image: 'https://via.placeholder.com/300' },
 ];
 
-// Updated cart initialization with a try-catch block for safety
+// Updated cart initialization with a try-catch block for safety, if not bisa error, since they might not be able to take from local storages
 const cart = (() => {
     const storedCart = localStorage.getItem('cart');
     try {
