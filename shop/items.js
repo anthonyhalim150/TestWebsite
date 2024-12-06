@@ -1,9 +1,9 @@
 const items = [
-    { id: 1, name: 'Laptop', price: 1000.00, image: 'https://via.placeholder.com/300' },
-    { id: 2, name: 'Phone', price: 800.00, image: 'https://via.placeholder.com/300' },
+    { id: 1, name: 'Laptop', price: 1000.00, image: 'https://via.placeholder.com/300', stock: 10 },
+    { id: 2, name: 'Phone', price: 800.00, image: 'https://via.placeholder.com/300', stock: 15 },
 ];
 
-// Updated cart initialization with a try-catch block for safety, if not bisa error, since they might not be able to take from local storages
+// Safely initialize the cart with localStorage handling
 const cart = (() => {
     const storedCart = localStorage.getItem('cart');
     try {
@@ -14,6 +14,7 @@ const cart = (() => {
     }
 })();
 
+// Render shop items with stock and quantity controls
 function renderItems() {
     const itemsContainer = document.getElementById('items');
     if (!itemsContainer) return;
@@ -25,18 +26,61 @@ function renderItems() {
                 <div class="card-body text-center">
                     <h5 class="card-title">${item.name}</h5>
                     <p class="card-text">$${item.price.toFixed(2)}</p>
-                    <button class="btn btn-primary" onclick="addToCart(${item.id})">Add to Cart</button>
+                    <p class="card-text">Stock: ${item.stock}</p>
+                    <div class="quantity-control">
+                        <button class="btn btn-secondary" onclick="changeQuantity(${item.id}, -1)">-</button>
+                        <input type="number" id="quantity-${item.id}" value="1" min="1" max="${item.stock}" class="quantity-input">
+                        <button class="btn btn-secondary" onclick="changeQuantity(${item.id}, 1)">+</button>
+                    </div>
+                    <button class="btn btn-primary mt-2" onclick="addToCart(${item.id})">Add to Cart</button>
                 </div>
             </div>
         </div>
     `).join('');
 }
 
+// Adjust the quantity value in the input field
+function changeQuantity(itemId, delta) {
+    const quantityInput = document.getElementById(`quantity-${itemId}`);
+    const currentQuantity = parseInt(quantityInput.value, 10);
+    const item = items.find(i => i.id === itemId);
+    const newQuantity = currentQuantity + delta;
+
+    if (newQuantity >= 1 && newQuantity <= item.stock) {
+        quantityInput.value = newQuantity;
+    }
+}
+
+// Add an item to the cart
+function addToCart(itemId) {
+    const quantityInput = document.getElementById(`quantity-${itemId}`);
+    const quantity = parseInt(quantityInput.value, 10);
+    const item = items.find(i => i.id === itemId);
+
+    if (quantity > item.stock) {
+        alert("Insufficient stock available.");
+        return;
+    }
+
+    const cartItem = cart.find(i => i.id === itemId);
+
+    if (cartItem) {
+        cartItem.quantity += quantity;
+    } else {
+        cart.push({ ...item, quantity });
+    }
+
+    item.stock -= quantity; // Deduct from stock
+    localStorage.setItem('cart', JSON.stringify(cart));
+    alert(`${item.name} added to cart.`);
+    renderItems(); // Update stock display
+}
+
+// Render the cart contents
 function renderCart() {
     const cartContent = document.getElementById('cart-content');
     if (!cartContent) return;
 
-    // Filter out invalid items (e.g., missing name or price)
     const validCart = cart.filter(item => item && item.name && item.price);
 
     if (validCart.length === 0) {
@@ -53,50 +97,27 @@ function renderCart() {
         <ul class="list-group">
             ${validCart.map(item => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    ${item.name} 
-                    <span>$${item.price.toFixed(2)}</span>
+                    ${item.name} (${item.quantity})
+                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
                 </li>
             `).join('')}
         </ul>
         <div class="mt-3">
-            <h4>Total: $${validCart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}</h4>
+            <h4>Total: $${validCart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</h4>
             <button class="btn btn-success" onclick="checkout()">Checkout</button>
         </div>
     `;
 }
 
-function addToCart(id) {
-    const item = items.find(i => i.id === id);
-    if (!item) {
-        console.error(`Item with id ${id} not found`);
-        return;
-    }
-    cart.push(item);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    alert(`${item.name} added to cart.`);
-}
-
+// Handle the checkout process
 function checkout() {
     alert('Thank you for your purchase!');
     localStorage.setItem('cart', JSON.stringify([]));  // Clear the cart after checkout
     location.reload();  // Reload the page
 }
 
-// Example login form handling (if needed in your app)
-document.getElementById('loginForm')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    if (username === 'admin' && password === 'admin123') {
-        alert('Welcome Admin!');
-    } else if (username === 'customer' && password === 'customer123') {
-        alert('Welcome Customer!');
-    } else {
-        alert('Invalid login!');
-    }
-});
-
 // Initial rendering of items and cart
-renderItems();
-renderCart();
+document.addEventListener('DOMContentLoaded', () => {
+    renderItems();
+    renderCart();
+});
