@@ -20,7 +20,8 @@ body {
 }
 
 #start-button,
-#portfolio-button {
+#portfolio-button,
+#shop-button {
   padding: 20px 40px;
   font-size: 24px;
   color: white;
@@ -47,6 +48,13 @@ body {
   background-color: #2980b9;  /* Slightly darker blue on hover */
 }
 
+#shop-button {
+  background-color: #b86c26;  /* Blue color for differentiation */
+}
+
+#shop-button:hover {
+  background-color: #e6ad05;  /* Slightly darker blue on hover */
+}
 
 /* Loading screen styles */
 #loading-screen {
