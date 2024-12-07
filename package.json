@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
+    "firebase": "^11.0.2",
     "mysql": "^2.18.1",
+    "mysql2": "^3.11.5",
     "three": "^0.171.0"
   },
   "description": ""
