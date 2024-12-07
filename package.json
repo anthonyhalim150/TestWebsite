@@ -8,8 +8,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "express": "^4.21.2",
+    "mysql": "^2.18.1",
     "three": "^0.171.0"
-  }
+  },
+  "description": ""
 }
