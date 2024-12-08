@@ -16,6 +16,8 @@ document.getElementById('login_form').addEventListener('submit', async (event) =
 
         if (result.success) {
             alert('Login successful!');
+            localStorage.setItem('userID', result.userID); // Save user ID (or token if available)
+            localStorage.setItem('username', username); // Save username
             window.location.href = 'shop.html'; // Redirect to shop or dashboard
         } else {
             document.getElementById('login_message').innerText = `Login failed: ${result.error}`;

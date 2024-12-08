@@ -83,7 +83,11 @@ app.post('/login', async (req, res) => {
             return res.json({ success: false, error: 'Invalid username or password.' });
         }
 
-        res.json({ success: true });
+        res.json({
+            success: true,
+            userID: user.id, 
+            username: user.username, 
+        });
     });
 });
 
@@ -98,6 +102,85 @@ app.get('/items', (req, res) => {
         }
         console.log('Fetched items:', results);
         res.json({ success: true, items: results });
+    });
+});
+
+app.post('/add-to-cart', (req, res) => {
+    const { userID, itemID, quantity } = req.body;
+
+    if (!userID || !itemID || !quantity) {
+        return res.json({ success: false, error: 'UserID, ItemID, and Quantity are required.' });
+    }
+
+    // Start a transaction to ensure both the cart and cartItems are updated
+    db.beginTransaction((err) => {
+        if (err) {
+            return res.json({ success: false, error: 'Error starting transaction.' });
+        }
+
+        // Check if the user already has a cart
+        db.query('SELECT cartID FROM cart WHERE userID = ?', [userID], (err, results) => {
+            if (err) {
+                return db.rollback(() => {
+                    res.json({ success: false, error: 'Error checking user cart.' });
+                });
+            }
+
+            let cartID;
+            if (results.length === 0) {
+                // Create a new cart if user doesn't have one
+                db.query('INSERT INTO cart (userID) VALUES (?)', [userID], (err, result) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            res.json({ success: false, error: 'Error creating cart.' });
+                        });
+                    }
+
+                    cartID = result.insertId; // Get the new cart ID
+                });
+            } else {
+                cartID = results[0].cartID; // Use existing cart ID
+            }
+
+            // Add item to cartItems table
+            const query = `INSERT INTO cartItems (cartID, itemID, quantity) VALUES (?, ?, ?)`;
+            db.query(query, [cartID, itemID, quantity], (err, result) => {
+                if (err) {
+                    return db.rollback(() => {
+                        res.json({ success: false, error: 'Error adding item to cart.' });
+                    });
+                }
+
+                db.commit((err) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            res.json({ success: false, error: 'Error committing transaction.' });
+                        });
+                    }
+
+                    res.json({ success: true });
+                });
+            });
+        });
+    });
+});
+
+// Get user's cart
+app.get('/cart/:userID', (req, res) => {
+    const { userID } = req.params;
+
+    const query = `
+        SELECT ci.cartItemID, i.name, ci.quantity, i.price 
+        FROM cartItems ci
+        JOIN items i ON ci.itemID = i.itemID
+        WHERE ci.cartID = (SELECT cartID FROM cart WHERE userID = ?)
+    `;
+    
+    db.query(query, [userID], (err, results) => {
+        if (err) {
+            return res.json({ success: false, error: 'Error fetching cart items.' });
+        }
+        res.json({ success: true, cartItems: results });
     });
 });
 

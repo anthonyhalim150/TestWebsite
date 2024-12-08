@@ -1,6 +1,62 @@
 const API_URL = 'http://localhost:3000/items';
 let items = [];
 
+function update_login() {
+    const navbarLinks = document.getElementById('navbar-links');
+    const userID = localStorage.getItem('userID');
+    const username = localStorage.getItem('username');
+    
+    if (userID) {
+        // User is logged in
+        navbarLinks.innerHTML = `
+            <li class="nav-item">
+                <a class="nav-link text-white">Hello, ${username}!</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="cart.html">
+                    <i class="fas fa-shopping-cart"></i> Cart
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" id = "logout_nav" href="#">Logout</a>
+            </li>
+        `;
+        clear_login();
+    } else {
+        // User is logged out
+        navbarLinks.innerHTML = `
+            <li class="nav-item">
+                <a class="nav-link text-white" href="#" id="cart_nav">
+                    <i class="fas fa-shopping-cart"></i> Cart
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="login.html">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="signup.html">Sign Up</a>
+            </li>
+        `;
+        const cartNav = document.getElementById('cart_nav');
+        cartNav.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent navigation
+            window.location.href = 'signup.html';
+            alert('You must be logged in to access your cart.');
+        });
+        
+    }
+}
+
+function clear_login(){
+    const login = document.getElementById('logout_nav');
+    login.addEventListener('click', () => {
+        // Clear user info and refresh the page
+        localStorage.clear();
+        alert('You have logged out.');
+        location.reload();
+    });
+}
+
 async function fetchItems() {
     try {
         // Fetch items from the backend
@@ -22,13 +78,6 @@ async function fetchItems() {
 function renderItems() {
     const itemsContainer = document.getElementById('items');
     if (!itemsContainer) return;
-    cart.forEach(cartItem => {
-        const item = items.find(i => i.id === cartItem.id);
-        if (item) {
-            item.stock -= cartItem.quantity; // Deduct the quantity already in the cart
-        }
-    });
-
     itemsContainer.innerHTML = items.map(item => `
         <div class="col-md-4 mb-4">
             <div class="card">
@@ -137,6 +186,7 @@ function checkout() {
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', () => {
+    update_login();
     fetchItems(); // Fetch items when page loads
     renderCart();
 });
