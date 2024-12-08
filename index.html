@@ -23,7 +23,7 @@
   
   <!-- Background Music -->
   <audio id="background-music" loop autoplay>
-    <source src="background_music1.mp3" type="audio/mp3">
+    <source src="/music/background_music1.mp3" type="audio/mp3">
   </audio>
   
   <!-- Container for Three.js canvas (initially hidden) ???-->
@@ -66,7 +66,7 @@
       document.querySelectorAll('.panda-emoji').forEach(panda => panda.remove());
       
       // Dynamically import and run map1.js
-      import('./map1.js');
+      import('/3D_Project/map1.js');
     });
 
     document.getElementById('shop-button').addEventListener('click', () => {
@@ -74,7 +74,7 @@
     });
 
     document.getElementById('portfolio-button').addEventListener('click', () => {
-      window.location.href = 'portfolio.html';  
+      window.location.href = '/Portfolio/portfolio.html';  
     });
   </script>
 </body>

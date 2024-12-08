@@ -37,7 +37,7 @@ export async function map1(scene = null, object_path = null, movementSpeed = 0.1
     scene.add(object);
 
     // Door
-    door = await create_object('door1.glb',  0.5,  [2, 1, 4], 0x000000, [0, 0.5, 10])
+    door = await create_object('/3D_Project/door1.glb',  0.5,  [2, 1, 4], 0x000000, [0, 0.5, 10])
     scene.add(door);
 
     // Movement logic
