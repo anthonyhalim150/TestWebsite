@@ -58,13 +58,9 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-// To check login bener
+// Ini request and response object, request itu yng dikirim ke servernya, res is the server response.
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.json({ success: false, error: 'Both username and password are required.' });
-    }
 
     const query = `SELECT * FROM users WHERE username = ?`;
 

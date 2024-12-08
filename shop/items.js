@@ -1,23 +1,33 @@
-const items = [
-    { id: 1, name: 'Laptop', price: 1000.00, image: 'https://via.placeholder.com/300', stock: 10 },
-    { id: 2, name: 'Phone', price: 800.00, image: 'https://via.placeholder.com/300', stock: 15 },
-];
+const API_URL = 'http://localhost:3000/items';
+let items = [];
 
-// Safely initialize the cart with localStorage handling
-const cart = (() => {
-    const storedCart = localStorage.getItem('cart');
+async function fetchItems() {
     try {
-        return storedCart ? JSON.parse(storedCart) : [];
-    } catch (e) {
-        console.error('Error parsing cart data from localStorage:', e);
-        return [];
+        // Fetch items from the backend
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        if (data.success && data.items) {
+            items = data.items; // Store items from the response
+            renderItems(); // Render items after they are fetched
+        } else {
+            console.error('Failed to fetch items:', data.error);
+        }
+    } catch (error) {
+        console.error('Error fetching items:', error);
     }
-})();
+}
 
 // Render shop items with stock and quantity controls
 function renderItems() {
     const itemsContainer = document.getElementById('items');
     if (!itemsContainer) return;
+    cart.forEach(cartItem => {
+        const item = items.find(i => i.id === cartItem.id);
+        if (item) {
+            item.stock -= cartItem.quantity; // Deduct the quantity already in the cart
+        }
+    });
 
     itemsContainer.innerHTML = items.map(item => `
         <div class="col-md-4 mb-4">
@@ -25,7 +35,7 @@ function renderItems() {
                 <img src="${item.image}" class="card-img-top" alt="${item.name}">
                 <div class="card-body text-center">
                     <h5 class="card-title">${item.name}</h5>
-                    <p class="card-text">$${item.price.toFixed(2)}</p>
+                    <p class="card-text">$${item.price}</p>
                     <p class="card-text">Stock: ${item.stock}</p>
                     <div class="quantity-control">
                         <button class="btn btn-secondary" onclick="changeQuantity(${item.id}, -1)">-</button>
@@ -39,10 +49,20 @@ function renderItems() {
     `).join('');
 }
 
+const cart = (() => {
+    const storedCart = localStorage.getItem('cart');
+    try {
+        return storedCart ? JSON.parse(storedCart) : [];
+    } catch (e) {
+        console.error('Error parsing cart data from localStorage:', e);
+        return [];
+    }
+})();
+
 // Adjust the quantity value in the input field
 function changeQuantity(itemId, delta) {
     const quantityInput = document.getElementById(`quantity-${itemId}`);
-    const currentQuantity = parseInt(quantityInput.value, 10);
+    const currentQuantity = parseInt(quantityInput.value, 10);//10 means to parse it as decimal(base 10).
     const item = items.find(i => i.id === itemId);
     const newQuantity = currentQuantity + delta;
 
@@ -70,7 +90,6 @@ function addToCart(itemId) {
         cart.push({ ...item, quantity });
     }
 
-    item.stock -= quantity; // Deduct from stock
     localStorage.setItem('cart', JSON.stringify(cart));
     alert(`${item.name} added to cart.`);
     renderItems(); // Update stock display
@@ -118,6 +137,6 @@ function checkout() {
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', () => {
-    renderItems();
+    fetchItems(); // Fetch items when page loads
     renderCart();
 });

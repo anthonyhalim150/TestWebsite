@@ -13,11 +13,6 @@ document.getElementById('sign-up-form').addEventListener('submit', async (event)
     }
     alert(`Account created successfully for ${username}!`);
 
-    // Validation that all fields are required
-    if (!username || !email || !password) {
-        document.getElementById('signup_message').innerText = 'All fields are required.';
-        return;
-    }
 
     // Create the user object
     const user = { username, email, password };
