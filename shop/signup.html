@@ -17,10 +17,10 @@
                         <a class="nav-link text-white" href="cart.html">Cart</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="signup.html">Sign Up</a>
+                        <a class="nav-link text-white" href="login.html">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="login.html">Login</a>
+                        <a class="nav-link text-white" href="signup.html">Sign Up</a>
                     </li>
                 </ul>
             </div>
@@ -31,16 +31,12 @@
         <h2>Sign Up</h2>
         <form id="sign-up-form">
             <div class="mb-3">
-                <label for="name" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="name" required>
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" required>
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Email Address</label>
                 <input type="email" class="form-control" id="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" required>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
@@ -52,29 +48,13 @@
             </div>
             <button type="submit" class="btn btn-primary">Sign Up</button>
         </form>
+        <div id="signup_message" class="mt-3 text-danger"></div>
     </main>
     
     <footer class="bg-orange text-white text-center py-3">
         <p>&copy; 2024 ShopMate. All Rights Reserved.</p>
     </footer>
 
-    <script>
-        document.getElementById("sign-up-form").addEventListener("submit", (e) => {
-            e.preventDefault();
-            const name = document.getElementById("name").value;
-            const email = document.getElementById("email").value;
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const confirm_password = document.getElementById("confirm_password").value;
-
-            if (password !== confirm_password) {
-                alert("Passwords do not match!");
-                return;
-            }
-
-            // Add backend integration here to save user data to the database
-            alert(`Account created successfully for ${name}!`);
-        });
-    </script>
+    <script src="signup.js"></script>
 </body>
 </html>
