@@ -217,3 +217,14 @@ footer {
 .quantity-input[type="number"] {
     -moz-appearance: textfield; /* For Firefox */
 }
+
+.blue-link {
+    color: rgb(6, 122, 255);
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.blue-link:hover {
+    color: rgb(61, 61, 239);
+    text-decoration: none;
+}
