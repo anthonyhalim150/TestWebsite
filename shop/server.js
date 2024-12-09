@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise'); // Using promise-based API
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -12,176 +12,246 @@ const port = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Database connection
-const db = mysql.createConnection({
+// Database connection pool
+const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'Vvs319338',
     database: 'ecommerce',
-    port: 3306
-});
-
-db.connect((err) => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err);
-        return;
-    }
-    console.log('Connected to MySQL database');
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
 // Sign-up route
 app.post('/signup', async (req, res) => {
-    console.log('Received signup data:', req.body);
-
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
-        console.error('Missing fields in signup request');
         return res.json({ success: false, error: 'All fields are required.' });
     }
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        const query = `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`;
-        db.query(query, [username, email, hashedPassword], (err, result) => {
-            if (err) {
-                console.error('Database error:', err);
-                return res.json({ success: false, error: 'Error saving user. Make sure email is unique.' });
-            }
-            console.log('User inserted successfully:', result);
+        const connection = await pool.getConnection();
+        try {
+            const query = `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`;
+            await connection.query(query, [username, email, hashedPassword]);
             res.json({ success: true });
-        });
+        } finally {
+            connection.release();
+        }
     } catch (error) {
-        console.error('Error hashing password:', error);
+        console.error('Error signing up:', error);
         res.json({ success: false, error: 'Internal server error.' });
     }
 });
 
-// Ini request and response object, request itu yng dikirim ke servernya, res is the server response.
+// Login route
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    const query = `SELECT * FROM users WHERE username = ?`;
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `SELECT * FROM users WHERE username = ?`;
+            const [results] = await connection.query(query, [username]);
 
-    db.query(query, [username], async (err, results) => {
-        if (err) {
-            console.error('Error querying database:', err);
-            return res.json({ success: false, error: 'Database error.' });
+            if (results.length === 0) {
+                return res.json({ success: false, error: 'Invalid username or password.' });
+            }
+
+            const user = results[0];
+            const passwordMatch = await bcrypt.compare(password, user.password);
+
+            if (!passwordMatch) {
+                return res.json({ success: false, error: 'Invalid username or password.' });
+            }
+
+            res.json({
+                success: true,
+                userID: user.id,
+                username: user.username,
+            });
+        } finally {
+            connection.release();
         }
-
-        if (results.length === 0) {
-            return res.json({ success: false, error: 'Invalid username or password.' });
-        }
-
-        const user = results[0];
-
-        // Compare the provided password with the hashed password
-        const passwordMatch = await bcrypt.compare(password, user.password);
-
-        if (!passwordMatch) {
-            return res.json({ success: false, error: 'Invalid username or password.' });
-        }
-
-        res.json({
-            success: true,
-            userID: user.id, 
-            username: user.username, 
-        });
-    });
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.json({ success: false, error: 'Internal server error.' });
+    }
 });
-
 
 // Fetch items for the shop
-app.get('/items', (req, res) => {
-    const query = `SELECT * FROM items`;
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error fetching items:', err);
-            return res.json({ success: false, error: 'Error fetching items.' });
+app.get('/items', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `SELECT * FROM items`;
+            const [results] = await connection.query(query);
+            res.json({ success: true, items: results });
+        } finally {
+            connection.release();
         }
-        console.log('Fetched items:', results);
-        res.json({ success: true, items: results });
-    });
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        res.json({ success: false, error: 'Error fetching items.' });
+    }
 });
 
-app.post('/add-to-cart', (req, res) => {
-    const { userID, itemID, quantity } = req.body;
+// Fetch cart items
+app.get('/cart-items', async (req, res) => {
+    const userID = req.query.userID;
 
-    if (!userID || !itemID || !quantity) {
-        return res.json({ success: false, error: 'UserID, ItemID, and Quantity are required.' });
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'User ID is required' });
     }
 
-    // Start a transaction to ensure both the cart and cartItems are updated
-    db.beginTransaction((err) => {
-        if (err) {
-            return res.json({ success: false, error: 'Error starting transaction.' });
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const [cart] = await connection.query(
+                'SELECT cart_id FROM Cart WHERE user_id = ?',
+                [userID]
+            );
+
+            if (cart.length === 0) {
+                return res.json({ success: true, cartItems: [] });
+            }
+
+            const cartID = cart[0].cart_id;
+            const [cartItems] = await connection.query(
+                `SELECT ci.cart_item_id, ci.item_id, i.name, ci.quantity, ci.price
+                 FROM CartItems ci
+                 JOIN Items i ON ci.item_id = i.id
+                 WHERE ci.cart_id = ?`,
+                [cartID]
+            );
+
+            res.json({ success: true, cartItems });
+        } finally {
+            connection.release();
         }
-
-        // Check if the user already has a cart
-        db.query('SELECT cartID FROM cart WHERE userID = ?', [userID], (err, results) => {
-            if (err) {
-                return db.rollback(() => {
-                    res.json({ success: false, error: 'Error checking user cart.' });
-                });
-            }
-
-            let cartID;
-            if (results.length === 0) {
-                // Create a new cart if user doesn't have one
-                db.query('INSERT INTO cart (userID) VALUES (?)', [userID], (err, result) => {
-                    if (err) {
-                        return db.rollback(() => {
-                            res.json({ success: false, error: 'Error creating cart.' });
-                        });
-                    }
-
-                    cartID = result.insertId; // Get the new cart ID
-                });
-            } else {
-                cartID = results[0].cartID; // Use existing cart ID
-            }
-
-            // Add item to cartItems table
-            const query = `INSERT INTO cartItems (cartID, itemID, quantity) VALUES (?, ?, ?)`;
-            db.query(query, [cartID, itemID, quantity], (err, result) => {
-                if (err) {
-                    return db.rollback(() => {
-                        res.json({ success: false, error: 'Error adding item to cart.' });
-                    });
-                }
-
-                db.commit((err) => {
-                    if (err) {
-                        return db.rollback(() => {
-                            res.json({ success: false, error: 'Error committing transaction.' });
-                        });
-                    }
-
-                    res.json({ success: true });
-                });
-            });
-        });
-    });
+    } catch (error) {
+        console.error('Error fetching cart items:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch cart items' });
+    }
 });
 
-// Get user's cart
-app.get('/cart/:userID', (req, res) => {
-    const { userID } = req.params;
+// Add to cart
+app.post('/cart', async (req, res) => {
+    const { userID, itemID, quantity } = req.body;
 
-    const query = `
-        SELECT ci.cartItemID, i.name, ci.quantity, i.price 
-        FROM cartItems ci
-        JOIN items i ON ci.itemID = i.itemID
-        WHERE ci.cartID = (SELECT cartID FROM cart WHERE userID = ?)
-    `;
-    
-    db.query(query, [userID], (err, results) => {
-        if (err) {
-            return res.json({ success: false, error: 'Error fetching cart items.' });
+    if (!userID || !itemID || !quantity || quantity <= 0) {
+        return res.status(400).json({ success: false, error: 'Invalid request data' });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [existingCart] = await connection.query(
+            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            [userID]
+        );
+
+        let cartID;
+        if (existingCart.length > 0) {
+            cartID = existingCart[0].cart_id;
+        } else {
+            const [cartResult] = await connection.query(
+                'INSERT INTO Cart (user_id) VALUES (?)',
+                [userID]
+            );
+            cartID = cartResult.insertId;
         }
-        res.json({ success: true, cartItems: results });
-    });
+
+        const [existingCartItem] = await connection.query(
+            'SELECT cart_item_id, quantity FROM CartItems WHERE cart_id = ? AND item_id = ?',
+            [cartID, itemID]
+        );
+
+        const [itemDetails] = await connection.query(
+            'SELECT price FROM Items WHERE id = ?',
+            [itemID]
+        );
+        if (itemDetails.length === 0) {
+            throw new Error('Item not found in database.');
+        }
+
+        const price = itemDetails[0].price;
+
+        if (existingCartItem.length > 0) {
+            const newQuantity = existingCartItem[0].quantity + quantity;
+            await connection.query(
+                'UPDATE CartItems SET quantity = ?, price = ? WHERE cart_item_id = ?',
+                [newQuantity, newQuantity * price, existingCartItem[0].cart_item_id]
+            );
+        } else {
+            await connection.query(
+                'INSERT INTO CartItems (cart_id, item_id, quantity, price) VALUES (?, ?, ?, ?)',
+                [cartID, itemID, quantity, quantity * price]
+            );
+        }
+
+        await connection.commit();
+        res.json({ success: true, message: 'Item added to cart.' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error adding to cart:', error);
+        res.status(500).json({ success: false, error: 'Failed to add item to cart.' });
+    } finally {
+        connection.release();
+    }
+});
+
+// Checkout route
+app.post('/checkout', async (req, res) => {
+    const { userID } = req.body;
+
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'User ID is required for checkout.' });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [cart] = await connection.query(
+            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            [userID]
+        );
+
+        if (cart.length === 0) {
+            return res.status(400).json({ success: false, error: 'No active cart found for the user.' });
+        }
+
+        const cartID = cart[0].cart_id;
+        const [cartItems] = await connection.query(
+            'SELECT item_id, quantity FROM CartItems WHERE cart_id = ?',
+            [cartID]
+        );
+
+        for (const item of cartItems) {
+            await connection.query(
+                'UPDATE items SET stock = stock - ? WHERE id = ?',
+                [item.quantity, item.item_id]
+            );
+        }
+
+        await connection.query('DELETE FROM CartItems WHERE cart_id = ?', [cartID]);
+        await connection.query('DELETE FROM Cart WHERE cart_id = ?', [cartID]);
+
+        await connection.commit();
+        res.json({ success: true, message: 'Checkout completed successfully.' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error during checkout:', error);
+        res.status(500).json({ success: false, error: 'Checkout failed.' });
+    } finally {
+        connection.release();
+    }
 });
 
 // Start server
