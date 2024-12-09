@@ -1,5 +1,11 @@
 CREATE DATABASE ecommerce;
 USE ecommerce;
+drop table items;
+drop table users;
+drop table Cart;
+drop table Transactions;
+drop table sale_items;
+
 CREATE TABLE items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -16,7 +22,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     role ENUM('user', 'admin') DEFAULT 'user'
 );
-ALTER TABLE users ADD COLUMN role ENUM('user', 'admin') DEFAULT 'user';
+
 -- Carts Table
 CREATE TABLE Cart (
     cart_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,7 +63,7 @@ CREATE TABLE sale_items (
 );
 
 
-INSERT INTO items (name, price, stock, image) VALUES 
+INSERT INTO items (name, description, category, price, stock, image) VALUES 
 ('Laptop', 'I am a laptop', 'Electronics', 1000.00, 10, 'https://via.placeholder.com/300'),
 ('Phone', 800.00, 15, 'https://via.placeholder.com/300');
 
