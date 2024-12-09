@@ -9,10 +9,9 @@ function update_login() {
     const userID = localStorage.getItem('userID');
     const username = localStorage.getItem('username');
     const role = localStorage.getItem('role'); 
-    console.log(role);
     if (userID) {
         if (role === 'admin') {
-            window.location.href = 'index.html';
+            //window.location.href = 'index.html';
 
         }
         // User is logged in
@@ -188,9 +187,25 @@ function changeQuantity(itemId, delta) {
         quantityInput.value = newQuantity;
     }
 }
+function get_user_role() {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
+        return payload.role;
+    } catch (error) {
+        console.error('Error decoding token:', error);
+        return null;
+    }
+}
+
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', () => {
     update_login();
     fetchItems(); // Fetch items when page loads
+    if (get_user_role() !== localStorage.getItem('role')){
+        alert("Token changed"); //Jangan sampe masuk sini
+    }
 });
