@@ -9,10 +9,13 @@ function update_login() {
     const userID = localStorage.getItem('userID');
     const username = localStorage.getItem('username');
     const role = localStorage.getItem('role'); 
+    if (get_user_role() !== role){
+        alert("Token changed, alert developer of the error!"); //Jangan sampe masuk sini
+        window.location.href = 'shop.html';
+    }
     if (userID) {
         if (role === 'admin') {
-            //window.location.href = 'index.html';
-
+            window.location.href = 'admin.html';
         }
         // User is logged in
         navbarLinks.innerHTML = `
@@ -266,10 +269,6 @@ function closeItemOverview() {
 document.addEventListener('DOMContentLoaded', () => {
     update_login();
     fetchItems(); // Fetch items when page loads
-    if (get_user_role() !== localStorage.getItem('role')){
-        alert("Token changed, alert developer of the error!"); //Jangan sampe masuk sini
-        window.location.href = 'shop.html';
-    }
 });
 
 document.getElementById('search-bar').addEventListener('input', (event) => {
