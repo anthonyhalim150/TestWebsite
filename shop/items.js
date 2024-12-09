@@ -8,8 +8,13 @@ function update_login() {
     const navbarLinks = document.getElementById('navbar-links');
     const userID = localStorage.getItem('userID');
     const username = localStorage.getItem('username');
-    
+    const role = localStorage.getItem('role'); 
+    console.log(role);
     if (userID) {
+        if (role === 'admin') {
+            window.location.href = 'index.html';
+
+        }
         // User is logged in
         navbarLinks.innerHTML = `
             <li class="nav-item">

@@ -4,6 +4,11 @@ const mysql = require('mysql2/promise'); // Using promise-based API
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+// Secret key for JWT (use a secure key in a production environment)
+const JWT_SECRET = 'your_jwt_secret_key';
+
 
 const app = express();
 const port = 3000;
@@ -31,7 +36,9 @@ app.post('/signup', async (req, res) => {
     if (!username || !email || !password) {
         return res.json({ success: false, error: 'All fields are required.' });
     }
-
+    if (password.length < 8 || !/\d/.test(password)) {
+        return res.status(400).json({ success: false, error: 'Password must be at least 8 characters long and include a number.' });
+    }    
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const connection = await pool.getConnection();
@@ -48,30 +55,42 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-// Login route
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
         const connection = await pool.getConnection();
         try {
+            // Fetch the user by username
             const query = `SELECT * FROM users WHERE username = ?`;
             const [results] = await connection.query(query, [username]);
 
+            // Check if the user exists
             if (results.length === 0) {
-                return res.json({ success: false, error: 'Invalid username or password.' });
+                return res.status(401).json({ success: false, error: 'Invalid username or password.' });
             }
 
             const user = results[0];
-            const passwordMatch = await bcrypt.compare(password, user.password);
 
+            // Verify the password
+            const passwordMatch = await bcrypt.compare(password, user.password);
             if (!passwordMatch) {
-                return res.json({ success: false, error: 'Invalid username or password.' });
+                return res.status(401).json({ success: false, error: 'Invalid username or password.' });
             }
 
+            // Generate a JWT with the user's ID, username, and role
+            const token = jwt.sign(
+                { id: user.id, username: user.username, role: user.role },
+                JWT_SECRET,
+                { expiresIn: '2h' } // Token expires in 2 hours
+            );
+
+            // Send the token and role to the client
             res.json({
                 success: true,
-                userID: user.id,
+                token,
+                userID : user.id,
+                role: user.role,
                 username: user.username,
             });
         } finally {
@@ -79,9 +98,10 @@ app.post('/login', async (req, res) => {
         }
     } catch (error) {
         console.error('Error during login:', error);
-        res.json({ success: false, error: 'Internal server error.' });
+        res.status(500).json({ success: false, error: 'Internal server error.' });
     }
 });
+
 
 // Fetch items for the shop
 app.get('/items', async (req, res) => {

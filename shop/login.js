@@ -18,6 +18,8 @@ document.getElementById('login_form').addEventListener('submit', async (event) =
             alert('Login successful!');
             localStorage.setItem('userID', result.userID); // Save user ID (or token if available)
             localStorage.setItem('username', username); // Save username
+            localStorage.setItem('role', result.role);
+            localStorage.setItem('token', result.token); // Store the token in localStorage after login
             window.location.href = 'shop.html'; // Redirect to shop or dashboard
         } else {
             document.getElementById('login_message').innerText = `Login failed: ${result.error}`;
