@@ -218,6 +218,7 @@ app.post('/checkout', async (req, res) => {
     try {
         await connection.beginTransaction();
 
+        // 1. Retrieve the user's cart
         const [cart] = await connection.query(
             'SELECT cart_id FROM Cart WHERE user_id = ?',
             [userID]
@@ -228,12 +229,31 @@ app.post('/checkout', async (req, res) => {
         }
 
         const cartID = cart[0].cart_id;
+
+        // 2. Get the items from the cart
         const [cartItems] = await connection.query(
-            'SELECT item_id, quantity FROM CartItems WHERE cart_id = ?',
+            'SELECT item_id, quantity, price FROM CartItems WHERE cart_id = ?',
             [cartID]
         );
 
+        if (cartItems.length === 0) {
+            return res.status(400).json({ success: false, error: 'No items in the cart.' });
+        }
+
+        const totalAmount = cartItems.reduce((total, item) => total + (item.quantity * item.price), 0);
+
+        const [transactionResult] = await connection.query(
+            'INSERT INTO transactions (user_id, total_amount) VALUES (?, ?)',
+            [userID, totalAmount]
+        );
+
+        const transactionID = transactionResult.insertId;
+
         for (const item of cartItems) {
+            await connection.query(
+                'INSERT INTO sale_items (transaction_id, item_id, quantity, price) VALUES (?, ?, ?, ?)',
+                [transactionID, item.item_id, item.quantity, item.price]
+            );
             await connection.query(
                 'UPDATE items SET stock = stock - ? WHERE id = ?',
                 [item.quantity, item.item_id]
@@ -243,16 +263,17 @@ app.post('/checkout', async (req, res) => {
         await connection.query('DELETE FROM CartItems WHERE cart_id = ?', [cartID]);
         await connection.query('DELETE FROM Cart WHERE cart_id = ?', [cartID]);
 
-        await connection.commit();
+        await connection.commit(); //Commit to the database, biar kalo ada error di tengah bisa di rollback, sblm dicommit
         res.json({ success: true, message: 'Checkout completed successfully.' });
     } catch (error) {
         await connection.rollback();
         console.error('Error during checkout:', error);
         res.status(500).json({ success: false, error: 'Checkout failed.' });
     } finally {
-        connection.release();
+        connection.release();//Buat pool
     }
 });
+
 
 // Start server
 app.listen(port, () => {

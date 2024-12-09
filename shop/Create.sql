@@ -32,6 +32,26 @@ CREATE TABLE CartItems (
     FOREIGN KEY (cart_id) REFERENCES Cart(cart_id),
     FOREIGN KEY (item_id) REFERENCES Items(id)
 );
+CREATE TABLE  TRANSACTIONS(
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,   -- Total price of the transaction
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+
+CREATE TABLE sale_items (
+    sales_id INT AUTO_INCREMENT PRIMARY KEY,
+    transaction_id INT NOT NULL,
+    item_id INT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,  -- The price at the time of sale
+    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id),
+    FOREIGN KEY (item_id) REFERENCES items(id)
+);
+
 
 INSERT INTO items (name, price, stock, image) VALUES 
 ('Laptop', 1000.00, 10, 'https://via.placeholder.com/300'),
