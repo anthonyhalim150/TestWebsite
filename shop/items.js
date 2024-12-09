@@ -155,22 +155,22 @@ function renderItems() {
         const availableStock = item.stock - cartQuantity; // Stock available after subtracting cart quantity
         return `
             <div class="col-md-4 mb-4">
-                <div class="card">
+                <div class="card" onclick="showItemOverview(${item.id})">
                     <img src="${item.image}" class="card-img-top" alt="${item.name}">
                     <div class="card-body text-center">
                         <h5 class="card-title">${item.name}</h5>
                         <p class="card-text">$${item.price}</p>
                         <p class="card-text">Stock: ${availableStock}</p>
                         <div class="quantity-control">
-                            <button class="btn btn-secondary" onclick="changeQuantity(${item.id}, -1)">-</button>
+                            <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity(${item.id}, -1)">-</button>
                             <input type="number" id="quantity-${item.id}" value="1" min="1" max="${availableStock}" class="quantity-input">
-                            <button class="btn btn-secondary" onclick="changeQuantity(${item.id}, 1)">+</button>
+                            <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity(${item.id}, 1)">+</button>
                         </div>
-                        <button class="btn btn-primary mt-2" onclick="addToCart(${item.id})">Add to Cart</button>
+                        <button class="btn btn-primary mt-2" onclick="event.stopPropagation(); addToCart(${item.id})">Add to Cart</button>
                     </div>
                 </div>
             </div>
-        `;
+        `; //Event propagation stops it from displaying the showItemOverview for specific buttons
     }).join('');
 }
 
@@ -200,12 +200,36 @@ function get_user_role() {
     }
 }
 
+function showItemOverview(itemId) {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+
+    const overviewContainer = document.getElementById('item-overview');
+    overviewContainer.innerHTML = `
+        <h3>${item.name}</h3>
+        <img src="${item.image}" alt="${item.name}" style="max-width: 100%; margin-bottom: 15px;">
+        <p><strong>Description:</strong> ${item.description}</p>
+        <p><strong>Price:</strong> $${item.price}</p>
+        <p><strong>Stock:</strong> ${item.stock}</p>
+        <p><strong>Category:</strong> ${item.category || 'N/A'}</p>
+        <button class="btn btn-secondary" onclick="closeItemOverview()">Close</button>
+    `;
+    overviewContainer.classList.add('visible');
+}
+
+function closeItemOverview() {
+    const overviewContainer = document.getElementById('item-overview');
+    overviewContainer.classList.remove('visible');
+}
+
+
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', () => {
     update_login();
     fetchItems(); // Fetch items when page loads
     if (get_user_role() !== localStorage.getItem('role')){
-        alert("Token changed"); //Jangan sampe masuk sini
+        alert("Token changed, alert developer of the error!"); //Jangan sampe masuk sini
+        window.location.href = 'shop.html';
     }
 });

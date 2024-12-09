@@ -4,6 +4,7 @@ CREATE TABLE items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    category TEXT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL,
     image VARCHAR(255)
@@ -57,10 +58,13 @@ CREATE TABLE sale_items (
 
 
 INSERT INTO items (name, price, stock, image) VALUES 
-('Laptop', 1000.00, 10, 'https://via.placeholder.com/300'),
+('Laptop', 'I am a laptop', 'Electronics', 1000.00, 10, 'https://via.placeholder.com/300'),
 ('Phone', 800.00, 15, 'https://via.placeholder.com/300');
 
 INSERT INTO users (username, email, password) VALUES ('testuser', 'test@example.com', 'hashedpassword');
 UPDATE users
 SET role = 'admin'
 WHERE id = 8;
+
+ALTER TABLE items
+ADD COLUMN category TEXT;

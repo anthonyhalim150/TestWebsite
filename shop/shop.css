@@ -228,3 +228,34 @@ footer {
     color: rgb(61, 61, 239);
     text-decoration: none;
 }
+
+.item-overview {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 1000;
+    display: none;
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically */
+    text-align: center; /* Center text */
+}
+
+
+.item-overview.visible {
+    display: block;
+}
+
+.item-overview h3 {
+    margin-bottom: 15px;
+}
+
+.item-overview button {
+    margin-top: 15px;
+}
