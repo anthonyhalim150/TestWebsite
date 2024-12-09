@@ -29,7 +29,7 @@ CREATE TABLE CartItems (
     item_id INT NOT NULL,
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (cart_id) REFERENCES Carts(cart_id),
+    FOREIGN KEY (cart_id) REFERENCES Cart(cart_id),
     FOREIGN KEY (item_id) REFERENCES Items(id)
 );
 
