@@ -145,12 +145,50 @@ async function addToCart(itemID) {
         alert('An error occurred. Please try again later.');
     }
 }
+function searchItems() {
+    const query = document.getElementById('search-bar').value.toLowerCase();
+    let desc_match = 0;
+    let category_match = 0;
+    if (query === ''){//Biar kalo ga ada search barnya, itemnya ga ke sort lgi
+        location.reload();
+        return;
+    }
+    // Filter and sort items based on the query
+    const filteredItems = items
+        .map(item => {
+            // Calculate the match score based on the name and description
+            const nameMatch = (item.name.toLowerCase().includes(query) ? 1 : 0);
+            if (item.description !== null){
+                desc_match = (item.description.toLowerCase().includes(query) ? 1 : 0);
+            }
+            if (item.category !== null){
+                category_match = (item.category.toLowerCase().includes(query) ? 1 : 0);
+            }
+            console.log(category_match);
 
+            // Total match score
+            const matchScore = nameMatch + desc_match + category_match;
+
+            return { ...item, matchScore };
+        })
+        .filter(item => item.matchScore > 0) // Filter out items with no match
+        .sort((a, b) => {
+            // Sort primarily by match score (descending), then by name (ascending)
+            if (b.matchScore !== a.matchScore) {
+                return b.matchScore - a.matchScore;
+            }
+            return a.name.localeCompare(b.name);
+        });
+
+    // Render the filtered items
+    renderItems(filteredItems);
+}
 // Render shop items with updated stock
-function renderItems() {
+function renderItems(filteredItems = null) {
+    const itemsToRender = filteredItems || items; // Use filtered items if provided, otherwise render all items
     const itemsContainer = document.getElementById('items');
     if (!itemsContainer) return;
-    itemsContainer.innerHTML = items.map(item => { 
+    itemsContainer.innerHTML = itemsToRender.map(item => { 
         const cartQuantity = cartItems[item.id] || 0; // Quantity of the item in the cart
         const availableStock = item.stock - cartQuantity; // Stock available after subtracting cart quantity
         return `
@@ -232,4 +270,9 @@ document.addEventListener('DOMContentLoaded', () => {
         alert("Token changed, alert developer of the error!"); //Jangan sampe masuk sini
         window.location.href = 'shop.html';
     }
+});
+
+document.getElementById('search-bar').addEventListener('input', (event) => {
+    const query = event.target.value.trim();
+    searchItems(query); 
 });
