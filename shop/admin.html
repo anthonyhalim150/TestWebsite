@@ -1,11 +1,108 @@
-<html>
-    <head>
-        <title>Admin Page</title>
-        <!-- Other head elements -->
-    </head>
-    <body>
-        <!-- Admin page content -->
+<!DOCTYPE html>
+<html lang="en">
 
-        <script src="admin.js"> </script>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="shop.css">
+    <script defer type="module" src="admin.js"></script> <!-- Link to your admin JavaScript file -->
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin Dashboard</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="index.html" class="nav-item">Home</a></li>
+                <li><a href="shop.html" class="nav-item">Shop</a></li>
+                <li><a href="admin.html" class="nav-item active">Admin</a></li>
+                <li><a href="login.html" id="logout_nav" class="nav-item">Logout</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="main-header">
+            <h1>Admin Dashboard</h1>
+        </header>
+
+        <!-- Shop Metrics Section -->
+        <section id="shop-metrics" class="metrics">
+            <h2>Shop Metrics</h2>
+            <div class="metrics-container">
+                <div class="metric card">
+                    <p><strong>Total Sales:</strong> $<span id="total-sales">0</span></p>
+                </div>
+                <div class="metric card">
+                    <p><strong>Total Items Sold:</strong> <span id="total-items-sold">0</span></p>
+                </div>
+                <div class="metric card">
+                    <p><strong>Total Products in Stock:</strong> <span id="total-products-in-stock">0</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Product Form -->
+        <section id="add-product" class="form-section">
+            <h2>Add New Product</h2>
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="product-name">Product Name:</label>
+                    <input type="text" id="product-name" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="product-price">Price:</label>
+                    <input type="number" id="product-price" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Description:</label>
+                    <textarea id="product-description" required class="form-input"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="product-stock">Stock Quantity:</label>
+                    <input type="number" id="product-stock" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="product-image">Image URL:</label>
+                    <input type="text" id="product-image" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="product-category">Category:</label>
+                    <input type="text" id="product-category" class="form-input">
+                </div>
+                <button type="submit" class="btn-primary">Add Product</button>
+            </form>
+        </section>
+
+        <!-- Product List Section -->
+        <section id="product-list" class="product-list">
+            <h2>Product List</h2>
+            <table id="product-container">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamically filled with products -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Your Company. All rights reserved.</p>
+    </footer>
+</body>
+
 </html>

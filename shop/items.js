@@ -63,7 +63,6 @@ function clear_login() {
         // Clear user info and refresh the page
         localStorage.clear();
         alert('You have logged out.');
-        location.reload();
         window.location.href = 'login.html';
     });
 }
@@ -149,7 +148,7 @@ async function addToCart(itemID) {
     }
 }
 function searchItems() {
-    const query = document.getElementById('search-bar').value.toLowerCase();
+    const query = document.getElementById('search-bar').value.trim().toLowerCase();
     let desc_match = 0;
     let category_match = 0;
     if (query === ''){//Biar kalo ga ada search barnya, itemnya ga ke sort lgi
@@ -262,16 +261,16 @@ function closeItemOverview() {
     const overviewContainer = document.getElementById('item-overview');
     overviewContainer.classList.remove('visible');
 }
-
-
-
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', () => {
     update_login();
     fetchItems(); // Fetch items when page loads
 });
 
-document.getElementById('search-bar').addEventListener('input', (event) => {
-    const query = event.target.value.trim();
-    searchItems(query); 
-});
+
+const searchBar = document.getElementById('search-bar');
+if (searchBar) {
+    searchBar.addEventListener('input', (event) => {
+        searchItems(); 
+    });
+} 

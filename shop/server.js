@@ -294,6 +294,46 @@ app.post('/checkout', async (req, res) => {
     }
 });
 
+// Get Shop Metrics
+app.get('/shop-metrics', async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+        // Query for total products
+        const [totalProductsResult] = await connection.query(
+            'SELECT COUNT(*) AS totalProducts FROM Items'
+        );
+        const totalProducts = totalProductsResult[0].totalProducts;
+
+        // Query for total stock
+        const [totalStockResult] = await connection.query(
+            'SELECT SUM(stock) AS totalStock FROM Items'
+        );
+        const totalStock = totalStockResult[0].totalStock || 0;
+
+        // Query for total sales (sum of transaction totals)
+        const [totalSalesResult] = await connection.query(
+            'SELECT SUM(total_amount) AS totalSales FROM transactions'
+        );
+        const totalSales = totalSalesResult[0].totalSales || 0;
+
+        // Respond with metrics
+        res.json({
+            success: true,
+            metrics: {
+                totalProducts,
+                totalStock,
+                totalSales,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching shop metrics:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch shop metrics.' });
+    } finally {
+        connection.release();
+    }
+});
+
+
 
 // Start server
 app.listen(port, () => {
