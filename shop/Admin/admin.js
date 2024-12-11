@@ -42,6 +42,15 @@ function createSidebar() {
                         <li><a href="product_list.html" class="nav-item">Product List</a></li>
                     </ul>
                 </li>
+                <li class="dropdown">
+                    <a href="#" class="nav-user dropdown-toggle">
+                        Users <span class="arrow">▼</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="add_new_product.html" class="nav-user">Add Users</a></li>
+                        <li><a href="product_list.html" class="nav-user">User List</a></li>
+                    </ul>
+                </li>
                 <li><a href="metrics.html" class="nav-item">Metrics</a></li>
                 <li><a id="logout_nav" class="nav-item">Logout</a></li>
             </ul>
@@ -65,15 +74,37 @@ function clear_login() {
     });
 }
 
-function open_drop_down(){
-    const drop_down_toggle = document.querySelector('.dropdown-toggle');
-    const drop_down = document.querySelector('.dropdown');
+function open_drop_down() {
+    // Select all dropdown toggles
+    const drop_down_toggles = document.querySelectorAll('.dropdown-toggle');
 
-    drop_down_toggle.addEventListener('click', (event) => {
-        event.preventDefault();
-        drop_down.classList.toggle('open');
+    drop_down_toggles.forEach(toggle => {
+        toggle.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            // Find the parent dropdown and toggle the 'open' class
+            const dropdown = toggle.parentElement;
+            dropdown.classList.toggle('open');
+
+            // Close other open dropdowns
+            document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                if (otherDropdown !== dropdown) {
+                    otherDropdown.classList.remove('open');
+                }
+            });
+        });
+    });
+
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            if (!dropdown.contains(event.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
     });
 }
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
