@@ -8,6 +8,7 @@ function crawler_check(){
         window.location.href = 'shop.html';  // Redirect to non-admins to homepage
     }
 }
+
 function get_user_role() {
     const token = localStorage.getItem('token');
     if (!token) return null;
@@ -120,12 +121,23 @@ function clear_login() {
     });
 }
 
+function open_drop_down(){
+    const drop_down_toggle = document.querySelector('.dropdown-toggle');
+    const drop_down = document.querySelector('.dropdown');
+
+    drop_down_toggle.addEventListener('click', (event) => {
+        event.preventDefault();
+        drop_down.classList.toggle('open');
+    });
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('product-form');
+    open_drop_down();
     if (productForm) {
         productForm.addEventListener('submit', addProduct); // Prevent form reload
     }
     crawler_check();
+    clear_login();
 });
-clear_login();

@@ -13,22 +13,68 @@
 .sidebar-nav ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
 .sidebar-nav ul li {
     margin-bottom: 15px;
+    position: relative;
 }
 
 .sidebar-nav ul li a {
     color: white;
     text-decoration: none;
     font-size: 1.2rem;
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 10px;
     transition: background-color 0.3s;
 }
 
 .sidebar-nav ul li a:hover {
+    background-color: var(--highlight-color);
+}
+
+.arrow {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.dropdown.open .arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-top: 10px;
+    position: relative;
+    background-color: var(--primary-color);
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.dropdown.open .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li {
+    margin: 0;
+}
+
+.dropdown-menu li a {
+    padding: 10px 20px;
+    font-size: 1rem;
+    display: block;
+}
+
+.dropdown-menu li a:hover {
     background-color: var(--highlight-color);
 }
 
