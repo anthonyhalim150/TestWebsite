@@ -11,11 +11,11 @@ function update_login() {
     const role = localStorage.getItem('role'); 
     if (get_user_role() !== role){
         alert("Token changed, alert developer of the error!"); //Jangan sampe masuk sini
-        window.location.href = 'shop.html';
+        window.location.href = './index.html';
     }
     if (userID) {
         if (role === 'admin') {
-            window.location.href = '/admin/admin.html';
+            window.location.href = './admin/index.html';
         }
         // User is logged in
         navbarLinks.innerHTML = `

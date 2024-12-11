@@ -4,8 +4,8 @@ const API_SALES_URL = 'http://localhost:3000/sales'; // Assuming an API to get s
 
 function crawler_check(){
     const userRole = localStorage.getItem('role'); 
-    if (window.location.pathname === '/shop/admin.html' && (userRole !== 'admin' || get_user_role()!== 'admin')) {
-        window.location.href = 'shop.html';  // Redirect to non-admins to homepage
+    if (window.location.pathname.includes('/shop/admin') && (userRole !== 'admin' || get_user_role()!== 'admin')) {
+        window.location.href = '../index.html';  // Redirect to non-admins to homepage
     }
 }
 
@@ -117,7 +117,7 @@ function clear_login() {
         // Clear user info and refresh the page
         localStorage.clear();
         alert('You have logged out.');
-        window.location.href = 'login.html';
+        window.location.href = '../login.html';
     });
 }
 
