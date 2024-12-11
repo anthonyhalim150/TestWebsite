@@ -294,44 +294,51 @@ app.post('/checkout', async (req, res) => {
     }
 });
 
-// Get Shop Metrics
 app.get('/shop-metrics', async (req, res) => {
+    const { userId, startDate, endDate } = req.query;
     const connection = await pool.getConnection();
+
     try {
-        // Query for total products
-        const [totalProductsResult] = await connection.query(
-            'SELECT COUNT(*) AS totalProducts FROM Items'
-        );
-        const totalProducts = totalProductsResult[0].totalProducts;
+        const conditions = [];
+        const values = [];
 
-        // Query for total stock
-        const [totalStockResult] = await connection.query(
-            'SELECT SUM(stock) AS totalStock FROM Items'
-        );
-        const totalStock = totalStockResult[0].totalStock || 0;
+        if (userId) {
+            conditions.push('transactions.user_id = ?');
+            values.push(userId);
+        }
+        if (startDate) {
+            conditions.push('transactions.created_at >= ?');
+            values.push(startDate);
+        }
+        if (endDate) {
+            conditions.push('transactions.created_at <= ?');
+            values.push(endDate);
+        }
 
-        // Query for total sales (sum of transaction totals)
-        const [totalSalesResult] = await connection.query(
-            'SELECT SUM(total_amount) AS totalSales FROM transactions'
-        );
-        const totalSales = totalSalesResult[0].totalSales || 0;
+        const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-        // Respond with metrics
-        res.json({
-            success: true,
-            metrics: {
-                totalProducts,
-                totalStock,
-                totalSales,
-            },
-        });
+        const [metricsResult] = await connection.query(
+            `SELECT 
+                COUNT(transactions.transaction_id) AS totalTransactions,
+                SUM(transactions.total_amount) AS totalAmount,
+                SUM(sale_items.quantity) AS totalItemsSold
+            FROM transactions
+            LEFT JOIN sale_items ON transactions.transaction_id = sale_items.transaction_id
+            ${whereClause}`,
+            values
+        );
+
+        const metrics = metricsResult[0] || { totalTransactions: 0, totalAmount: 0, totalItemsSold: 0 };
+
+        res.json({ success: true, metrics });
     } catch (error) {
-        console.error('Error fetching shop metrics:', error);
-        res.status(500).json({ success: false, error: 'Failed to fetch shop metrics.' });
+        console.error('Error fetching metrics:', error);
+        res.status(500).json({ success: false, error: 'Internal server error.' });
     } finally {
         connection.release();
     }
 });
+
 
 
 
