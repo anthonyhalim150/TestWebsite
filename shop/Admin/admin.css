@@ -102,20 +102,31 @@
 /* Product List Table */
 .product-list table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: collapse; /* Ensures no space between table cells */
     margin-top: 30px;
+    border: 1px solid #ddd; /* Adds a border around the entire table */
 }
 
 .product-list th,
 .product-list td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border: 1px solid #ddd; /* Adds a border to each cell */
 }
 
 .product-list th {
-    background-color: var(--primary-color);
+    background-color: var(--primary-color); /* Adjust the primary color variable */
     color: white;
+    text-transform: uppercase; /* Optional: Makes header text uppercase */
+}
+
+.product-list tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Adds a subtle striping effect */
+}
+
+.product-list tbody tr:hover {
+    background-color: #f1f1f1; /* Highlight row on hover */
+    cursor: pointer; /* Optional: Changes cursor to pointer */
 }
 
 .form-section {
@@ -174,4 +185,8 @@
 .btn-primary:hover {
     background-color: var(--highlight-color);
     color: var(--text-color);
+}
+
+.search-container{
+    margin-left: 420px;
 }

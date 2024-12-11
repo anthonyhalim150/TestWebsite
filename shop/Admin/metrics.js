@@ -1,7 +1,7 @@
-// Admin Dashboard - Fetch shop metrics
+const API_URL = 'http://localhost:3000/shop-metrics'
 async function fetchShopMetrics() {
     try {
-        const response = await fetch(API_SALES_URL);
+        const response = await fetch(API_URL);
         const data = await response.json();
 
         if (data.success) {
@@ -15,3 +15,4 @@ async function fetchShopMetrics() {
         console.error('Error fetching shop metrics:', error);
     }
 }
+fetchShopMetrics();

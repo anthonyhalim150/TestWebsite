@@ -335,6 +335,42 @@ app.get('/shop-metrics', async (req, res) => {
 
 
 
+app.post('/add-new-product', async (req, res) => {
+    const { name, category, price, stock, image, description } = req.body;
+
+    // Validate required fields
+    if (!name || !category || !price || !stock || !image || !description) {
+        return res.status(400).json({ success: false, error: 'All fields are required.' });
+    }
+
+    // Ensure `price` and `stock` are valid numbers
+    if (isNaN(price) || isNaN(stock)) {
+        return res.status(400).json({ success: false, error: 'Price and stock must be valid numbers.' });
+    }
+
+    try {
+        const connection = await pool.getConnection(); // Get a connection from the pool
+        try {
+            // SQL query to insert the product into the database
+            const query = `
+                INSERT INTO items (name, category, price, stock, image, description) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            `;
+            const values = [name, category, price, stock, image, description];
+
+            // Execute the query
+            await connection.query(query, values);
+            res.status(201).json({ success: true, message: 'Product added successfully!' });
+        } finally {
+            connection.release(); // Always release the connection back to the pool
+        }
+    } catch (error) {
+        console.error('Error adding product:', error);
+        res.status(500).json({ success: false, error: 'Internal server error.' });
+    }
+});
+
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

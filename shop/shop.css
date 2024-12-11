@@ -263,7 +263,7 @@ footer {
 
 #search-bar {
     width: 200%;  /* Adjust the width as per your requirement */
-    max-width: 1000px; /* Limits the maximum width */
+    max-width: 700px; /* Limits the maximum width */
     padding: 5px;
     font-size: 16px;
     border-radius: 20px;
