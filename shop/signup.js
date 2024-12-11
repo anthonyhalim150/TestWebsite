@@ -11,7 +11,6 @@ document.getElementById('sign-up-form').addEventListener('submit', async (event)
         alert("Passwords do not match!");
         return;
     }
-    alert(`Account created successfully for ${username}!`);
 
 
     // Create the user object
@@ -32,8 +31,9 @@ document.getElementById('sign-up-form').addEventListener('submit', async (event)
         const result = await response.json();
         console.log('Server response:', result);
         if (response.ok && result.success) {
+            alert(`Account created successfully for ${username}!`);
             document.getElementById('signup_message').innerText = 'Sign-Up Successful!';
-            window.location.href = 'shop.html';
+            window.location.href = 'index.html';
             document.getElementById('signupForm').reset(); // Reset form
         } else {
             document.getElementById('signup_message').innerText = 'Sign-Up Failed: ' + (result.error || 'Unknown error.');

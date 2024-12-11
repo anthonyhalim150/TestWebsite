@@ -14,23 +14,34 @@
     <main class="main-content">
         <section id="shop-metrics" class="metrics">
             <h2>Shop Metrics</h2>
-            <div class="filters">
-                <label for="user-id">User ID:</label>
-                <input type="number" id="user-id" placeholder="Enter user ID">
-
+            <div class="filters">      
                 <label for="start-date">Start Date:</label>
                 <input type="date" id="start-date">
-
+        
                 <label for="end-date">End Date:</label>
                 <input type="date" id="end-date">
-
+        
                 <button id="filter-button">Apply Filters</button>
             </div>
-            <canvas id="metrics-chart"></canvas>
-        </section>
+        
+            <h3>Revenue Over Time</h3>
+            <canvas id="sales-chart"></canvas>
+        
+            <h3>Product Metrics Over Time</h3>
+            <canvas id="product-metrics-chart"></canvas>
+        
+            <h3>Product Sales Comparison</h3>
+            <canvas id="product-comparison-chart"></canvas>
+            
+            <h3>User Registrations Over Time</h3>
+            <canvas id="user-registration-chart"></canvas>
+
+        </section>        
     </main>
     <footer>
         <p>&copy; 2024 Your Company. All rights reserved.</p>
     </footer>
+    
 </body>
 </html>
+

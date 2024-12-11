@@ -20,6 +20,7 @@ CREATE TABLE users (
     username VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     role ENUM('user', 'admin') DEFAULT 'user'
 );
 
@@ -66,6 +67,9 @@ CREATE TABLE sale_items (
 INSERT INTO items (name, description, category, price, stock, image) VALUES 
 ('Laptop', 'I am a laptop', 'Electronics', 1000.00, 10, 'https://via.placeholder.com/300'),
 ('Phone', 800.00, 15, 'https://via.placeholder.com/300');
+
+INSERT INTO items (name, category, description, price, stock, image) VALUES 
+('Laptop', 'I am a laptop', 'Electronics', 1000.00, 10, 'https://via.placeholder.com/300');
 
 INSERT INTO users (username, email, password) VALUES ('testuser', 'test@example.com', 'hashedpassword');
 UPDATE users

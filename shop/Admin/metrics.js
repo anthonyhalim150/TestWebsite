@@ -2,14 +2,13 @@ const API_URL = 'http://localhost:3000/shop-metrics';
 
 document.getElementById('filter-button').addEventListener('click', fetchFilteredMetrics);
 
-let chartInstance; // Declare a global variable to hold the chart instance
+let salesChart, productMetricsChart, productComparisonChart, userRegistrationChart; // Chart instances
 
 async function fetchFilteredMetrics() {
-    const userId = document.getElementById('user-id').value;
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
 
-    const params = new URLSearchParams({ userId, startDate, endDate }).toString();
+    const params = new URLSearchParams({ startDate, endDate }).toString();
     const url = `${API_URL}?${params}`;
 
     try {
@@ -17,7 +16,10 @@ async function fetchFilteredMetrics() {
         const data = await response.json();
 
         if (data.success) {
-            displayMetricsChart(data.metrics);
+            displaySalesOverTimeChart(data.salesOverTime);
+            displayProductMetricsChart(data.productMetricsOverTime);
+            displayProductComparisonChart(data.productComparison);
+            displayUserRegistrationChart(data.userRegistrations);
         } else {
             console.error('Failed to fetch shop metrics:', data.error);
         }
@@ -26,31 +28,133 @@ async function fetchFilteredMetrics() {
     }
 }
 
-function displayMetricsChart(metrics) {
-    const ctx = document.getElementById('metrics-chart').getContext('2d');
-
-    // Destroy the existing chart instance if it exists
-    if (chartInstance) {
-        chartInstance.destroy();
+function displaySalesOverTimeChart(salesData) {
+    if (!salesData || !salesData.timeLabels) {
+        console.error("Missing sales data");
+        return;
     }
 
-    // Create a new chart instance and store it in the global variable
-    chartInstance = new Chart(ctx, {
-        type: 'bar',
+    const ctx = document.getElementById('sales-chart').getContext('2d');
+
+    if (salesChart) {
+        salesChart.destroy();
+    }
+
+    salesChart = new Chart(ctx, {
+        type: 'line',
         data: {
-            labels: ['Total Transactions', 'Total Amount', 'Total Items Sold'],
-            datasets: [{
-                label: 'Metrics',
-                data: [metrics.totalTransactions, metrics.totalAmount, metrics.totalItemsSold],
-                backgroundColor: ['#FF5733', '#33FF57', '#3357FF'],
-            }]
+            labels: salesData.timeLabels,
+            datasets: [
+                {
+                    label: 'Total Amount',
+                    data: salesData.totalAmounts || [],
+                    borderColor: '#33FF57',
+                    fill: false,
+                },
+            ],
         },
         options: {
             scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
+                x: { title: { display: true, text: 'Time' } },
+                y: { beginAtZero: true },
+            },
+        },
+    });
+}
+
+function displayProductMetricsChart(productMetrics) {
+    const ctx = document.getElementById('product-metrics-chart').getContext('2d');
+
+    if (productMetricsChart) {
+        productMetricsChart.destroy();
+    }
+
+    productMetricsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: productMetrics.timeLabels,
+            datasets: [
+                {
+                    label: 'Total Items Sold',
+                    data: productMetrics.itemsSold,
+                    borderColor: '#3357FF',
+                    fill: false,
+                },
+                {
+                    label: 'Stock Remaining',
+                    data: productMetrics.stockRemaining,
+                    borderColor: '#FF33FF',
+                    fill: false,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                x: { title: { display: true, text: 'Time' } },
+                y: { beginAtZero: true },
+            },
+        },
+    });
+}
+
+function displayProductComparisonChart(productComparison) {
+    const ctx = document.getElementById('product-comparison-chart').getContext('2d');
+
+    if (productComparisonChart) {
+        productComparisonChart.destroy();
+    }
+
+    productComparisonChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: productComparison.productNames,
+            datasets: [
+                {
+                    label: 'Total Items Sold',
+                    data: productComparison.itemsSold,
+                    backgroundColor: '#FF5733',
+                },
+            ],
+        },
+        options: {
+            scales: {
+                x: { title: { display: true, text: 'Products' } },
+                y: { beginAtZero: true },
+            },
+        },
+    });
+}
+
+function displayUserRegistrationChart(userRegistrations) {
+    if (!userRegistrations || !userRegistrations.timeLabels) {
+        console.error("Missing user registration data");
+        return;
+    }
+
+    const ctx = document.getElementById('user-registration-chart').getContext('2d');
+
+    if (userRegistrationChart) {
+        userRegistrationChart.destroy();
+    }
+
+    userRegistrationChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: userRegistrations.timeLabels,
+            datasets: [
+                {
+                    label: 'New Users',
+                    data: userRegistrations.newUsers || [],
+                    borderColor: '#FF5733',
+                    fill: false,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                x: { title: { display: true, text: 'Time' } },
+                y: { beginAtZero: true },
+            },
+        },
     });
 }

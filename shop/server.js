@@ -295,17 +295,14 @@ app.post('/checkout', async (req, res) => {
 });
 
 app.get('/shop-metrics', async (req, res) => {
-    const { userId, startDate, endDate } = req.query;
+    const { startDate, endDate } = req.query;
     const connection = await pool.getConnection();
 
     try {
         const conditions = [];
         const values = [];
 
-        if (userId) {
-            conditions.push('transactions.user_id = ?');
-            values.push(userId);
-        }
+        // Add conditions based on query parameters
         if (startDate) {
             conditions.push('transactions.created_at >= ?');
             values.push(startDate);
@@ -315,29 +312,83 @@ app.get('/shop-metrics', async (req, res) => {
             values.push(endDate);
         }
 
+        // Build WHERE clause dynamically
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-        const [metricsResult] = await connection.query(
-            `SELECT 
-                COUNT(transactions.transaction_id) AS totalTransactions,
-                SUM(transactions.total_amount) AS totalAmount,
-                SUM(sale_items.quantity) AS totalItemsSold
+        // Query for sales over time
+        const [salesOverTime] = await connection.query(`
+            SELECT DATE(transactions.created_at) AS timeLabel, 
+                   COUNT(transactions.transaction_id) AS totalTransactions,
+                   SUM(transactions.total_amount) AS totalAmounts
             FROM transactions
-            LEFT JOIN sale_items ON transactions.transaction_id = sale_items.transaction_id
-            ${whereClause}`,
-            values
-        );
+            ${whereClause}
+            GROUP BY DATE(transactions.created_at)
+            ORDER BY DATE(transactions.created_at)
+        `, values);
 
-        const metrics = metricsResult[0] || { totalTransactions: 0, totalAmount: 0, totalItemsSold: 0 };
+        // Query for product metrics over time
+        const [productMetricsOverTime] = await connection.query(`
+            SELECT DATE(transactions.created_at) AS timeLabel,
+                   SUM(sale_items.quantity) AS itemsSold,
+                   IFNULL(SUM(items.stock), 0) AS stockRemaining
+            FROM sale_items
+            JOIN items ON sale_items.item_id = items.id
+            JOIN transactions ON sale_items.transaction_id = transactions.transaction_id
+            ${whereClause}
+            GROUP BY DATE(transactions.created_at)
+            ORDER BY DATE(transactions.created_at)
+        `, values);
 
-        res.json({ success: true, metrics });
+        // Query for product comparison
+        const [productComparison] = await connection.query(`
+            SELECT items.name AS productName,
+                   SUM(sale_items.quantity) AS itemsSold
+            FROM sale_items
+            JOIN items ON sale_items.item_id = items.id
+            ${whereClause}
+            GROUP BY items.name
+            ORDER BY items.name
+        `, values);
+
+        // Construct and send the response
+        const [userRegistrations] = await connection.query(`
+            SELECT DATE(created_at) AS timeLabel, COUNT(id) AS newUsers
+            FROM users
+            ${startDate || endDate ? `WHERE ${startDate ? 'created_at >= ?' : ''} ${endDate ? (startDate ? 'AND created_at <= ?' : 'created_at <= ?') : ''}` : ''}
+            GROUP BY DATE(created_at)
+            ORDER BY DATE(created_at)
+        `, startDate && endDate ? [startDate, endDate] : startDate ? [startDate] : endDate ? [endDate] : []);
+        
+        res.json({
+            success: true,
+            salesOverTime: {
+                timeLabels: salesOverTime.map(row => row.timeLabel),
+                totalAmounts: salesOverTime.map(row => row.totalAmounts),
+            },
+            productMetricsOverTime: {
+                timeLabels: productMetricsOverTime.map(row => row.timeLabel),
+                itemsSold: productMetricsOverTime.map(row => row.itemsSold),
+                stockRemaining: productMetricsOverTime.map(row => row.stockRemaining),
+            },
+            productComparison: {
+                productNames: productComparison.map(row => row.productName),
+                itemsSold: productComparison.map(row => row.itemsSold),
+            },
+            userRegistrations: {
+                timeLabels: userRegistrations.map(row => row.timeLabel),
+                newUsers: userRegistrations.map(row => row.newUsers),
+            },
+        });        
     } catch (error) {
-        console.error('Error fetching metrics:', error);
-        res.status(500).json({ success: false, error: 'Internal server error.' });
+        console.error('Error fetching shop metrics:', error);
+        res.status(500).json({ success: false, error: 'No data found.' });
     } finally {
         connection.release();
     }
 });
+
+
+
 
 
 
