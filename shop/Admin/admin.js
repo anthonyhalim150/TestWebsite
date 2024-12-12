@@ -47,8 +47,8 @@ function createSidebar() {
                         Users <span class="arrow">▼</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="add_new_product.html" class="nav-user">Add Users</a></li>
-                        <li><a href="product_list.html" class="nav-user">User List</a></li>
+                        <li><a href="add_new_user.html" class="nav-user">Add Users</a></li>
+                        <li><a href="user_list.html" class="nav-user">User List</a></li>
                     </ul>
                 </li>
                 <li><a href="metrics.html" class="nav-item">Metrics</a></li>

@@ -120,6 +120,21 @@ app.get('/items', async (req, res) => {
     }
 });
 
+app.get('/users', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `SELECT * FROM users`;
+            const [results] = await connection.query(query);
+            res.json({ success: true, items: results });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        res.json({ success: false, error: 'Error fetching items.' });
+    }
+});
 // Fetch cart items
 app.get('/cart-items', async (req, res) => {
     const userID = req.query.userID;
