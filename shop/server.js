@@ -443,6 +443,36 @@ app.post('/add-new-product', async (req, res) => {
     }
 });
 
+app.post('/add-new-user', async (req, res) => {
+    const { username, password, role, email} = req.body;
+
+    // Validate required fields
+    if (!username || !password || !role || !email) {
+        return res.status(400).json({ success: false, error: 'All fields are required.' });
+    }
+    try {
+        
+        const connection = await pool.getConnection(); // Get a connection from the pool
+        try {
+            // SQL query to insert the product into the database
+            const query = `
+                INSERT INTO users (username, email, password, role) 
+                VALUES (?, ?, ?, ?)
+            `;
+            const values = [username, email, password, role];
+
+            // Execute the query
+            await connection.query(query, values);
+            res.status(201).json({ success: true, message: 'User added successfully!' });
+        } finally {
+            connection.release(); // Always release the connection back to the pool
+        }
+    } catch (error) {
+        console.error('Error adding user:', error);
+        res.status(500).json({ success: false, error: 'Internal server error.' });
+    }
+});
+
 
 // Start server
 app.listen(port, () => {

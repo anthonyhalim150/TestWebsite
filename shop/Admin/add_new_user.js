@@ -1,22 +1,24 @@
-API_URL = 'http://localhost:3000/add-new-product';
+API_URL = 'http://localhost:3000/add-new-user';
 async function addProduct(){
     event.preventDefault(); // Prevent form reload
 
     // Get form data
-    const name = document.getElementById('product-name').value;
-    const price = parseFloat(document.getElementById('product-price').value);
-    const description = document.getElementById('product-description').value;
-    const stock = parseInt(document.getElementById('product-stock').value);
-    const image = document.getElementById('product-image').value;
-    const category = document.getElementById('product-category').value;
+    const username = document.getElementById('product-name').value;
+    const password = document.getElementById('product-price').value;
+    const role = document.getElementById('product-stock').value.toLowerCase();
+    const email = document.getElementById('product-category').value;
 
     // Validate form inputs
-    if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !image || !category) {
-        alert('All fields are required, and price/stock must be positive numbers.');
+    if (!username || !password || !role || !email) {
+        alert('All fields are required!');
+        return;
+    }
+    if (role != 'admin' && role != 'user'){
+        alert('Role must be either admin or user');
         return;
     }
 
-    const newProduct = { name, category, price, stock, image, description};
+    const new_user = {username, password, role, email};
 
     try {
         const response = await fetch(API_URL, {
@@ -24,17 +26,17 @@ async function addProduct(){
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(newProduct),
+            body: JSON.stringify(new_user),
         });
 
         const result = await response.json();
         if (result.success) {
-            alert('Product added successfully!');
+            alert('User added successfully!');
         } else {
-            alert('Failed to add product. Please try again.');
+            alert('Failed to add user. Please try again.');
         }
     } catch (error) {
-        console.error('Error adding product:', error);
+        console.error('Error adding user:', error);
         alert('An error occurred. Please try again later.');
     }
 }
