@@ -473,6 +473,37 @@ app.post('/add-new-user', async (req, res) => {
     }
 });
 
+app.put('/items/:id', async (req, res) => {
+    const productId = req.params.id;
+    const { name, price, stock, description, category } = req.body;
+
+    if (!name || price === undefined || stock === undefined || !description || !category) {
+        return res.status(400).json({ success: false, error: 'All fields are required.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                UPDATE items
+                SET name = ?, price = ?, stock = ?, description = ?, category = ?
+                WHERE id = ?
+            `;
+            const [result] = await connection.query(query, [name, price, stock, description, category, productId]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, error: 'Product not found.' });
+            }
+
+            res.json({ success: true, message: 'Product updated successfully.' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error updating product:', error);
+        res.status(500).json({ success: false, error: 'Failed to update product.' });
+    }
+});
 
 // Start server
 app.listen(port, () => {

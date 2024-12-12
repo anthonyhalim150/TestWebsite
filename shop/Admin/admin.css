@@ -160,7 +160,7 @@
 
 #product-price,
 #product-stock {
-    width: 8%; 
+    width: 20%; 
 }
 
 #product-name,
@@ -192,4 +192,91 @@
 }
 .filters{
     margin-left: 230px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Product Overview Styles */
+.product-overview {
+    position: fixed;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for width/height */
+    background-color: #fff7e6; /* Cream background */
+    border: 2px solid #ff8800; /* Orange border */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    max-width: 400px;
+    width: 100%; /* Responsive width */
+}
+
+.product-overview img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.product-overview .details label {
+    display: block;
+    font-weight: bold;
+    color: #ff8800; /* Orange text */
+    margin-top: 10px;
+}
+
+.product-overview .details input,
+.product-overview .details textarea {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+}
+
+.product-overview button {
+    background-color: #ff8800;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.product-overview button:hover {
+    background-color: #ff6600;
+}
+
+.product-overview .close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    border: none;
+    font-size: 25px; /* Smaller font size */
+    font-weight: bold;
+    color: #ff8800;
+    cursor: pointer;
+    padding: 20px 20px; /* Reduce padding to make the clickable area smaller */
+    line-height: 1;
+    border-radius: 100%; /* Circular button */
+    transform: translate(20%, -50%);
+    width: 20px; /* Fixed width for the button */
+    height: 20px; /* Fixed height for the button */
+    display: flex; /* Use flex to center the text inside the button */
+    justify-content: center; /* Center text horizontally */
+    align-items: center; /* Center text vertically */
+}
+
+.product-overview .close-btn:hover {
+    color: #ff6600; /* Darker orange on hover */
+    background-color: rgba(255, 136, 0, 0.1);
 }

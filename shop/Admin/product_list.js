@@ -1,5 +1,7 @@
-const API_URL = 'http://localhost:3000/items'
+// Existing API URL and items array remain unchanged
+const API_URL = 'http://localhost:3000/items';
 let items = [];
+
 async function fetch_products(sorted_items = null) {
     try {
         const response = await fetch(API_URL);
@@ -7,22 +9,31 @@ async function fetch_products(sorted_items = null) {
 
         if (data.success && data.items) {
             items = data.items;
-            if (sorted_items !== null){
+            if (sorted_items !== null) {
                 items = sorted_items;
             }
-            const productContainer = document.getElementById('product-container tbody');
+
+            const productContainer = document.getElementById('product-container-tbody');
             productContainer.innerHTML = items.map(product => {
                 return `
-                <tr>
+                <tr data-id="${product.id}">
                     <td><img src="${product.image}" alt="Not Found!" style="width: 200px; height: 200px; object-fit: cover;"></td>
                     <td>${product.name}</td>
                     <td>$${product.price}</td>
                     <td>${product.stock}</td>
                     <td>${product.description || 'N/A'}</td>
                     <td>${product.category || 'N/A'}</td>
-                </tr>
-            `;
-        }).join('');
+                </tr>`;
+            }).join('');
+
+            // Add click event listeners to rows
+            document.querySelectorAll('#product-container tbody tr').forEach(row => {
+                row.addEventListener('click', () => {
+                    const productId = row.getAttribute('data-id');
+                    const product = items.find(item => item.id == productId);
+                    displayProductOverview(product);
+                });
+            });
         } else {
             console.error('Failed to fetch products:', data.error);
         }
@@ -30,50 +41,123 @@ async function fetch_products(sorted_items = null) {
         console.error('Error fetching products:', error);
     }
 }
+
 function searchItems() {
     const query = document.getElementById('search-bar').value.trim().toLowerCase();
     let desc_match = 0;
     let category_match = 0;
-    if (query === ''){//Biar kalo ga ada search barnya, itemnya ga ke sort lgi
+
+    if (query === '') {
         location.reload();
         return;
     }
-    // Filter and sort items based on the query
+
     const filteredItems = items
         .map(item => {
-            // Calculate the match score based on the name and description
             const nameMatch = (item.name.toLowerCase().includes(query) ? 1 : 0);
-            if (item.description !== null){
+            if (item.description !== null) {
                 desc_match = (item.description.toLowerCase().includes(query) ? 1 : 0);
             }
-            if (item.category !== null){
+            if (item.category !== null) {
                 category_match = (item.category.toLowerCase().includes(query) ? 1 : 0);
             }
 
-            // Total match score
             const matchScore = nameMatch + desc_match + category_match;
-
             return { ...item, matchScore };
         })
-        .filter(item => item.matchScore > 0) // Filter out items with no match
+        .filter(item => item.matchScore > 0)
         .sort((a, b) => {
-            // Sort primarily by match score (descending), then by name (ascending)
             if (b.matchScore !== a.matchScore) {
                 return b.matchScore - a.matchScore;
             }
             return a.name.localeCompare(b.name);
         });
 
-    // Render the filtered items
     fetch_products(filteredItems);
 }
 
+async function saveProductChanges(productId) {
+    const updatedProduct = {
+        id: productId,
+        name: document.getElementById('product-name').value,
+        price: parseFloat(document.getElementById('product-price').value),
+        stock: parseInt(document.getElementById('product-stock').value, 10),
+        description: document.getElementById('product-description').value,
+        category: document.getElementById('product-category').value,
+    };
+
+    const confirmed = confirm('Are you sure you want to save these changes?');
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch(`${API_URL}/${productId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedProduct),
+        });
+
+        if (response.ok) {
+            alert('Product updated successfully!');
+            document.getElementById('product-overview').classList.add('hidden');
+            fetch_products(); // Refresh the list
+        } else {
+            alert('Failed to update the product.');
+        }
+    } catch (error) {
+        console.error('Error saving product:', error);
+        alert('An error occurred while saving the product.');
+    }
+}
+
+function displayProductOverview(product, rowElement) {
+    const overviewSection = document.getElementById('product-overview');
+    overviewSection.style.display = 'block';
+
+    // Populate the overview card with product details
+    document.getElementById('product-image').src = product.image;
+    document.getElementById('product-name').value = product.name;
+    document.getElementById('product-price').value = product.price;
+    document.getElementById('product-stock').value = product.stock;
+    document.getElementById('product-description').value = product.description;
+    document.getElementById('product-category').value = product.category;
+
+    // Add a save button listener
+    document.getElementById('save-button').onclick = () => saveProductChanges(product.id);
+}
+
+// Hide product overview when clicking outside
+document.addEventListener('click', (event) => {
+    const overviewSection = document.getElementById('product-overview');
+    const closeBtn = event.target.closest('.close-btn');
+    if (!overviewSection.contains(event.target) && !event.target.closest('tr') || closeBtn) {
+        overviewSection.style.display = 'none';
+    }
+});
+
+// Add row click events dynamically
+document.querySelectorAll('#product-container tbody tr').forEach(row => {
+    row.addEventListener('click', () => {
+        const productId = row.getAttribute('data-id');
+        const product = items.find(item => item.id == productId);
+
+        // Highlight the selected row
+        document.querySelectorAll('#product-container tbody tr').forEach(r => r.classList.remove('highlight-row'));
+        row.classList.add('highlight-row');
+
+        displayProductOverview(product, row);
+    });
+});
+
+// Existing event listeners remain unchanged
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products();
 });
+
 const searchBar = document.getElementById('search-bar');
 if (searchBar) {
-    searchBar.addEventListener('input', (event) => {
-        searchItems(); 
+    searchBar.addEventListener('input', () => {
+        searchItems();
     });
-} 
+}
+
+
