@@ -1,10 +1,8 @@
 CREATE DATABASE ecommerce;
 USE ecommerce;
-drop table items;
-drop table users;
-drop table Cart;
-drop table Transactions;
-drop table sale_items;
+
+
+
 
 CREATE TABLE items (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -63,7 +61,14 @@ CREATE TABLE sale_items (
     FOREIGN KEY (item_id) REFERENCES items(id)
 );
 
-
+CREATE TABLE comments(
+	comments_id INT AUTO_INCREMENT PRIMARY KEY,
+    comment TEXT,
+    user_id INT NOT NULL,
+	FOREIGN KEY (user_id) REFERENCES items(id)
+);
+drop table comments;
+use ecommerce;
 INSERT INTO items (name, description, category, price, stock, image) VALUES 
 ('Laptop', 'I am a laptop', 'Electronics', 1000.00, 10, 'https://via.placeholder.com/300'),
 ('Phone', 800.00, 15, 'https://via.placeholder.com/300');
@@ -74,7 +79,6 @@ INSERT INTO items (name, category, description, price, stock, image) VALUES
 INSERT INTO users (username, email, password) VALUES ('testuser', 'test@example.com', 'hashedpassword');
 UPDATE users
 SET role = 'admin'
-WHERE id = 8;
+WHERE id = 1;
 
-ALTER TABLE items
-ADD COLUMN category TEXT;
+INSERT INTO comments (comment, user_id) VALUES ('This webpage is so smooth!', 1);
