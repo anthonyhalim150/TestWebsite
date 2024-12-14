@@ -51,6 +51,7 @@ function createSidebar() {
                         <li><a href="user_list.html" class="nav-user">User List</a></li>
                     </ul>
                 </li>
+                <li><a href="transaction_list.html" class="nav-item">Transaction List</a></li>
                 <li><a href="metrics.html" class="nav-item">Metrics</a></li>
                 <li><a id="logout_nav" class="nav-item">Logout</a></li>
             </ul>

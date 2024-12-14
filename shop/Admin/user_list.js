@@ -31,14 +31,14 @@ async function fetch_products(sorted_items = null) {
 function search_users() {
     const query = document.getElementById('search-bar').value.trim().toLowerCase();
     if (query === ''){//Biar kalo ga ada search barnya, itemnya ga ke sort lgi
-        location.reload();
+        fetch_products();
         return;
     }
     // Filter and sort items based on the query
     const filteredItems = items
         .map(item => {
             // Calculate the match score based on the name and description
-            const nameMatch = (item.name.toLowerCase().includes(query) ? 1 : 0);
+            const nameMatch = (item.username.toLowerCase().includes(query) ? 1 : 0);
             // Total match score
             const matchScore = nameMatch;
 
@@ -50,7 +50,7 @@ function search_users() {
             if (b.matchScore !== a.matchScore) {
                 return b.matchScore - a.matchScore;
             }
-            return a.name.localeCompare(b.name);
+            return a.username.localeCompare(b.username);
         });
 
     // Render the filtered items

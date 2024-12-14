@@ -48,7 +48,7 @@ function searchItems() {
     let category_match = 0;
 
     if (query === '') {
-        location.reload();
+        fetch_products();
         return;
     }
 

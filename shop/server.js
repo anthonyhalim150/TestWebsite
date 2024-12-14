@@ -505,6 +505,34 @@ app.put('/items/:id', async (req, res) => {
     }
 });
 
+app.get('/transactions', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                SELECT 
+                    t.transaction_id, 
+                    u.username, 
+                    t.total_amount, 
+                    t.created_at,
+                    GROUP_CONCAT(CONCAT('Item: ', i.name, ', Quantity: ', s.quantity, ', Price: $', s.price) SEPARATOR '\n') AS description
+                FROM transactions t
+                JOIN users u ON t.user_id = u.id
+                JOIN sale_items s ON t.transaction_id = s.transaction_id
+                JOIN items i ON s.item_id = i.id
+                GROUP BY t.transaction_id
+                ORDER BY t.created_at DESC;
+            `;
+            const [results] = await connection.query(query);
+            res.json(results);
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch transactions.' });
+    }
+});
 // Start server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
