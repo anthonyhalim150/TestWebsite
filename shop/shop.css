@@ -270,3 +270,127 @@ footer {
     border: 1px solid #ccc;
 }
 
+.comment-section {
+    background-color: var(--highlight-color); /* Light highlight background */
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+}
+
+.comment-section h3, 
+.comment-section h4 {
+    color: var(--primary-color); /* Vibrant orange headings */
+    margin-bottom: 1rem;
+}
+
+.comment-section {
+    background-color: var(--highlight-color); /* Soft pastel background */
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.comment-section h2 {
+    color: var(--primary-color); /* Vibrant orange */
+    margin-bottom: 1.5rem;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#comment-text {
+    width: 100%;
+    height: 150px;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    resize: none;
+    transition: border-color 0.3s ease;
+}
+
+#comment-text:focus {
+    border-color: var(--success-color);
+    outline: none;
+}
+
+.submit-comment {
+    align-self: flex-end;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-comment:hover {
+    background-color: #e68a62; /* Slightly darker orange */
+}
+/* Feedback link styling */
+.feedback-link {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.feedback-link:hover {
+    color: var(--highlight-color);
+}
+
+.feedback-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    filter: invert(100%);
+    transition: transform 0.3s ease;
+}
+
+.feedback-link:hover .feedback-icon {
+    transform: scale(1.2);
+}
+/* Floating Feedback Button */
+.floating-feedback {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.2rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.floating-feedback:hover {
+    background-color: #e68a62;
+    transform: translateY(-4px);
+}
+
+.floating-feedback img {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    filter: invert(100%);
+}

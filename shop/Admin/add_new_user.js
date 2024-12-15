@@ -1,6 +1,6 @@
 API_URL = 'http://localhost:3000/add-new-user';
 async function addProduct(){
-    event.preventDefault(); // Prevent form reload
+    event.preventDefault(); // Prevent form reload??
 
     // Get form data
     const username = document.getElementById('product-name').value;

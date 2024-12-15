@@ -154,7 +154,7 @@
     padding: 10px;
     margin-top: 5px;
     border-radius: 5px;
-    resize: vertical; /*Ini to make resize cuma bisa vertical*/
+    resize: none; /*Ini to make resizenya cma pake ngescroll dripada bisa dibesarin/kecilin */
     border: 1px solid #ddd;
 }
 
@@ -237,7 +237,7 @@
     margin-top: 5px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    resize: vertical;
+    resize: none;
 }
 
 .product-overview button {

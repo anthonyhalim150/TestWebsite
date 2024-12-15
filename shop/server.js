@@ -473,6 +473,37 @@ app.post('/add-new-user', async (req, res) => {
     }
 });
 
+
+app.post('/add-new-comment', async (req, res) => {
+    const { userID, comment_text} = req.body;
+
+    // Validate required fields
+    if (!userID|| !comment_text) {
+        return res.status(400).json({ success: false, error: 'All fields are required.' });
+    }
+    try {
+        
+        const connection = await pool.getConnection(); // Get a connection from the pool
+        try {
+            // SQL query to insert the product into the database
+            const query = `
+                INSERT INTO comments(comment, user_id)
+                VALUES (?, ?)
+            `;
+            const values = [comment_text, userID];
+
+            // Execute the query
+            await connection.query(query, values);
+            res.status(201).json({ success: true, message: 'User added successfully!' });
+        } finally {
+            connection.release(); // Always release the connection back to the pool
+        }
+    } catch (error) {
+        console.error('Error adding comment:', error);
+        res.status(500).json({ success: false, error: 'Internal server error.' });
+    }
+});
+
 app.put('/items/:id', async (req, res) => {
     const productId = req.params.id;
     const { name, price, stock, description, category } = req.body;
