@@ -13,15 +13,6 @@ CREATE TABLE items (
     stock INT NOT NULL,
     image VARCHAR(255)
 );
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    role ENUM('user', 'admin') DEFAULT 'user'
-);
-
 -- Carts Table
 CREATE TABLE Cart (
     cart_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,11 +52,23 @@ CREATE TABLE sale_items (
     FOREIGN KEY (item_id) REFERENCES items(id)
 );
 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role ENUM('user', 'admin') DEFAULT 'user'
+);
+
+
 CREATE TABLE comments(
 	comments_id INT AUTO_INCREMENT PRIMARY KEY,
     comment TEXT,
     user_id INT NOT NULL,
-	FOREIGN KEY (user_id) REFERENCES items(id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (user_id) REFERENCES users(id)
 );
 drop table comments;
 use ecommerce;
@@ -81,4 +84,4 @@ UPDATE users
 SET role = 'admin'
 WHERE id = 1;
 
-INSERT INTO comments (comment, user_id) VALUES ('This webpage is so smooth!', 1);
+

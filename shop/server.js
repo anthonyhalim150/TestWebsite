@@ -533,6 +533,31 @@ app.get('/transactions', async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to fetch transactions.' });
     }
 });
+
+app.get('/comments', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                SELECT 
+                    u.username, 
+                    c.comment, 
+                    c.created_at
+                FROM comments c
+                JOIN users u ON c.user_id = u.id
+                ORDER BY c.created_at DESC;
+            `;
+            const [results] = await connection.query(query);
+            res.json({success: true, items:results}); //Biar organized, sends the results in key-value pair jdi ada clear structure for response, not just send the value, also tells the system whether it is successful or not.
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch comments.' });
+    }
+});
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

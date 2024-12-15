@@ -1,62 +1,72 @@
-/* Global Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Body Styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f7fa;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
 }
-
-/* Container Styles */
 .container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+h1 {
     text-align: center;
-    background-color: #fff;
-    padding: 40px;
+    color: #333;
+}
+.card {
+    background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 500px;
-}
-
-/* Heading Styles */
-h1 {
-    font-size: 2rem;
-    color: #333;
     margin-bottom: 20px;
-}
-
-/* Button Styles */
-#analyze-btn {
-    background-color: #ff7f50; /* Vibrant orange */
-    color: #fff;
-    font-size: 1.2rem;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-#analyze-btn:hover {
-    background-color: #e06c40;
-}
-
-/* Result Section Styles */
-#result {
-    margin-top: 20px;
     padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
-    border: 1px solid #e0e0e0;
-    min-height: 50px;
-    font-size: 1rem;
-    color: #333;
+}
+.card h2 {
+    margin-top: 0;
+}
+.feedback-summary, .suggestions {
+    margin-top: 10px;
+}
+.feedback-summary p, .suggestions p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+.chat-container {
+    margin-top: 30px;
+}
+.chat-box {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+.chat-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 10px;
+}
+.chat-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.chat-button:hover {
+    background-color: #0056b3;
+}
+.loading {
+    text-align: center;
+    display: none;
+}
+.error {
+    color: red;
+    font-weight: bold;
 }
