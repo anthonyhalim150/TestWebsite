@@ -203,7 +203,7 @@ function renderItems(filteredItems = null) {
                         <p class="card-text">Stock: ${availableStock}</p>
                         <div class="quantity-control">
                             <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity(${item.id}, -1)">-</button>
-                            <input type="number" id="quantity-${item.id}" value="1" min="1" max="${availableStock}" class="quantity-input">
+                            <input type="number" id="quantity-${item.id}" value="1" min="1" max="${availableStock}" class="quantity-input"  onchange="updateQuantity('${item.id}', ${availableStock})"  onclick="event.stopPropagation();">
                             <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity(${item.id}, 1)">+</button>
                         </div>
                         <button class="btn btn-primary mt-2" onclick="event.stopPropagation(); addToCart(${item.id})">Add to Cart</button>
@@ -213,7 +213,15 @@ function renderItems(filteredItems = null) {
         `; //Event propagation stops it from displaying the showItemOverview for specific buttons
     }).join('');
 }
+async function updateQuantity(itemID, stock) {
+    const quantityInput = document.getElementById(`quantity-${itemID}`);
+    const newQuantity = parseInt(quantityInput.value);
 
+    if (newQuantity < 1 || newQuantity > stock) {
+        quantityInput.value = stock; // Reset to max kalo invalid, this is from input.
+        return;
+    }
+}
 // Adjust the quantity value in the input field
 function changeQuantity(itemId, delta) {
     const quantityInput = document.getElementById(`quantity-${itemId}`);

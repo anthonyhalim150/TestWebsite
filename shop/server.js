@@ -157,7 +157,7 @@ app.get('/cart-items', async (req, res) => {
 
             const cartID = cart[0].cart_id;
             const [cartItems] = await connection.query(
-                `SELECT ci.cart_item_id, ci.item_id, i.name, ci.quantity, ci.price
+                `SELECT i.id, ci.cart_item_id, ci.item_id, i.name, ci.quantity, ci.price, i.stock
                  FROM CartItems ci
                  JOIN Items i ON ci.item_id = i.id
                  WHERE ci.cart_id = ?`,
@@ -240,6 +240,150 @@ app.post('/cart', async (req, res) => {
         connection.release();
     }
 });
+
+app.post('/clear-cart', async (req, res) => {
+    const { userID } = req.body;
+
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'User ID is required' });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Check if the user has a cart
+        const [existingCart] = await connection.query(
+            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            [userID]
+        );
+
+        if (existingCart.length === 0) {
+            return res.status(404).json({ success: false, error: 'Cart not found' });
+        }
+
+        const cartID = existingCart[0].cart_id;
+
+        // Delete all items from the cart
+        await connection.query(
+            'DELETE FROM CartItems WHERE cart_id = ?',
+            [cartID]
+        );
+        await connection.query(
+            'DELETE FROM Cart WHERE cart_id = ?',
+            [cartID]
+        );
+
+        await connection.commit();
+        res.json({ success: true, message: 'Cart cleared successfully.' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error clearing cart:', error);
+        res.status(500).json({ success: false, error: 'Failed to clear cart.' });
+    } finally {
+        connection.release();
+    }
+});
+app.post('/remove-cart-item', async (req, res) => {
+    const { userID, itemID } = req.body;
+
+    if (!userID || !itemID) {
+        return res.status(400).json({ success: false, error: 'User ID and Item ID are required' });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Check if the user has a cart
+        const [existingCart] = await connection.query(
+            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            [userID]
+        );
+
+        if (existingCart.length === 0) {
+            return res.status(404).json({ success: false, error: 'Cart not found' });
+        }
+
+        const cartID = existingCart[0].cart_id;
+        console.log(cartID);
+        // Check if the item exists in the cart
+        const [existingItem] = await connection.query(
+            'SELECT cart_item_id FROM CartItems WHERE cart_id = ? AND item_id = ?',
+            [cartID, itemID]
+        );
+
+        if (existingItem.length === 0) {
+            return res.status(404).json({ success: false, error: 'Item not found in cart' });
+        }
+
+        await connection.query(
+            'DELETE FROM CartItems WHERE cart_id = ? AND item_id = ?',
+            [cartID, itemID]
+        );
+
+        await connection.commit();
+        res.json({ success: true, message: 'Item removed from cart successfully.' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error removing item from cart:', error);
+        res.status(500).json({ success: false, error: 'Failed to remove item from cart.' });
+    } finally {
+        connection.release();
+    }
+});
+
+
+app.post('/update-cart-item', async (req, res) => {
+    const { userID, itemID, quantity } = req.body;
+
+    if (!userID || !itemID || !quantity || quantity < 1) {
+        return res.status(400).json({ success: false, error: 'Invalid input. User ID, item ID, and a valid quantity are required.' });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Check if the user has a cart
+        const [existingCart] = await connection.query(
+            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            [userID]
+        );
+
+        if (existingCart.length === 0) {
+            return res.status(404).json({ success: false, error: 'Cart not found' });
+        }
+
+        const cartID = existingCart[0].cart_id;
+
+        // Check if the item exists in the cart
+        const [existingItem] = await connection.query(
+            'SELECT cart_item_id FROM CartItems WHERE cart_id = ? AND item_id = ?',
+            [cartID, itemID]
+        );
+
+        if (existingItem.length === 0) {
+            return res.status(404).json({ success: false, error: 'Item not found in cart' });
+        }
+
+        // Update the quantity of the item
+        await connection.query(
+            'UPDATE CartItems SET quantity = ? WHERE cart_id = ? AND item_id = ?',
+            [quantity, cartID, itemID]
+        );
+
+        await connection.commit();
+        res.json({ success: true, message: 'Cart item quantity updated successfully.' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error updating cart item quantity:', error);
+        res.status(500).json({ success: false, error: 'Failed to update cart item quantity.' });
+    } finally {
+        connection.release();
+    }
+});
+
 
 // Checkout route
 app.post('/checkout', async (req, res) => {
