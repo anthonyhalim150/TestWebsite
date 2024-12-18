@@ -1,0 +1,17 @@
+2024-12-18 18:46:47,151 [INFO]: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-12-18 18:46:47,151 [INFO]: [33mPress CTRL+C to quit[0m
+2024-12-18 18:46:47,153 [INFO]:  * Restarting with stat
+2024-12-18 18:46:59,022 [WARNING]:  * Debugger is active!
+2024-12-18 18:46:59,028 [INFO]:  * Debugger PIN: 431-879-976
+2024-12-18 18:46:59,048 [INFO]: Rendering the home page
+2024-12-18 18:46:59,052 [INFO]: 127.0.0.1 - - [18/Dec/2024 18:46:59] "GET / HTTP/1.1" 200 -
+2024-12-18 18:46:59,333 [INFO]: 127.0.0.1 - - [18/Dec/2024 18:46:59] "[36mGET /static/AI_comment.js HTTP/1.1[0m" 304 -
+2024-12-18 18:46:59,333 [INFO]: 127.0.0.1 - - [18/Dec/2024 18:46:59] "[36mGET /static/AI_comment.css HTTP/1.1[0m" 304 -
+2024-12-18 18:46:59,363 [INFO]: Received request for comment analysis
+2024-12-18 18:46:59,365 [INFO]: 127.0.0.1 - - [18/Dec/2024 18:46:59] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-12-18 18:46:59,423 [INFO]: Fetched 72 comments from the database
+2024-12-18 18:46:59,479 [INFO]: Comment analysis successful
+2024-12-18 18:46:59,481 [INFO]: 127.0.0.1 - - [18/Dec/2024 18:46:59] "POST /analyze HTTP/1.1" 200 -
+2024-12-18 18:54:32,511 [INFO]:  * Detected change in 'C:\\Users\\Antho\\OneDrive\\Desktop\\tes\\TestWebsite\\AI Testing\\AI_comment.py', reloading
+2024-12-18 18:54:33,759 [INFO]:  * Restarting with stat

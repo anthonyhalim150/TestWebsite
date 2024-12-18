@@ -1,146 +1,327 @@
 import os
 from flask import Flask, jsonify, request, render_template
-from sentence_transformers import SentenceTransformer
-from sklearn.cluster import KMeans
 from transformers import pipeline
-from textblob import TextBlob
 import mysql.connector
-import openai
+import logging
 
+# Initialize Flask app
 app = Flask(__name__)
 
-embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
-openai.api_key = "your_openai_api_key_here"
+# Initialize Hugging Face sentiment-analysis pipeline
+sentiment_model = pipeline(
+    "sentiment-analysis",
+    model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+    revision="714eb0f"
+)
 
-def fetch_comments_from_db():
+# Database connection
+def get_db_connection():
+    """Create a connection to the database."""
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="Vvs319338",
+        database="ecommerce"
+    )
+
+def fetch_comments_and_ratings():
+    """Fetch comments and their ratings from the database."""
     try:
-        connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Vvs319338",
-            database="ecommerce"
-        )
-        cursor = connection.cursor()
-        cursor.execute("SELECT comment, user_id FROM comments")
-        comments = [(row[0], row[1]) for row in cursor.fetchall()]
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT comment FROM comments")
+        comments = cursor.fetchall()
         connection.close()
         return comments
     except Exception as e:
-        print(f"Database error: {e}")
+        logging.error(f"Database error: {e}")
         return []
 
-def analyze_sentiment_and_intent(comment):
-    analysis = TextBlob(comment)
-    sentiment = "Neutral"
-    if analysis.sentiment.polarity > 0:
-        sentiment = "Positive"
-    elif analysis.sentiment.polarity < 0:
-        sentiment = "Negative"
-    
-    if "bug" in comment.lower() or "error" in comment.lower():
-        intent = "Bug Report"
-    elif "feature" in comment.lower():
-        intent = "Feature Request"
-    elif "slow" in comment.lower() or "lag" in comment.lower():
-        intent = "Performance Issue"
-    else:
-        intent = "General Feedback"
-    
-    return sentiment, intent
+# Static baseline keyword weights for importance and quality
+# Expanded keyword weights with additional keywords
+# Updated keyword weights (adding 50 more keywords)
+# Remove duplicates from the keyword_weights dictionary
+keyword_weights = {
+    "bug": {"importance": 5, "quality": 1},
+    "error": {"importance": 5, "quality": 2},
+    "feature": {"importance": 4, "quality": 5},
+    "fast": {"importance": 2, "quality": 5},
+    "reliable": {"importance": 3, "quality": 5},
+    "slow": {"importance": 5, "quality": 2},
+    "lag": {"importance": 5, "quality": 1},
+    "long": {"importance": 5, "quality": 1},
+    "delay": {"importance": 5, "quality": 1},
+    "payment": {"importance": 4, "quality": 3},
+    "design": {"importance": 4, "quality": 5},
+    "excellent": {"importance": 1, "quality": 5},
+    "bad": {"importance": 3, "quality": 1},
+    "poor": {"importance": 2, "quality": 1},
+    "delivery": {"importance": 3, "quality": 4},
+    "checkout": {"importance": 4, "quality": 4},
+    "confusing": {"importance": 5, "quality": 2},
+    "helpful": {"importance": 2, "quality": 5},
+    "perfect": {"importance": 2, "quality": 5},
+    "disappointing": {"importance": 4, "quality": 1},
+    "love": {"importance": 2, "quality": 5},
+    "best": {"importance": 2, "quality": 5},
+    "quality": {"importance": 5, "quality": 3},
+    "highly recommend": {"importance": 2, "quality": 5},
+    "satisfied": {"importance": 2, "quality": 5},
+    "recommended": {"importance": 4, "quality": 5},
+    "disappointed": {"importance": 5, "quality": 1},
+    "durable": {"importance": 4, "quality": 5},
+    "easy to use": {"importance": 3, "quality": 5},
+    "affordable": {"importance": 4, "quality": 4},
+    "efficient": {"importance": 3, "quality": 5},
+    "worth the price": {"importance": 4, "quality": 5},
+    "high quality": {"importance": 5, "quality": 5},
+    "poor quality": {"importance": 3, "quality": 1},
+    "fantastic": {"importance": 2, "quality": 5},
+    "impressive": {"importance": 2, "quality": 5},
+    "amazing": {"importance": 1, "quality": 5},
+    "fast delivery": {"importance": 3, "quality": 4},
+    "friendly": {"importance": 3, "quality": 5},
+    "responsive": {"importance": 2, "quality": 5},
+    "convenient": {"importance": 4, "quality": 5},
+    "smooth": {"importance": 2, "quality": 5},
+    "reliable service": {"importance": 4, "quality": 5},
+    "intuitive": {"importance": 3, "quality": 5},
+    "easy to navigate": {"importance": 2, "quality": 5},
+    "clean design": {"importance": 3, "quality": 5},
+    "value for money": {"importance": 5, "quality": 4},
+    "disappointing experience": {"importance": 5, "quality": 1},
+    "user-friendly": {"importance": 3, "quality": 5},
+    "solid performance": {"importance": 4, "quality": 5},
+    "great value": {"importance": 4, "quality": 5},
+    "great": {"importance": 1, "quality": 5},
+    "needed": {"importance": 1, "quality": 5},
+    "worth every penny": {"importance": 4, "quality": 5},
+    "trustworthy": {"importance": 4, "quality": 5},
+    "functional": {"importance": 3, "quality": 4},
+    "fast response": {"importance": 4, "quality": 5},
+    "excellent customer service": {"importance": 4, "quality": 5},
+    "easy checkout": {"importance": 3, "quality": 5},
+    "well-designed": {"importance": 4, "quality": 5},
+    "helpful support": {"importance": 3, "quality": 5},
+    "amazing product": {"importance": 1, "quality": 5},
+    "highly functional": {"importance": 3, "quality": 5},
+    "sleek design": {"importance": 3, "quality": 5},
+    "satisfied customer": {"importance": 2, "quality": 5},
+    "good value": {"importance": 3, "quality": 4},
+    "well-packaged": {"importance": 3, "quality": 5},
+    "recommendable": {"importance": 3, "quality": 5},
+    "dependable": {"importance": 4, "quality": 5},
+    "perfect fit": {"importance": 2, "quality": 5},
+    "fast shipping": {"importance": 3, "quality": 5},
+    "smooth process": {"importance": 2, "quality": 5},
+    "easy-to-assemble": {"importance": 3, "quality": 5},
+    "unreliable": {"importance": 5, "quality": 1},
+    "overpriced": {"importance": 5, "quality": 2},
+    "disastrous": {"importance": 5, "quality": 1},
+    "unhelpful": {"importance": 5, "quality": 1},
+    "complicated": {"importance": 4, "quality": 2},
+    "clunky": {"importance": 5, "quality": 1},
+    "underwhelming": {"importance": 5, "quality": 2},
+    "inconsistent": {"importance": 5, "quality": 2},
+    "flawless": {"importance": 2, "quality": 5},
+        "flawed": {"importance": 5, "quality": 1},
+    "overpriced": {"importance": 5, "quality": 2},
+    "underwhelming": {"importance": 5, "quality": 2},
+    "inconsistent quality": {"importance": 5, "quality": 1},
+    "lack of features": {"importance": 5, "quality": 1},
+    "slow performance": {"importance": 5, "quality": 1},
+    "difficult to use": {"importance": 5, "quality": 1},
+    "unresponsive": {"importance": 5, "quality": 1},
+    "non-intuitive": {"importance": 5, "quality": 1},
+    "clunky interface": {"importance": 5, "quality": 1},
+    "glitchy behavior": {"importance": 5, "quality": 1},
+    "limited functionality": {"importance": 5, "quality": 1},
+    "overpriced product": {"importance": 5, "quality": 1},
+    "inefficient": {"importance": 5, "quality": 1},
+    "incomplete": {"importance": 5, "quality": 1},
+    "unhelpful": {"importance": 5, "quality": 1},
+    "overdelivered": {"importance": 3, "quality": 5},
+    "imperfect": {"importance": 4, "quality": 2},
+    "game-changer": {"importance": 2, "quality": 5},
+    "budget-friendly": {"importance": 3, "quality": 4},
+    "slow response": {"importance": 5, "quality": 1},
+    "easy access": {"importance": 4, "quality": 5},
+    "value-added": {"importance": 3, "quality": 5},
+    "annoying": {"importance": 5, "quality": 1},
+    "innovative": {"importance": 2, "quality": 5},
+    "lacking features": {"importance": 5, "quality": 1},
+    "cheap": {"importance": 5, "quality": 1},
+    "minimalist": {"importance": 3, "quality": 5},
+    "amazing value": {"importance": 3, "quality": 5},
+    "outdated": {"importance": 4, "quality": 2},
+    "refreshing": {"importance": 3, "quality": 5},
+    "unattractive": {"importance": 4, "quality": 2},
+    "user-oriented": {"importance": 3, "quality": 5},
+    "awkward": {"importance": 5, "quality": 1},
+    "glitchy": {"importance": 5, "quality": 1},
+    "frustrating": {"importance": 5, "quality": 1},
+    "easy-to-navigate": {"importance": 4, "quality": 5},
+    "worse than expected": {"importance": 5, "quality": 1},
+    "irritating": {"importance": 5, "quality": 1},
+    "non-usable": {"importance": 5, "quality": 1},
+    "no functionality": {"importance": 5, "quality": 1},
+    "poor quality control": {"importance": 5, "quality": 1},
+    "negative experience": {"importance": 5, "quality": 1},
+    "buggy": {"importance": 5, "quality": 1},
+    "too complicated": {"importance": 5, "quality": 1},
+    "unreliable service": {"importance": 5, "quality": 1},
+    "no value": {"importance": 5, "quality": 1},
+    "difficult setup": {"importance": 5, "quality": 1},
+    "poor documentation": {"importance": 5, "quality": 1},
+    "misleading instructions": {"importance": 5, "quality": 1},
+    "lack of support": {"importance": 5, "quality": 1},
+    "unpolished": {"importance": 5, "quality": 1},
+    "unfit": {"importance": 5, "quality": 1},
+    "frustrating": {"importance": 5, "quality": 1},
+    "doesn't work": {"importance": 5, "quality": 1},
+    "uninstallable": {"importance": 5, "quality": 1},
+    "empty promises": {"importance": 5, "quality": 1},
+    "totally broken": {"importance": 5, "quality": 1},
+    "sophisticated": {"importance": 3, "quality": 5},
+    "next-level": {"importance": 2, "quality": 5},
+    "simple design": {"importance": 4, "quality": 5},
+    "unattractive design": {"importance": 5, "quality": 2},
+    "feature-packed": {"importance": 2, "quality": 5},
+    "underperforming": {"importance": 5, "quality": 2},
+    "overwhelming": {"importance": 4, "quality": 2},
+    "best-in-class": {"importance": 2, "quality": 5},
+    "terrible quality": {"importance": 5, "quality": 1},
+    "all-inclusive": {"importance": 3, "quality": 5},
+    "easy installation": {"importance": 4, "quality": 5},
+    "well-crafted": {"importance": 3, "quality": 5},
+    "durable material": {"importance": 3, "quality": 5},
+    "top-tier": {"importance": 2, "quality": 5},
+    "high-end": {"importance": 3, "quality": 5},
+    "overcomplicated": {"importance": 5, "quality": 1},
+    "trendy": {"importance": 3, "quality": 5},
+    "outstanding": {"importance": 2, "quality": 5},
+    "cutting-edge": {"importance": 2, "quality": 5},
+    "premium": {"importance": 2, "quality": 5}
+}
 
-def generate_developer_suggestions(comment):
-    sentiment, intent = analyze_sentiment_and_intent(comment)
-    
-    if intent == "Bug Report":
-        if sentiment == "Negative":
-            suggestion = "Investigate the bug and prioritize fixing it. Ensure a patch is available in the next update."
-        else:
-            suggestion = "Ensure the bug is fixed promptly to maintain user trust and quality. Communicate the fix in release notes."
-    
-    elif intent == "Feature Request":
-        if sentiment == "Positive":
-            suggestion = "Evaluate the feasibility of adding this feature in the next release. Conduct a user survey for validation."
-        else:
-            suggestion = "This feature should be prioritized if it's requested by a significant number of users. Plan accordingly."
-    
-    elif intent == "Performance Issue":
-        suggestion = "Analyze system performance and identify bottlenecks. Optimize code and resources to improve speed."
-    
-    else:
-        suggestion = "Ensure general feedback is logged and reviewed for potential improvements to user experience."
-    
-    return suggestion
 
-def process_comments_with_feedback(num_clusters=5):
-    comments = fetch_comments_from_db()
+
+# Function to check if a keyword is meaningful for analysis
+def is_meaningful_keyword(word):
+    """Determine if a keyword is meaningful for analysis."""
+    # Exclude overly generic words
+    # Expanded generic keywords
+    generic_keywords = {
+    "product", "item", "thing", "purchase", "order", "company", "store", "website", "service",
+    "site", "brand", "shop", "business", "experience", "delivery", "customer", "checkout", "shopping",
+    "team", "market",  "review", "feedback",  
+    "discount", "return", "exchange", "warranty", "support", "help", "feedback", 
+    "issue", "problem", "solution", "response", "message", "request", "notification", "comment", 
+    "rating", "suggestion", "feature", "option", "setting", "configuration", "screen", "model", 
+    "version", "type", "size", "specifications", "condition", "quality", "image", "picture", 
+    "description", "manual", "app", "device", "system", "policy", "update", "function", "functionality", 
+    "availability", "user", "interaction", "performance", "user experience", "compatibility", 
+    "navigation", "installation"
+    }
+
+    return word.isalpha() and word not in generic_keywords
+
+# Sentiment analysis function
+def sentiment_analysis(comment):
+    """Perform sentiment analysis on the comment."""
+    sentiment = sentiment_model(comment)
+    return sentiment[0]["label"], sentiment[0]["score"]
+
+# Keyword analysis for importance
+def analyze_importance(comment, weights):
+    """Analyze importance of the comment."""
+    importance = 0
+    keywords_found = 0
+    for word in comment.lower().split():
+        if word in weights and is_meaningful_keyword(word):
+            importance += weights[word]["importance"]
+            keywords_found += 1
+    
+    # If no keywords are found, set a default importance based on the presence of negative or positive sentiment
+    if keywords_found == 0:
+        importance = 2  # Default importance score if no meaningful keywords are found
+    
+    if keywords_found > 0:
+        importance /= keywords_found  # Normalize by number of keywords
+    return min(max(importance, 0), 5)  # Ensure range 0-5
+
+
+# Keyword analysis for quality
+def analyze_quality(comment, weights):
+    """Analyze quality of the comment."""
+    quality = 0
+    keywords_found = 0
+    for word in comment.lower().split():
+        if word in weights:
+            quality += weights[word]["quality"]
+            keywords_found += 1
+    if keywords_found > 0:
+        quality /= keywords_found  # Normalize by number of keywords
+    return min(max(quality, 1), 5)  # Ensure range 1-5
+
+# Processing comments and generating ratings
+def process_comments_with_feedback():
+    """Process comments and generate ratings."""
+    comments = fetch_comments_and_ratings()
     if not comments:
-        return None, None, "No comments available or database connection failed."
+        return None, "No comments available or database connection failed."
 
     try:
-        embeddings = embedding_model.encode([comment[0] for comment in comments])
+        ratings = []
+        for comment_data in comments:
+            comment = comment_data["comment"]
 
-        kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init='auto')
-        kmeans.fit(embeddings)
-        labels = kmeans.labels_
+            # Analyze sentiment
+            sentiment_label, sentiment_score = sentiment_analysis(comment)
 
-        clusters = {i: [] for i in range(num_clusters)}
-        for label, (comment, user_id) in zip(labels, comments):
-            clusters[label].append((comment, user_id))
+            # Adjust ratings based on sentiment
+            importance = analyze_importance(comment, keyword_weights)
+            quality = analyze_quality(comment, keyword_weights)
 
-        summaries = {}
-        suggestions = {}
-        for cluster_id, cluster_comments in clusters.items():
-            text = " ".join([comment[0] for comment in cluster_comments])
-            text = text[:1024]
-            summary = summarizer(text, max_length=50, min_length=10, do_sample=False)
-            summaries[cluster_id] = summary[0]['summary_text']
+            if sentiment_label == "POSITIVE":
+                quality = min(quality + sentiment_score * 2, 5)
+                importance = max(importance - sentiment_score, 0)
+            elif sentiment_label == "NEGATIVE":
+                importance = min(importance + sentiment_score * 2, 5)
+                quality = max(quality - sentiment_score, 1)
 
-            feedbacks = [generate_developer_suggestions(comment[0]) for comment in cluster_comments]
-            suggestions[cluster_id] = " ".join(feedbacks)
+            # Append to the ratings list
+            ratings.append({
+                "comment": comment,
+                "rating_importance": round(importance, 2),
+                "rating_quality": round(quality, 2)
+            })
 
-        return summaries, suggestions, None
+        return ratings, None
     except Exception as e:
-        print(f"Processing error: {e}")
-        return None, None, "Error during comment processing."
+        logging.error(f"Processing error: {e}")
+        return None, "Error during comment processing."
 
-def generate_response(user_input):
-    try:
-        response = openai.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "You are an assistant that provides helpful feedback on comments and conversations."},
-                      {"role": "user", "content": user_input}]
-        )
-        return response['choices'][0]['message']['content']
-    except Exception as e:
-        print(f"OpenAI error: {e}")
-        return "Sorry, I couldn't process that. Please try again."
-
+# Routes
 @app.route('/')
 def home():
+    """Render home page."""
     return render_template('AI_comment.html')
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    summaries, suggestions, error = process_comments_with_feedback()
+    """Analyze comments and provide ratings."""
+    ratings, error = process_comments_with_feedback()
     if error:
         return jsonify({"status": "error", "message": error})
     
     return jsonify({
         "status": "success",
-        "summaries": summaries,
-        "suggestions": suggestions
+        "ratings": ratings
     })
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    user_message = request.json.get('message', '')
-    if not user_message:
-        return jsonify({"status": "error", "message": "No input provided."})
-    
-    bot_response = generate_response(user_message)
-    return jsonify({"status": "success", "response": bot_response})
-
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run()

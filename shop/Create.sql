@@ -67,6 +67,8 @@ CREATE TABLE comments(
 	comments_id INT AUTO_INCREMENT PRIMARY KEY,
     comment TEXT,
     user_id INT NOT NULL,
+    website_rating INT,
+    importance_rating INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (user_id) REFERENCES users(id)
 );

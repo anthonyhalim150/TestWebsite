@@ -3,39 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Feedback and Chatbot</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="static/AI_comment.css"></style>
-    <script src="static/AI_comment.js"></script>
+    <title>AI Comment Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>AI Feedback and Chatbot</h1>
-
-    <!-- Feedback Summary and Suggestions -->
-    <div id="feedback-section">
-        <div class="card">
-            <h2>Feedback Analysis</h2>
-            <div id="loading-feedback" class="loading">Loading feedback...</div>
-            <div id="error-feedback" class="error" style="display:none;"></div>
-
-            <div id="summaries" class="feedback-summary"></div>
-            <div id="suggestions" class="suggestions"></div>
+    <div class="container">
+        <h1>AI Comment Analysis</h1>
+        <textarea id="commentInput" placeholder="Enter a comment to analyze..."></textarea>
+        <button onclick="analyzeComment()">Analyze</button>
+        <div id="results" class="results" style="display: none;">
+            <h3>Results</h3>
+            <p id="resultText"></p>
         </div>
     </div>
 
-    <!-- Chatbot Section -->
-    <div id="chat-container" class="chat-container">
-        <div class="card">
-            <h2>Chat with AI</h2>
-            <div id="loading-chat" class="loading">Loading...</div>
-            <div class="chat-box" id="chat-box"></div>
-            <textarea class="chat-input" id="user-input" placeholder="Ask something..."></textarea>
-            <button class="chat-button" id="send-chat">Send</button>
-        </div>
-    </div>
-</div>
+    <script>
+        async function analyzeComment() {
+            const comment = document.getElementById('commentInput').value;
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment })
+            });
+            const data = await response.json();
 
+            const resultsDiv = document.getElementById('results');
+            const resultText = document.getElementById('resultText');
+
+            if (data.status === 'success') {
+                resultText.innerText = JSON.stringify(data.ratings, null, 2);
+                resultsDiv.style.display = 'block';
+            } else {
+                resultText.innerText = `Error: ${data.message}`;
+                resultsDiv.style.display = 'block';
+            }
+        }
+    </script>
 </body>
 </html>
