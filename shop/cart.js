@@ -32,14 +32,20 @@ async function renderCart() {
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <div class="quantity-control me-3">
-                                <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', -1, ${item.stock})">-</button>
-                                <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="1" max="${item.stock}" class="quantity-input" onchange="updateQuantity('${item.id}', ${item.stock})">
-                                <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', 1, ${item.stock})">+</button>
+                            <div class="quantity-container me-3">
+                                <div class="quantity-control">
+                                    <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', -1, ${item.stock})">-</button>
+                                    <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="1" max="${item.stock}" class="quantity-input" onchange="updateQuantity('${item.id}', ${item.stock})">
+                                    <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', 1, ${item.stock})">+</button>
+                                </div>
                             </div>
-                            <span class="me-3">$${(item.price * item.quantity).toFixed(2)}</span>
+                            <div class="price-container me-3">
+                                <span class="price-text">$${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
                             <button class="btn btn-sm btn-danger" onclick="removeItem('${item.id}')">Remove All</button>
                         </div>
+
+
                     </li>
                 `).join('')}
             </ul>

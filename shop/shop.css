@@ -179,6 +179,13 @@ footer {
     border-radius: 5px;
     padding: 5px;
 }
+.price-container {
+    display: flex;
+    align-items: center; /* Vertically align the price */
+    min-width: 90px; /* Ensure the price container has a consistent width */
+    justify-content: center; /* Align price to the right */
+}
+
 
 /* Center the checkout and total section */
 .cart-total {
