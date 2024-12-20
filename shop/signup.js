@@ -33,8 +33,8 @@ document.getElementById('sign-up-form').addEventListener('submit', async (event)
         if (response.ok && result.success) {
             alert(`Account created successfully for ${username}!`);
             document.getElementById('signup_message').innerText = 'Sign-Up Successful!';
-            window.location.href = 'index.html';
             document.getElementById('signupForm').reset(); // Reset form
+            window.location.href = 'index.html';
         } else {
             document.getElementById('signup_message').innerText = 'Sign-Up Failed: ' + (result.error || 'Unknown error.');
         }
