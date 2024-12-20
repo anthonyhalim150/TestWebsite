@@ -1,95 +1,42 @@
- // Fetch and display feedback analysis
- function fetchFeedback() {
-    document.getElementById('loading-feedback').style.display = 'block';
+document.querySelector('.analyze-btn').addEventListener('click', function (e) {
+    e.preventDefault();
 
-    fetch('/analyze', {
+    // Collect comments (you can change this to dynamically fetch from input fields)
+    
+    // Send POST request to Node.js server
+    fetch('http://localhost:3000/analyze-comments', {  // Point to the Node.js server
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' },
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('loading-feedback').style.display = 'none';
-
-        if (data.status === "success") {
-            let summaries = data.summaries;
-            let suggestions = data.suggestions;
-
-            let summaryHtml = '';
-            let suggestionHtml = '';
-
-            for (let clusterId in summaries) {
-                summaryHtml += `<p><strong>Cluster ${parseInt(clusterId) + 1}:</strong> ${summaries[clusterId]}</p>`;
-                suggestionHtml += `<p><strong>Suggestion:</strong> ${suggestions[clusterId]}</p>`;
-            }
-
-            document.getElementById('summaries').innerHTML = summaryHtml;
-            document.getElementById('suggestions').innerHTML = suggestionHtml;
-        } else {
-            document.getElementById('error-feedback').style.display = 'block';
-            document.getElementById('error-feedback').innerText = data.message;
-        }
-    })
-    .catch(error => {
-        document.getElementById('loading-feedback').style.display = 'none';
-        document.getElementById('error-feedback').style.display = 'block';
-        document.getElementById('error-feedback').innerText = 'An error occurred. Please try again.';
-    });
-}
-
-// Handle sending chat messages to AI
-function sendChat() {
-    let userMessage = document.getElementById('user-input').value;
-    if (!userMessage.trim()) {
-        alert('Please enter a message.');
-        return;
-    }
-
-    // Display the user message in the chat box
-    let chatBox = document.getElementById('chat-box');
-    chatBox.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
-    document.getElementById('user-input').value = '';
-
-    document.getElementById('loading-chat').style.display = 'block';
-
-    fetch('/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: userMessage })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('loading-chat').style.display = 'none';
-
         if (data.status === 'success') {
-            chatBox.innerHTML += `<div><strong>AI:</strong> ${data.response}</div>`;
+            displayAnalysisResults(data.ratings);  // Display results from Flask
         } else {
-            chatBox.innerHTML += `<div><strong>AI:</strong> Sorry, I couldn't process that. Please try again.</div>`;
+            alert('Error: ' + data.message);
         }
-
-        // Scroll to the bottom of the chat box
-        chatBox.scrollTop = chatBox.scrollHeight;
     })
-    .catch(error => {
-        document.getElementById('loading-chat').style.display = 'none';
-        chatBox.innerHTML += `<div><strong>AI:</strong> An error occurred. Please try again.</div>`;
-    });
-}
-
-// Initialize the page
-
-document.addEventListener('DOMContentLoaded', () => {
-    const testing = document.getElementById('send-chat');
-if (testing){
-    document.getElementById('send-chat').addEventListener('click', sendChat);
-}
+    .catch(error => alert('Error: ' + error.message));
 });
 
+// Function to display analysis results
+function displayAnalysisResults(ratings) {
+    const resultContainer = document.getElementById('analysis-result');
+    resultContainer.innerHTML = '';  // Clear previous results
 
-// Fetch feedback on page load
-window.onload = function() {
-    fetchFeedback();
-};
+    ratings.forEach(result => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.classList.add('mb-3');
+
+        card.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title">Comment:</h5>
+                <p class="card-text">${result.comment}</p>
+                <p><strong>Predicted Importance:</strong> ${result.predicted_importance}</p>
+                <p><strong>Predicted Quality:</strong> ${result.predicted_quality}</p>
+            </div>
+        `;
+        resultContainer.appendChild(card);
+    });
+}

@@ -2,15 +2,19 @@ require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2/promise'); // Using promise-based API
 const bodyParser = require('body-parser');
-const cors = require('cors');
+const cors = require('cors');//Buat cross-port
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const axios = require('axios'); // For AI
 
 // Secret key for JWT (use a secure key in a production environment)
 const JWT_SECRET = 'your_jwt_secret_key';
 
 
 const app = express();
+app.use(cors({
+    origin: ['http://localhost:5500', 'http://127.0.0.1:5500'],  // Harus diganti nanti
+}));
 const port = 3000;
 
 // Middleware
@@ -28,6 +32,28 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
+
+app.post('/analyze-comments', async (req, res) => {
+    try {
+        const comments = req.body.comments || []; // Ensure comments are passed
+        console.log('Sending comments to Flask for analysis:', comments);
+
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/analyze', req.body);//Gabisa pake localhost
+
+        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
+
+        // Check if the response from Flask is valid JSON
+        if (flaskResponse.data && flaskResponse.data.status === 'success') {
+            res.status(flaskResponse.status).json(flaskResponse.data);
+        } else {
+            throw new Error('Invalid response from Flask');
+        }
+    } catch (error) {
+        console.error('Error communicating with Flask:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
+    }
+});
+
 
 // Sign-up route
 app.post('/signup', async (req, res) => {

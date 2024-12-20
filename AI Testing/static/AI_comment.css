@@ -1,72 +1,90 @@
+/* General Styles */
 body {
+    background-color: #f8f9fa;
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
+    padding: 20px;
 }
+
 .container {
-    width: 80%;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
+    padding-top: 20px;
 }
-h1 {
+
+h2 {
+    font-size: 2.5em;
     text-align: center;
-    color: #333;
+    margin-bottom: 40px;
 }
+
 .card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+}
+
+.card-title {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.card-body p {
+    font-size: 1em;
+}
+
+/* Button Styling */
+.btn {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    margin-top: 10px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    color: white;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border: none;
+    color: white;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border: none;
+    color: white;
+}
+
+/* Result Container */
+#analysis-result {
+    margin-top: 40px;
+}
+
+/* Card for individual analysis result */
+.card {
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
     padding: 20px;
 }
-.card h2 {
-    margin-top: 0;
+
+.card-text {
+    font-size: 1.1em;
+    margin-bottom: 15px;
 }
-.feedback-summary, .suggestions {
-    margin-top: 10px;
+
+.card p {
+    font-size: 1em;
 }
-.feedback-summary p, .suggestions p {
-    font-size: 16px;
-    line-height: 1.5;
-}
-.chat-container {
-    margin-top: 30px;
-}
-.chat-box {
-    background-color: white;
-    border: 1px solid #ddd;
-    padding: 10px;
-    height: 200px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-    border-radius: 8px;
-}
-.chat-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    margin-top: 10px;
-}
-.chat-button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-.chat-button:hover {
-    background-color: #0056b3;
-}
-.loading {
-    text-align: center;
-    display: none;
-}
-.error {
-    color: red;
-    font-weight: bold;
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    h2 {
+        font-size: 1.8em;
+    }
 }
