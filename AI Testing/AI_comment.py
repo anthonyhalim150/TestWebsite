@@ -108,7 +108,7 @@ def preprocess_comment(comment, baseline_weights, website_rating=None):
     if website_rating is not None:
         diff = website_rating - quality
         scaling_factor = abs(5-abs(diff))*1.5*0.1
-        quality += diff * 0.95 * scaling_factor
+        quality += (diff * 0.95) * scaling_factor
 
 
     # Clamp values to range [0, 5] for importance and [1, 5] for quality
