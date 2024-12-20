@@ -1,10 +1,15 @@
 const COMMENTS_API_URL = 'http://localhost:3000/add-new-comment';
-
+let selectedRating = 0;
 async function submitComment(event) {
     event.preventDefault(); // Prevent form reload
     const userID = localStorage.getItem('userID');
     if (!userID){
         alert('You must be logged in to give a comment!');
+        window.location.href = 'login.html'
+        return;
+    }
+    if(selectedRating === 0){
+        alert('Please add a rating for the website!');
         return;
     }
     // Get form data
@@ -17,7 +22,7 @@ async function submitComment(event) {
     }
 
     // Construct the comment object
-    const newComment = {userID, comment_text};
+    const newComment = {userID, comment_text, selectedRating};
 
     try {
         const response = await fetch(COMMENTS_API_URL, {
@@ -32,6 +37,8 @@ async function submitComment(event) {
         if (result.success) {
             alert('Comment submitted successfully!');
             document.getElementById('comment-form').reset(); // Clear the form
+            updateStars(0);
+            selectedRating = 0;
         } else {
             alert('Failed to submit comment. Please try again.');
         }
@@ -41,9 +48,29 @@ async function submitComment(event) {
     }
 }
 
+function updateStars(rating, stars) {
+    stars.forEach(star => {
+        const starValue = parseFloat(star.dataset.value);
+        if (starValue <= rating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
+        }
+    });
+}
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const commentForm = document.getElementById('comment-form');
     if (commentForm) {
         commentForm.addEventListener('submit', submitComment);
     }
+    const stars = document.querySelectorAll('#star-rating span');
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseFloat(star.dataset.value);
+                updateStars(selectedRating, stars);
+            });
+        });
 });

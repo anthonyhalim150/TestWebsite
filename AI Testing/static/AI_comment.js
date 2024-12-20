@@ -19,6 +19,22 @@ document.querySelector('.analyze-btn').addEventListener('click', function (e) {
     .catch(error => alert('Error: ' + error.message));
 });
 
+document.querySelector('.train-btn').addEventListener('click', function (e) {
+    e.preventDefault();
+    fetch('http://localhost:3000/train-AI', {
+        method: 'POST',
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Model trained successfully!');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => alert('Error: ' + error));
+});
+
 // Function to display analysis results
 function displayAnalysisResults(ratings) {
     const resultContainer = document.getElementById('analysis-result');

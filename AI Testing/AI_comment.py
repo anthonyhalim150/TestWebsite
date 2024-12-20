@@ -40,10 +40,10 @@ def fetch_comments_from_db():
     try:
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT comment FROM comments")
+        cursor.execute("SELECT comment, website_rating FROM comments")
         comments = cursor.fetchall()
         connection.close()
-        return [comment["comment"] for comment in comments]
+        return comments
     except Exception as e:
         logging.error(f"Database error: {e}")
         return []
@@ -66,7 +66,7 @@ def read_baseline_weights(filename='baseline_weight.txt'):
     with open(filename, 'r') as file:
         return json.load(file)
 
-def preprocess_comment(comment, baseline_weights):
+def preprocess_comment(comment, baseline_weights, website_rating=None):
     """Preprocess the comment and calculate importance and quality."""
     importance = 0
     quality = 0
@@ -104,6 +104,13 @@ def preprocess_comment(comment, baseline_weights):
         importance = min(importance + sentiment_score * 2, 5)
         quality = max(quality - sentiment_score, 1)
 
+    # Incorporate website_rating to quality, biar dua2nya efek
+    if website_rating is not None:
+        diff = website_rating - quality
+        scaling_factor = abs(5-abs(diff))*1.5*0.1
+        quality += diff * 0.95 * scaling_factor
+
+
     # Clamp values to range [0, 5] for importance and [1, 5] for quality
     importance = max(0, min(importance, 5))
     quality = max(1, min(quality, 5))
@@ -128,10 +135,13 @@ class EnhancedRatingModel(nn.Module):
         return torch.clamp(x, 0, 5)
 
 # Prepare dataset with meaningful keywords
-def prepare_dataset(comments, baseline_weights, feedback_data=None):
-    X, y = [], []
-    for comment in comments:
-        imp, qual = preprocess_comment(comment, baseline_weights)
+def prepare_dataset(comments_data, baseline_weights, feedback_data=None):
+    X = []
+    y = []#X, Y harus dipisah
+    for data in comments_data:
+        comment = data["comment"]
+        website_rating = data.get("website_rating")#Pake get karena [] bisa keyerror kalo NULL
+        imp, qual = preprocess_comment(comment, baseline_weights, website_rating=website_rating)
         X.append([imp, qual])  # Features: importance and quality
         y.append([imp, qual])  # Targets: importance and quality
 
@@ -173,9 +183,9 @@ def train_model(model, X_train, y_train, epochs=50, batch_size=32, model_file="e
     logging.info(f"Model saved to '{model_file}'.")
 
 # Evaluate model
-def evaluate_model(model, comments, baseline_weights):
+def evaluate_model(model, comments_data, baseline_weights):
     model.eval()
-    X, _ = prepare_dataset(comments, baseline_weights)
+    X, _ = prepare_dataset(comments_data, baseline_weights)
     X = torch.tensor(X, dtype=torch.float32)
 
     with torch.no_grad():
@@ -183,7 +193,7 @@ def evaluate_model(model, comments, baseline_weights):
         results = []
         for i, output in enumerate(outputs):
             results.append({
-                "comment": comments[i],
+                "comment": comments_data[i]["comment"],
                 "predicted_importance": round(output[0].item(), 2),
                 "predicted_quality": round(output[1].item(), 2)
             })
@@ -204,13 +214,13 @@ def home():
 
 @app.route('/train-enhanced', methods=['POST'])
 def train_enhanced():
-    comments = fetch_comments_from_db()
+    comments_data = fetch_comments_from_db()
     feedback_data = fetch_feedback_from_db()
-    if not comments:
+    if not comments_data:
         return jsonify({"status": "error", "message": "No comments found for training."})
 
     baseline_weights = read_baseline_weights()
-    X, y = prepare_dataset(comments, baseline_weights, feedback_data)
+    X, y = prepare_dataset(comments_data, baseline_weights, feedback_data)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     model = EnhancedRatingModel()
@@ -219,15 +229,15 @@ def train_enhanced():
 
 @app.route('/analyze', methods=['POST'])
 def analyze_enhanced():
-    comments = fetch_comments_from_db()
-    if not comments:
+    comments_data = fetch_comments_from_db()
+    if not comments_data:
         return jsonify({"status": "error", "message": "No comments found in the database."})
 
     baseline_weights = read_baseline_weights()
     model = EnhancedRatingModel()
     model.load_state_dict(torch.load("enhanced_model.pth"))
 
-    results = evaluate_model(model, comments, baseline_weights)
+    results = evaluate_model(model, comments_data, baseline_weights)
     return jsonify({"status": "success", "ratings": results})
 
 if __name__ == '__main__':

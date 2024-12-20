@@ -55,6 +55,27 @@ app.post('/analyze-comments', async (req, res) => {
 });
 
 
+app.post('/train-AI', async (req, res) => {
+    try {
+        const comments = req.body.comments || []; // Ensure comments are passed
+        console.log('Sending comments to Flask for analysis:', comments);
+
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/train-enhanced', req.body);//Gabisa pake localhost
+
+        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
+
+        // Check if the response from Flask is valid JSON
+        if (flaskResponse.data && flaskResponse.data.status === 'success') {
+            res.status(flaskResponse.status).json(flaskResponse.data);
+        } else {
+            throw new Error('Invalid response from Flask');
+        }
+    } catch (error) {
+        console.error('Error communicating with Flask:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
+    }
+});
+
 // Sign-up route
 app.post('/signup', async (req, res) => {
     const { username, email, password } = req.body;
@@ -645,7 +666,7 @@ app.post('/add-new-user', async (req, res) => {
 
 
 app.post('/add-new-comment', async (req, res) => {
-    const { userID, comment_text} = req.body;
+    const { userID, comment_text, selectedRating} = req.body;
 
     // Validate required fields
     if (!userID|| !comment_text) {
@@ -657,10 +678,10 @@ app.post('/add-new-comment', async (req, res) => {
         try {
             // SQL query to insert the product into the database
             const query = `
-                INSERT INTO comments(comment, user_id)
-                VALUES (?, ?)
+                INSERT INTO comments(comment, user_id, website_rating)
+                VALUES (?, ?, ?)
             `;
-            const values = [comment_text, userID];
+            const values = [comment_text, userID, selectedRating];
 
             // Execute the query
             await connection.query(query, values);
