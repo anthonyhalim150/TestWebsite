@@ -1,0 +1,5 @@
+good,2,5
+terrible,-3,-5
+bad,-2,-3
+amazing,5,5
+not,1,2
