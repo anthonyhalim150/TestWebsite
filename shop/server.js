@@ -763,6 +763,7 @@ app.get('/comments', async (req, res) => {
             const query = `
                 SELECT 
                     u.username, 
+                    c.comments_id,
                     c.comment, 
                     c.created_at
                 FROM comments c
@@ -777,6 +778,31 @@ app.get('/comments', async (req, res) => {
     } catch (error) {
         console.error('Error fetching comments:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch comments.' });
+    }
+});
+
+app.post('/feedback', async (req, res) => {
+    const { comments_id, true_importance, true_quality } = req.body;
+
+    if (!comments_id || true_importance === undefined || true_quality === undefined) {
+        return res.status(400).json({ success: false, error: 'Missing required fields.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                INSERT INTO feedback (comments_id, true_importance, true_quality) 
+                VALUES (?, ?, ?)
+            `;
+            await connection.query(query, [comments_id, true_importance, true_quality]);
+            res.json({ success: true, message: 'Feedback added successfully.' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error inserting feedback:', error);
+        res.status(500).json({ success: false, error: 'Failed to add feedback.' });
     }
 });
 
