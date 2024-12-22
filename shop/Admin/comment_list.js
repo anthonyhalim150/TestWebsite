@@ -2,6 +2,7 @@ const API_URL = 'http://localhost:3000/comments';
 let items = [];
 
 // Add flag button functionality
+// Modify fetch_products to include red triangle warning
 async function fetch_products(sorted_items = null) {
     try {
         const response = await fetch(API_URL);
@@ -21,25 +22,29 @@ async function fetch_products(sorted_items = null) {
                 item.predicted_quality = analysis ? analysis.predicted_quality : 0;
             });
 
-            // Render items with flag button
+            // Render items with a red triangle warning
             const productContainer = document.getElementById('product-container-tbody');
             productContainer.innerHTML = items.map(item => {
                 return `
                     <tr>
                         <td class="importance-rating">${renderExclamationMarks(item.predicted_importance)}</td>
                         <td>${item.username}</td>
-                        <td>${item.comment}</td>
+                        <td>
+                        ${item.comment}
+                        </td>
                         <td class="comment-rating">${renderStars(item.predicted_quality)}</td>
                         <td>${new Date(item.created_at).toLocaleString()}</td>
-                        <td><button class="flag-btn" data-id="${item.comments_id}">Flag</button></td>
+                        <td>
+                            <span class="red-triangle" data-id="${item.comments_id}" title="Flag this comment">⚠️</span>
+                        </td>
                     </tr>
                 `;
             }).join('');
 
-            // Add event listeners for flag buttons
-            document.querySelectorAll('.flag-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const commentId = button.getAttribute('data-id');
+            // Add event listeners for the red triangle warning
+            document.querySelectorAll('.red-triangle').forEach(triangle => {
+                triangle.addEventListener('click', () => {
+                    const commentId = triangle.getAttribute('data-id');
                     const comment = items.find(item => item.comments_id == commentId);
                     open_feedback_page(comment);
                 });
@@ -50,12 +55,16 @@ async function fetch_products(sorted_items = null) {
     }
 }
 
+
 function open_feedback_page(comment) {
     const feedbackPage = document.getElementById('feedback-page');
 
-    // Display the comment text (not editable)
-    const commentText = document.createElement('p');
-    commentText.textContent = comment.comment || 'No comment provided';
+    // Display the comment text in a readonly <textarea>
+    const commentText = document.createElement('div');
+    commentText.innerHTML = `
+        <label>Comment:</label>
+        <textarea readonly class="feedback-comment">${comment.comment}</textarea>
+    `;
 
     // Render stars for quality and exclamation marks for importance
     const qualityStars = renderStars(comment.predicted_quality || 0);
@@ -65,22 +74,24 @@ function open_feedback_page(comment) {
     const qualityContainer = document.createElement('div');
     qualityContainer.innerHTML = `
         <label>Website Rating:</label>
-        <div>${qualityStars}</div>
+        <div class="comment-rating">${qualityStars}</div>
         <input type="number" id="website-rating" min="1" max="5" step="0.01" value="${comment.predicted_quality || 0}" required>
     `;
 
     const importanceContainer = document.createElement('div');
     importanceContainer.innerHTML = `
         <label>Importance Rating:</label>
-        <div>${importanceMarks}</div>
+        <div class="importance-rating">${importanceMarks}</div>
         <input type="number" id="importance-rating" min="1" max="5" step="0.01" value="${comment.predicted_importance || 0}" required>
     `;
 
-
+    // Clear previous content and append the updated content
     const form = document.getElementById('feedback-form');
     form.innerHTML = ''; // Clear previous content
     form.appendChild(commentText);  // Add the comment above ratings
+    form.appendChild(document.createElement('br')); // Add spacing
     form.appendChild(qualityContainer);  // Add quality rating
+    form.appendChild(document.createElement('br')); // Add spacing
     form.appendChild(importanceContainer); // Add importance rating
 
     // Add the Submit button
@@ -92,8 +103,8 @@ function open_feedback_page(comment) {
     // Handle form submission
     form.onsubmit = async function (e) {
         e.preventDefault();
-        const importance = parseInt(document.getElementById('importance-rating').value, 10);
-        const quality = parseInt(document.getElementById('website-rating').value, 10);
+        const importance = parseFloat(document.getElementById('importance-rating').value);
+        const quality = parseFloat(document.getElementById('website-rating').value);
 
         if (importance === 0 || quality === 0 || !comment.comment) { // Validate inputs
             alert('Contact Developer of this error!');
@@ -126,6 +137,7 @@ function open_feedback_page(comment) {
 
     feedbackPage.classList.remove('hidden');
 }
+
 
 // Close feedback page
 document.getElementById('close-feedback').addEventListener('click', () => {
