@@ -55,6 +55,7 @@ function createSidebar() {
                 <li><a href="transaction_list.html" class="nav-item">Transaction List</a></li>
                 <li><a href="metrics.html" class="nav-item">Metrics</a></li>
                 <li><a href="comment_list.html" class="nav-item">Comments</a></li>
+                <li><a href="./AI/templates/AI_comment.html" class="nav-item">AI Page</a></li>
                 <li><a id="logout_nav" class="nav-item">Logout</a></li>
             </ul>
         </nav>

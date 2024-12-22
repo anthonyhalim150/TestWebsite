@@ -15,7 +15,7 @@ function update_login() {
     }
     if (userID) {
         if (role === 'admin') {
-            window.location.href = './admin/index.html';
+            window.location.href = './Admin/index.html';
         }
         // User is logged in
         navbarLinks.innerHTML = `
