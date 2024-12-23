@@ -270,11 +270,12 @@ input[type="number"] {
 
 #search-bar {
     width: 200%;  /* Adjust the width as per your requirement */
-    max-width: 700px; /* Limits the maximum width */
+    max-width: 400px; /* Limits the maximum width */
     padding: 5px;
     font-size: 16px;
     border-radius: 20px;
     border: 1px solid #ccc;
+    margin-left: 140px;
 }
 
 .comment-section {

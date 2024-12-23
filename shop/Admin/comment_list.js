@@ -248,3 +248,38 @@ if (searchBar) {
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products();
 });
+
+let importanceSortOrder = 'desc'; // Default order for Importance Rating
+let qualitySortOrder = 'desc'; // Default order for Quality Rating
+
+const importanceArrow = document.getElementById('importance-arrow');
+const qualityArrow = document.getElementById('quality-arrow');
+function sortTableByCriteria(criteria, sortOrder) {
+    console.log('Starting sort by:', criteria, 'Order:', sortOrder);
+
+    // Sort the items array
+    items.sort((a, b) => {
+        const aValue = a[`predicted_${criteria}`] || 0;
+        const bValue = b[`predicted_${criteria}`] || 0;
+        console.log(`Comparing a=${aValue} to b=${bValue}`);
+
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+
+    // Re-render the table
+    fetch_products(items);
+}
+
+
+// Modify event listeners
+importanceArrow.addEventListener('click', () => {
+    importanceSortOrder = importanceSortOrder === 'asc' ? 'desc' : 'asc';
+    importanceArrow.textContent = importanceSortOrder === 'asc' ? '⬆' : '⬇';
+    sortTableByCriteria('importance', importanceSortOrder);
+});
+
+qualityArrow.addEventListener('click', () => {
+    qualitySortOrder = qualitySortOrder === 'asc' ? 'desc' : 'asc';
+    qualityArrow.textContent = qualitySortOrder === 'asc' ? '⬆' : '⬇';
+    sortTableByCriteria('quality', qualitySortOrder);
+});

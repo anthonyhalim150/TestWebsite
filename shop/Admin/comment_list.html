@@ -12,21 +12,27 @@
 <body>
     <div class="search-container">
         <input type="text" id="search-bar" placeholder="Search items...">
-    </div>  
+    </div>
     <main class="main-content">
         <section id="product-list" class="product-list">
             <h2>User Comments</h2>
             <table id="product-container">
                 <thead>
                     <tr>
-                        <th>Importance</th>
+                        <th style="width: 125px;">
+                            Importance
+                            <span id="importance-arrow" class="sort-arrow">⬇</span>
+                        </th>
                         <th>Username</th>
                         <th>Comments</th>
-                        <th>User Rating</th>
+                        <th>
+                            Quality
+                            <span id="quality-arrow" class="sort-arrow">⬇</span>
+                        </th>
                         <th>Date</th>
                         <th>Feedback</th>
                     </tr>
-                </thead>
+                </thead>                
                 <tbody id="product-container-tbody">
                     <!-- Dynamically filled with products -->
                 </tbody>
