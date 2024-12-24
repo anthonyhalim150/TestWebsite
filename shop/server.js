@@ -35,7 +35,7 @@ const pool = mysql.createPool({
 
 app.post('/analyze-comments', async (req, res) => {
     try {
-        const comments = req.body.comments || []; // Ensure comments are passed
+        const comments = req.body.comments || []; // Ensure comments are passed, klo empty error
         console.log('Sending comments to Flask for analysis:', comments);
 
         const flaskResponse = await axios.post('http://127.0.0.1:5000/analyze', req.body);//Gabisa pake localhost

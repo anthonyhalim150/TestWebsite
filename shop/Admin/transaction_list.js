@@ -76,35 +76,49 @@ if (searchBar) {
 let importanceSortOrder = 'desc'; // Default order for Importance Rating
 let qualitySortOrder = 'desc'; // Default order for Quality Rating
 
-const amountArrow = document.getElementById('amount-arrow');
-const datesAArrow = document.getElementById('dates-arrow');
-function sortTableByCriteria(criteria, sortOrder) {
-    console.log('Starting sort by:', criteria, 'Order:', sortOrder);
+function sort_transactions(criteria, sortOrder) {
+    const sortedItems = [...items]; // Create a shallow copy of the items array to avoid modifying the original
 
-    // Sort the items array
-    items.sort((a, b) => {
-        const aValue = a[`predicted_${criteria}`] || 0;
-        const bValue = b[`predicted_${criteria}`] || 0;
-        console.log(`Comparing a=${aValue} to b=${bValue}`);
+    // Sort based on the criteria (date or total_amount)
+    sortedItems.sort((a, b) => {
+        let aValue, bValue;
 
-        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+        if (criteria === 'date') {
+            aValue = new Date(a.created_at).getTime(); // Convert date to timestamp for comparison
+            bValue = new Date(b.created_at).getTime();
+        } else if (criteria === 'amount') {
+            aValue = a.total_amount;
+            bValue = b.total_amount;
+        }
+
+        // Compare values based on the sort order (asc or desc)
+        if (sortOrder === 'asc') {
+            return aValue - bValue;
+        } else {
+            return bValue - aValue;
+        }
     });
 
-    // Re-render the table
-    fetch_products(items);
+    // After sorting, render the updated list
+    fetch_products(sortedItems);
 }
 
+// Event listeners for sorting when column headers are clicked
+let dateSortOrder = 'desc';
+let amountSortOrder = 'desc';
 
-// Modify event listeners
-importanceArrow.addEventListener('click', () => {
-    importanceSortOrder = importanceSortOrder === 'asc' ? 'desc' : 'asc';
-    importanceArrow.textContent = importanceSortOrder === 'asc' ? '⬆' : '⬇';
-    sortTableByCriteria('importance', importanceSortOrder);
+// Sort by Date when the date column is clicked
+const dateArrow = document.getElementById('date-arrow');
+dateArrow.addEventListener('click', () => {
+    dateSortOrder = dateSortOrder === 'asc' ? 'desc' : 'asc'; // Toggle sort order
+    dateArrow.textContent = dateSortOrder === 'asc' ? '⬆' : '⬇'; // Change arrow direction
+    sort_transactions('date', dateSortOrder); // Call sort function for date
 });
 
-qualityArrow.addEventListener('click', () => {
-    qualitySortOrder = qualitySortOrder === 'asc' ? 'desc' : 'asc';
-    qualityArrow.textContent = qualitySortOrder === 'asc' ? '⬆' : '⬇';
-    sortTableByCriteria('quality', qualitySortOrder);
+// Sort by Total Amount when the amount column is clicked
+const amountArrow = document.getElementById('amount-arrow');
+amountArrow.addEventListener('click', () => {
+    amountSortOrder = amountSortOrder === 'asc' ? 'desc' : 'asc'; // Toggle sort order
+    amountArrow.textContent = amountSortOrder === 'asc' ? '⬆' : '⬇'; // Change arrow direction
+    sort_transactions('amount', amountSortOrder); // Call sort function for amount
 });
-
