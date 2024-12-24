@@ -5,7 +5,6 @@ document.getElementById('customer-support').addEventListener('click', function (
             var s1 = document.createElement("script");
             s1.async = true;
             s1.src = 'https://embed.tawk.to/675fd299af5bfec1dbdc8347/1if74tanu';
-            s1.charset = 'UTF-8';
             s1.id = 'tawk-script'; // Add an ID to prevent duplicate loading
             s1.setAttribute('crossorigin', '*');
             document.body.appendChild(s1);
@@ -15,7 +14,7 @@ document.getElementById('customer-support').addEventListener('click', function (
                 Tawk_API.toggle();
             }
         }
-    
-});
+    }
+);
 
 
