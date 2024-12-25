@@ -46,6 +46,7 @@ function update_login() {
             <li class="nav-item">
                 <a class="nav-link text-white" href="signup.html">Sign Up</a>
             </li>
+            <button id="customer-support" class="support-btn"><img src="customer-support.png" alt="Feedback"> </button>   
         `;
         const cartNav = document.getElementById('cart_nav');
         cartNav.addEventListener('click', (event) => {
@@ -269,10 +270,36 @@ function closeItemOverview() {
     const overviewContainer = document.getElementById('item-overview');
     overviewContainer.classList.remove('visible');
 }
+
+function customer_support(){
+    customer_support_button = document.getElementById('customer-support');
+    if (customer_support_button){
+        customer_support_button.addEventListener('click', function () {
+            // Check if the script is already loaded
+            if (!document.getElementById('tawk-script')) {
+                // Dynamically create the script element
+                var s1 = document.createElement("script");
+                s1.async = true;
+                s1.src = 'https://embed.tawk.to/675fd299af5bfec1dbdc8347/1if74tanu';
+                s1.id = 'tawk-script'; // Add an ID to prevent duplicate loading
+                s1.setAttribute('crossorigin', '*');
+                document.body.appendChild(s1);
+            } else {
+                // If the script is already loaded, toggle the widget
+                if (typeof Tawk_API !== 'undefined') {
+                    Tawk_API.toggle();
+                }
+            }
+        }
+        )  
+    }  
+}
+
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', () => {
     update_login();
     fetchItems(); // Fetch items when page loads
+    customer_support();
 });
 
 
