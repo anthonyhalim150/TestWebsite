@@ -1,14 +1,14 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2/promise'); // Using promise-based API
+const mysql = require('mysql2/promise'); // Using promise-based API, biar gampang tau yng perlu aja
 const bodyParser = require('body-parser');
 const cors = require('cors');//Buat cross-port
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const axios = require('axios'); // For AI
 
-// Secret key for JWT (use a secure key in a production environment)
-const JWT_SECRET = 'your_jwt_secret_key';
+// Secret key
+const JWT_SECRET = 'Testrandom2000';
 
 
 const app = express();
@@ -805,6 +805,29 @@ app.post('/feedback', async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to add feedback.' });
     }
 });
+
+const stripe = require('stripe')('your_secret_key');
+
+app.post('/create-checkout-session', async (req, res) => {
+    const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [{
+            price_data: {
+                currency: 'usd',
+                product_data: {
+                    name: 'T-shirt',
+                },
+                unit_amount: 2000,
+            },
+            quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: 'http://127.0.0.1:5500/shop/index.html',
+        cancel_url: 'http://127.0.0.1:5500/shop/index.html',
+    });
+    res.json({ id: session.id });
+});
+
 
 // Start server
 app.listen(port, () => {

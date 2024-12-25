@@ -183,6 +183,35 @@ async function checkout() {
     }
 }
 
+async function create_checkout_page(){
+    const userID = localStorage.getItem('userID');
+    if (!userID) {
+        alert('You must be logged in to checkout.');
+        return;
+    }
+
+    try {
+        // Create a checkout session
+        const response = await fetch('http://localhost:3000/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userID }),
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            alert('Failed to start the checkout process: ' + result.error);
+            return;
+        }
+        const stripe = Stripe('your_publishable_key'); // Use your Stripe publishable key
+        await stripe.redirectToCheckout({ sessionId: result.sessionId });
+    } catch (error) {
+        console.error('Error during checkout:', error);
+        alert('An error occurred during checkout. Please try again.');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     renderCart();
 });
