@@ -422,136 +422,91 @@ input[type="number"] {
 .navbar-icons {
     display: flex;            /* Align children horizontally */
     justify-content: center;  /* Center the buttons horizontally */
-    align-items: center;      /* Center the buttons vertically */
-    gap: 15px;                /* Add space between buttons */
-    height: 100%;             /* Ensure it stretches to fill the container */
+    align-items: center;      /* Align buttons vertically */
+    gap: 5px;                 /* Add consistent space between buttons */
+    margin: 0;                /* Reset default list margin */
+    padding: 0;               /* Reset default list padding */
 }
 
-/* Support Button */
-.support-btn {
-    width: 45px; /* Make sure the button is larger */
-    height: 45px; 
-    display: flex; /* Center content */
-    justify-content: center; 
-    align-items: center; 
-    padding: 0; /* Remove padding to maintain proportions */
-    border-radius: 50%; /* Full circle */
-    cursor: pointer; /* Ensure the button is clickable */
+/* General styles for nav-item */
+.navbar-icons .nav-item {
+    margin: 0;                /* Prevent unwanted spacing */
+    padding: 0;               /* Reset padding */
+    display: flex;            /* Ensure child elements align properly */
+    justify-content: center;  /* Center child content */
+    align-items: center;      /* Center child content */
+}
+
+/* General styles for buttons */
+.cart-btn, .support-btn, .profile-btn {
+    width: 40px;              /* Uniform size for buttons */
+    height: 40px;             /* Ensure buttons are square */
+    display: flex;            /* Center the content */
+    justify-content: center;  /* Center the icon */
+    align-items: center;      /* Center the icon */
+    padding: 0;               /* Remove extra padding */
+    border-radius: 50%;       /* Full circle buttons */
+    cursor: pointer;          /* Pointer on hover */
     transition: all 0.3s ease;
-    border: 5px solid var(--primary-color); /* Border applied only to the button */
+    background-color: transparent; /* Transparent background */
+    border: none;             /* Remove borders */
+    box-shadow: none;         /* Remove any box shadows */
 }
 
-.support-btn img {
-    width: 30px;  /* Size of the icon inside the button */
-    height: 30px; /* Size of the icon inside the button */
-    transition: filter 0.3s ease;
-    border-radius: 0; /* Ensure the image doesn’t have any border-radius (no circular effect) */
+/* Images inside buttons */
+.support-btn img, .cart-btn img, .profile-btn img {
+    width: 30px;              /* Uniform icon size */
+    height: 30px;             /* Uniform icon size */
+    margin: 0;                /* Remove spacing around the image */
+    padding: 0;               /* Reset padding */
+    border: none;             /* Remove any image borders */
+    box-shadow: none;         /* Ensure no shadow on images */
+}
+.cart-btn img{
+    width: 45px;              /* Uniform icon size */
+    height: 45px;             /* Uniform icon size */
+    margin: 0;                /* Remove spacing around the image */
+    padding: 0;               /* Reset padding */
+    border: none;             /* Remove any image borders */
+    box-shadow: none;         /* Ensure no shadow on images */
+
 }
 
-/* Hover effect for Support Button */
-.support-btn:hover {
+/* Hover effects */
+.support-btn:hover, .cart-btn:hover, .profile-btn:hover {
     background-color: var(--highlight-color); /* Highlight on hover */
-    border: 5px solid var(--highlight-color); 
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Add hover shadow */
 }
 
-/* Cart Button */
-.cart-btn {
-    width: 45px; /* Ensure width and height are equal */
-    height: 45px; /* Same as width to keep it circular */
-    display: flex; /* Center content */
-    justify-content: center; 
-    align-items: center; 
-    padding: 0; /* Remove padding to maintain proportions */
-    border-radius: 50%; /* Full circle */
-    cursor: pointer; /* Ensure the button is clickable */
-    transition: all 0.3s ease;
+/* Dropdown menu */
+.navbar-icons .dropdown-menu {
+    position: absolute;       /* Position dropdown properly */
+    top: 60px;                /* Offset dropdown below the profile button */
+    list-style: none;         /* Remove list bullets */
+    margin: 0;                /* Reset margins */
+    padding: 10px;            /* Add padding */
+    display: none;            /* Initially hide the dropdown */
+    background-color: white;  /* Dropdown background color */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a light shadow */
+    z-index: 10;              /* Ensure dropdown appears above other elements */
 }
 
-.cart-btn img {
-    width: 40px;
-    height: 40px;
-    transition: filter 0.3s ease;
-    border-radius: 0; /* Ensure the image doesn’t have any border-radius (no circular effect) */
+.navbar-icons .dropdown-menu .dropdown-item {
+    display: block;             /* Make the item a block element */
+    width: 87%;                /* Take up the full width of the dropdown */
+    padding: 10px 15px;         /* Add padding for a larger clickable area */
+    text-align: left;           /* Align text to the left */
+    text-decoration: none;      /* Remove underline */
+    color: var(--primary-color); /* Match primary theme color */
+    cursor: pointer;            /* Add pointer on hover */
+    box-sizing: border-box;     /* Include padding and border in width */
 }
 
-/* Hover effect for Cart Button */
-.cart-btn:hover {
+.navbar-icons .dropdown-menu .dropdown-item:hover {
     background-color: var(--highlight-color); /* Highlight on hover */
-    border: 5px solid var(--highlight-color); 
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
+    color: white;             /* Change text color on hover */
 }
 
-/* Profile Button */
-.profile-btn {
-    width: 45px; /* Ensure width and height are equal */
-    height: 45px; /* Same as width to keep it circular */
-    display: flex; /* Center content */
-    justify-content: center; 
-    align-items: center; 
-    padding: 0; /* Remove padding to maintain proportions */
-    border-radius: 50%; /* Full circle */
-    cursor: pointer; /* Ensure the button is clickable */
-    background-color: white;
-    transition: all 0.3s ease;
-}
-
-.profile-btn img {
-    width: 40px;
-    height: 40px;
-    border-radius: 0; /* Remove circular effect on image */
-    transition: filter 0.3s ease;
-}
-
-/* Hover effect for Profile Button */
-.profile-btn:hover {
-    background-color: var(--highlight-color); /* Highlight on hover */
-    border: 5px solid var(--highlight-color); 
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
-}
-
-/* Dropdown and Nav items */
-.nav-item.dropdown {
-    position: relative;
-}
-
-
-
-
-.dropdown-menu {
-    width: 130px; /* Smaller width */
-    display: none;
-    position: absolute;
-    left: 50%; /* Where the drop down appears */
-    transform: translateX(-50%);
-    background-color: var(--secondary-color);
-    list-style: none;
-    padding: 5px 0; /* Reduce overall padding */
-    text-align: center; /* Center-align the text */
-    border-radius: 5px; /* Optional: add rounded corners */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: add shadow for a sleek look */
-}
-
-.dropdown-menu li {
-    padding: 0; /* Remove default padding */
-}
-
-.dropdown-menu li a {
-    display: block; /* Make the link a block element */
-    font-size: 16px; /* Adjust text size */
-    text-decoration: none;
-    color: var(--text-color);
-    padding: 10px 0; /* Add consistent padding to the block */
-    width: 90%; /* Ensure the block spans the full width */
-    box-sizing: border-box; /* Ensure padding doesn't overflow the block */
-    text-align: center; /* Center the text within the link */
-    transition: background-color 0.3s ease, color 0.3s ease; /* Add transition for background and text color */
-}
-
-.dropdown-menu li a:hover {
-    color: var(--text-hover-color); /* Adjust the hover text color if needed */
-    background-color: var(--highlight-color); /* Background covers the entire block */
-}
 #profileDropdown::after {
     display: none; /* Hides the down arrow */
 }
