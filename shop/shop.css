@@ -403,58 +403,6 @@ input[type="number"] {
     filter: invert(100%);
 }
 
-.support-btn {
-    padding-top:5px;
-    padding-bottom:5px;
-    background-color: var(--primary-color);
-    border: 5px solid var(--primary-color); 
-    border-radius: 100%;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.support-btn img {
-    width: 24px;
-    height: 24px;
-    transition: filter 0.3s ease;
-}
-
-.support-btn:hover {
-    background-color: var(--highlight-color); /* Highlight on hover */
-    border: 5px solid var(--highlight-color); 
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
-}
-
-.cart-btn {
-    width: 45px; /* Ensure width and height are equal */
-    height: 43px; 
-    display: flex; /* Center content */
-    justify-content: center; 
-    align-items: center; 
-    padding: 0; /* Remove padding to maintain proportions */
-    border-radius: 100%; /* Full circle */
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.cart-btn img {
-    width: 40px;
-    height: 40px;
-    transition: filter 0.3s ease;
-}
-
-.cart-btn:hover {
-    background-color: var(--highlight-color); /* Highlight on hover */
-    border: 5px solid var(--highlight-color); 
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
-}
-
-
-img {
-    background-color: transparent;
-    border: none;
-}
-
 .star-rating {
     display: flex;
     justify-content: center;
@@ -468,4 +416,142 @@ img {
 }
 .star-rating span.active {
     color: gold;
+}
+
+/* Navbar container */
+.navbar-icons {
+    display: flex;            /* Align children horizontally */
+    justify-content: center;  /* Center the buttons horizontally */
+    align-items: center;      /* Center the buttons vertically */
+    gap: 15px;                /* Add space between buttons */
+    height: 100%;             /* Ensure it stretches to fill the container */
+}
+
+/* Support Button */
+.support-btn {
+    width: 45px; /* Make sure the button is larger */
+    height: 45px; 
+    display: flex; /* Center content */
+    justify-content: center; 
+    align-items: center; 
+    padding: 0; /* Remove padding to maintain proportions */
+    border-radius: 50%; /* Full circle */
+    cursor: pointer; /* Ensure the button is clickable */
+    transition: all 0.3s ease;
+    border: 5px solid var(--primary-color); /* Border applied only to the button */
+}
+
+.support-btn img {
+    width: 30px;  /* Size of the icon inside the button */
+    height: 30px; /* Size of the icon inside the button */
+    transition: filter 0.3s ease;
+    border-radius: 0; /* Ensure the image doesn’t have any border-radius (no circular effect) */
+}
+
+/* Hover effect for Support Button */
+.support-btn:hover {
+    background-color: var(--highlight-color); /* Highlight on hover */
+    border: 5px solid var(--highlight-color); 
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
+}
+
+/* Cart Button */
+.cart-btn {
+    width: 45px; /* Ensure width and height are equal */
+    height: 45px; /* Same as width to keep it circular */
+    display: flex; /* Center content */
+    justify-content: center; 
+    align-items: center; 
+    padding: 0; /* Remove padding to maintain proportions */
+    border-radius: 50%; /* Full circle */
+    cursor: pointer; /* Ensure the button is clickable */
+    transition: all 0.3s ease;
+}
+
+.cart-btn img {
+    width: 40px;
+    height: 40px;
+    transition: filter 0.3s ease;
+    border-radius: 0; /* Ensure the image doesn’t have any border-radius (no circular effect) */
+}
+
+/* Hover effect for Cart Button */
+.cart-btn:hover {
+    background-color: var(--highlight-color); /* Highlight on hover */
+    border: 5px solid var(--highlight-color); 
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
+}
+
+/* Profile Button */
+.profile-btn {
+    width: 45px; /* Ensure width and height are equal */
+    height: 45px; /* Same as width to keep it circular */
+    display: flex; /* Center content */
+    justify-content: center; 
+    align-items: center; 
+    padding: 0; /* Remove padding to maintain proportions */
+    border-radius: 50%; /* Full circle */
+    cursor: pointer; /* Ensure the button is clickable */
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.profile-btn img {
+    width: 40px;
+    height: 40px;
+    border-radius: 0; /* Remove circular effect on image */
+    transition: filter 0.3s ease;
+}
+
+/* Hover effect for Profile Button */
+.profile-btn:hover {
+    background-color: var(--highlight-color); /* Highlight on hover */
+    border: 5px solid var(--highlight-color); 
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
+}
+
+/* Dropdown and Nav items */
+.nav-item.dropdown {
+    position: relative;
+}
+
+
+
+
+.dropdown-menu {
+    width: 130px; /* Smaller width */
+    display: none;
+    position: absolute;
+    left: 50%; /* Where the drop down appears */
+    transform: translateX(-50%);
+    background-color: var(--secondary-color);
+    list-style: none;
+    padding: 5px 0; /* Reduce overall padding */
+    text-align: center; /* Center-align the text */
+    border-radius: 5px; /* Optional: add rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: add shadow for a sleek look */
+}
+
+.dropdown-menu li {
+    padding: 0; /* Remove default padding */
+}
+
+.dropdown-menu li a {
+    display: block; /* Make the link a block element */
+    font-size: 16px; /* Adjust text size */
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 10px 0; /* Add consistent padding to the block */
+    width: 90%; /* Ensure the block spans the full width */
+    box-sizing: border-box; /* Ensure padding doesn't overflow the block */
+    text-align: center; /* Center the text within the link */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Add transition for background and text color */
+}
+
+.dropdown-menu li a:hover {
+    color: var(--text-hover-color); /* Adjust the hover text color if needed */
+    background-color: var(--highlight-color); /* Background covers the entire block */
+}
+#profileDropdown::after {
+    display: none; /* Hides the down arrow */
 }

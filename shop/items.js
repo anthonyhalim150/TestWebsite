@@ -35,25 +35,54 @@ function update_login() {
     } else {
         // User is logged out
         navbarLinks.innerHTML = `
+        <ul class="navbar-icons">
             <li class="nav-item">
                 <a class="cart-btn" href="#" id="cart_nav">
                     <img src="cart.png" alt="Transparent Cart Icon">
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-white" href="login.html">Login</a>
+            <li class="nav-item dropdown">
+                <a class="dropdown-toggle" href="#" id="profileDropdown" role="button">
+                    <img src="profile.png" alt="Profile Icon" class="profile-btn">
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                    <li><a class="dropdown-item" href="login.html">Login</a></li>
+                    <li><a class="dropdown-item" href="signup.html">Sign Up</a></li>
+                </ul>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white" href="signup.html">Sign Up</a>
+                <button id="customer-support" class="support-btn">
+                    <img src="customer-support.png" alt="Feedback">
+                </button>
             </li>
-            <button id="customer-support" class="support-btn"><img src="customer-support.png" alt="Feedback"> </button>   
+        </ul>
         `;
+
         const cartNav = document.getElementById('cart_nav');
         cartNav.addEventListener('click', (event) => {
             event.preventDefault(); // Prevent navigation
             window.location.href = 'signup.html';
             alert('You must be logged in to access your cart.');
         });
+        document.querySelector('#profileDropdown').addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent default link behavior
+            const dropdownMenu = this.nextElementSibling; // Get the dropdown menu
+            // Toggle visibility
+            if (dropdownMenu.style.display === 'block') {
+                dropdownMenu.style.display = 'none';
+            } else {
+                dropdownMenu.style.display = 'block';
+            }
+        });
+        
+        // Optional: Close the dropdown if the user clicks outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.querySelector('.dropdown-menu');
+            const profileDropdown = document.querySelector('#profileDropdown');
+            if (!profileDropdown.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });        
     }
 }
 
