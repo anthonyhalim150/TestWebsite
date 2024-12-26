@@ -425,6 +425,35 @@ input[type="number"] {
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
 }
 
+.cart-btn {
+    width: 45px; /* Ensure width and height are equal */
+    height: 43px; 
+    display: flex; /* Center content */
+    justify-content: center; 
+    align-items: center; 
+    padding: 0; /* Remove padding to maintain proportions */
+    border-radius: 100%; /* Full circle */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cart-btn img {
+    width: 40px;
+    height: 40px;
+    transition: filter 0.3s ease;
+}
+
+.cart-btn:hover {
+    background-color: var(--highlight-color); /* Highlight on hover */
+    border: 5px solid var(--highlight-color); 
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25); /* Slightly deeper shadow on hover */
+}
+
+
+img {
+    background-color: transparent;
+    border: none;
+}
 
 .star-rating {
     display: flex;

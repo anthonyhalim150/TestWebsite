@@ -36,8 +36,8 @@ function update_login() {
         // User is logged out
         navbarLinks.innerHTML = `
             <li class="nav-item">
-                <a class="nav-link text-white" href="#" id="cart_nav">
-                    <i class="fas fa-shopping-cart"></i> Cart
+                <a class="cart-btn" href="#" id="cart_nav">
+                    <img src="cart.png" alt="Transparent Cart Icon">
                 </a>
             </li>
             <li class="nav-item">
