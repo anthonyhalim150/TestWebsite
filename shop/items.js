@@ -4,7 +4,7 @@ let items = [];
 let cartItems = {};  // To store the quantities of items in the cart
 
 // Function to update the login state
-function update_login() {
+async function update_login() {
     const navbarLinks = document.getElementById('navbar-links');
     const userID = localStorage.getItem('userID');
     const role = localStorage.getItem('role'); 
@@ -21,20 +21,21 @@ function update_login() {
         <ul class="navbar-icons">
             <li class="nav-item">
                 <a class="cart-btn" href="cart.html" id="cart_nav">
-                    <img src="cart.png" alt="Transparent Cart Icon">
+                    <img src="Icons/cart.png" alt="Transparent Cart Icon">
                 </a>
             </li>
             <li class="nav-item dropdown">
                 <a class="dropdown-toggle" href="#" id="profileDropdown" role="button">
-                    <img src="profile.png" alt="Profile Icon" class="profile-btn">
+                    <img src="Icons/profile.png" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                <li><a class="dropdown-item" id="likes_nav" href="#">Likes</a></li>
                     <li><a class="dropdown-item" id="logout_nav" href="#">Logout</a></li>
                 </ul>
             </li>
             <li class="nav-item">
                 <button id="customer-support" class="support-btn">
-                    <img src="customer-support.png" alt="Feedback">
+                    <img src="Icons/customer-support.png" alt="Feedback">
                 </button>
             </li>
         </ul>
@@ -47,12 +48,12 @@ function update_login() {
         <ul class="navbar-icons">
             <li class="nav-item">
                 <a class="cart-btn" href="#" id="cart_nav">
-                    <img src="cart.png" alt="Transparent Cart Icon">
+                    <img src="Icons/cart.png" alt="Transparent Cart Icon">
                 </a>
             </li>
             <li class="nav-item dropdown">
                 <a class="dropdown-toggle" href="#" id="profileDropdown" role="button">
-                    <img src="profile.png" alt="Profile Icon" class="profile-btn">
+                    <img src="Icons/profile.png" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
                     <li><a class="dropdown-item" href="login.html">Login</a></li>
@@ -61,7 +62,7 @@ function update_login() {
             </li>
             <li class="nav-item">
                 <button id="customer-support" class="support-btn">
-                    <img src="customer-support.png" alt="Feedback">
+                    <img src="Icons/customer-support.png" alt="Feedback">
                 </button>
             </li>
         </ul>
@@ -78,10 +79,10 @@ function update_login() {
         }
    
     }
-    setup_icon(userID); 
+    setup_icon(); 
 }
 
-function setup_icon(userID) {
+function setup_icon() {
 
     // Attach profileDropdown event listener
     const profileDropdown = document.querySelector('#profileDropdown');
@@ -343,8 +344,8 @@ function customer_support(){
 }
 
 // Initial rendering of items and cart
-document.addEventListener('DOMContentLoaded', () => {
-    update_login();
+document.addEventListener('DOMContentLoaded', async () => {
+    await update_login();
     fetchItems(); // Fetch items when page loads
     customer_support();
 });

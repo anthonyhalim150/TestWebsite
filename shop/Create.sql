@@ -13,6 +13,24 @@ CREATE TABLE items (
     stock INT NOT NULL,
     image VARCHAR(255)
 );
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role ENUM('user', 'admin') DEFAULT 'user'
+);
+use ecommerce;
+
+CREATE TABLE likes (
+    user_id INT,
+	item_id INT,
+    PRIMARY KEY (user_id, item_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- The constraint is a powerful feature in SQL that ensures referential integrity by automatically deleting rows in a child table when the corresponding rows in the parent table are deleted
+    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
+);
+
 -- Carts Table
 CREATE TABLE Cart (
     cart_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,16 +71,6 @@ CREATE TABLE sale_items (
 );
 
 
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    role ENUM('user', 'admin') DEFAULT 'user'
-);
-
-
 CREATE TABLE comments(
 	comments_id INT AUTO_INCREMENT PRIMARY KEY,
     comment TEXT,
@@ -71,6 +79,15 @@ CREATE TABLE comments(
     importance_rating INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE feedback (
+    feedback_id INT AUTO_INCREMENT PRIMARY KEY,
+    comments_id INT NOT NULL,
+    true_importance INT,
+    true_quality INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (comments_id) REFERENCES comments(comments_id)
 );
 drop table comments;
 use ecommerce;
@@ -85,5 +102,4 @@ INSERT INTO users (username, email, password) VALUES ('testuser', 'test@example.
 UPDATE users
 SET role = 'admin'
 WHERE id = 1;
-
 

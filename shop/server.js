@@ -33,48 +33,6 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-app.post('/analyze-comments', async (req, res) => {
-    try {
-        const comments = req.body.comments || []; // Ensure comments are passed, klo empty error
-        console.log('Sending comments to Flask for analysis:', comments);
-
-        const flaskResponse = await axios.post('http://127.0.0.1:5000/analyze', req.body);//Gabisa pake localhost
-
-        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
-
-        // Check if the response from Flask is valid JSON
-        if (flaskResponse.data && flaskResponse.data.status === 'success') {
-            res.status(flaskResponse.status).json(flaskResponse.data);
-        } else {
-            throw new Error('Invalid response from Flask');
-        }
-    } catch (error) {
-        console.error('Error communicating with Flask:', error.message);
-        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
-    }
-});
-
-
-app.post('/train-AI', async (req, res) => {
-    try {
-        const comments = req.body.comments || []; // Ensure comments are passed
-        console.log('Sending comments to Flask for analysis:', comments);
-
-        const flaskResponse = await axios.post('http://127.0.0.1:5000/train-enhanced', req.body);//Gabisa pake localhost
-
-        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
-
-        // Check if the response from Flask is valid JSON
-        if (flaskResponse.data && flaskResponse.data.status === 'success') {
-            res.status(flaskResponse.status).json(flaskResponse.data);
-        } else {
-            throw new Error('Invalid response from Flask');
-        }
-    } catch (error) {
-        console.error('Error communicating with Flask:', error.message);
-        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
-    }
-});
 
 // Sign-up route
 app.post('/signup', async (req, res) => {
@@ -805,7 +763,154 @@ app.post('/feedback', async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to add feedback.' });
     }
 });
+app.post('/analyze-comments', async (req, res) => {
+    try {
+        const comments = req.body.comments || []; // Ensure comments are passed, klo empty error
+        console.log('Sending comments to Flask for analysis:', comments);
 
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/analyze', req.body);//Gabisa pake localhost
+
+        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
+
+        // Check if the response from Flask is valid JSON
+        if (flaskResponse.data && flaskResponse.data.status === 'success') {
+            res.status(flaskResponse.status).json(flaskResponse.data);
+        } else {
+            throw new Error('Invalid response from Flask');
+        }
+    } catch (error) {
+        console.error('Error communicating with Flask:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
+    }
+});
+
+
+app.post('/train-AI', async (req, res) => {
+    try {
+        const comments = req.body.comments || []; // Ensure comments are passed
+        console.log('Sending comments to Flask for analysis:', comments);
+
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/train-enhanced', req.body);//Gabisa pake localhost
+
+        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
+
+        // Check if the response from Flask is valid JSON
+        if (flaskResponse.data && flaskResponse.data.status === 'success') {
+            res.status(flaskResponse.status).json(flaskResponse.data);
+        } else {
+            throw new Error('Invalid response from Flask');
+        }
+    } catch (error) {
+        console.error('Error communicating with Flask:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
+    }
+});
+
+app.post('/add-like', async (req, res) => {
+    const { userID, itemID } = req.body;
+
+    if (!userID || !itemID) {
+        return res.status(400).json({ success: false, error: 'User ID and Item ID are required' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            // Check if the like already exists
+            const [existingLike] = await connection.query(
+                'SELECT * FROM likes WHERE user_id = ? AND item_id = ?',
+                [userID, itemID]
+            );
+
+            if (existingLike.length > 0) {
+                return res.status(400).json({ success: false, error: 'Item already liked' });
+            }
+
+            // Insert the like
+            await connection.query(
+                'INSERT INTO likes (user_id, item_id) VALUES (?, ?)',
+                [userID, itemID]
+            );
+
+            res.json({ success: true, message: 'Item liked successfully' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error liking item:', error);
+        res.status(500).json({ success: false, error: 'Failed to like item' });
+    }
+});
+
+// API to unlike an item
+app.delete('/delete-like', async (req, res) => {
+    const { userID, itemID } = req.body;
+
+    if (!userID || !itemID) {
+        return res.status(400).json({ success: false, error: 'User ID and Item ID are required' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            await connection.query(
+                'DELETE FROM likes WHERE user_id = ? AND item_id = ?',
+                [userID, itemID]
+            );
+
+            res.json({ success: true, message: 'Item unliked successfully' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error unliking item:', error);
+        res.status(500).json({ success: false, error: 'Failed to unlike item' });
+    }
+});
+
+// API to fetch liked items for a user
+app.get('/like-list', async (req, res) => {
+    const userID = req.query.userID;
+
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'User ID is required' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const [likedItems] = await connection.query(
+                `SELECT i.id, i.name, i.description, i.category, i.price, i.stock, i.image
+                 FROM likes l
+                 JOIN items i ON l.item_id = i.id
+                 WHERE l.user_id = ?`,
+                [userID]
+            );
+
+            res.json({ success: true, likedItems });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching liked items:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch liked items' });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Draft
 const stripe = require('stripe')('your_secret_key');
 
 app.post('/create-checkout-session', async (req, res) => {

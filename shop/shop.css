@@ -398,7 +398,7 @@ input[type="number"] {
 
 .floating-feedback img {
     width: 20px;
-    height: 20px;
+    height: 15px;
     margin-right: 8px;
     filter: invert(100%);
 }
