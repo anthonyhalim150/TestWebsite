@@ -7,7 +7,6 @@ let cartItems = {};  // To store the quantities of items in the cart
 function update_login() {
     const navbarLinks = document.getElementById('navbar-links');
     const userID = localStorage.getItem('userID');
-    const username = localStorage.getItem('username');
     const role = localStorage.getItem('role'); 
     if (get_user_role() !== role){
         alert("Token changed, alert developer of the error!"); //Jangan sampe masuk sini
@@ -19,18 +18,28 @@ function update_login() {
         }
         // User is logged in
         navbarLinks.innerHTML = `
+        <ul class="navbar-icons">
             <li class="nav-item">
-                <a class="nav-link text-white">Hello, ${username}!</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white" href="cart.html">
-                    <i class="fas fa-shopping-cart"></i> Cart
+                <a class="cart-btn" href="cart.html" id="cart_nav">
+                    <img src="cart.png" alt="Transparent Cart Icon">
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-white" id="logout_nav" href="#">Logout</a>
+            <li class="nav-item dropdown">
+                <a class="dropdown-toggle" href="#" id="profileDropdown" role="button">
+                    <img src="profile.png" alt="Profile Icon" class="profile-btn">
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                    <li><a class="dropdown-item" id="logout_nav" href="#">Logout</a></li>
+                </ul>
             </li>
+            <li class="nav-item">
+                <button id="customer-support" class="support-btn">
+                    <img src="customer-support.png" alt="Feedback">
+                </button>
+            </li>
+        </ul>
         `;
+
         clear_login();
     } else {
         // User is logged out
@@ -57,32 +66,41 @@ function update_login() {
             </li>
         </ul>
         `;
-
         const cartNav = document.getElementById('cart_nav');
-        cartNav.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent navigation
-            window.location.href = 'signup.html';
-            alert('You must be logged in to access your cart.');
-        });
-        document.querySelector('#profileDropdown').addEventListener('click', function (event) {
+        if (cartNav) {
+            cartNav.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent navigation
+                if (!userID) {
+                    window.location.href = 'signup.html';
+                    alert('You must be logged in to access your cart.');
+                }
+            });
+        }
+   
+    }
+    setup_icon(userID); 
+}
+
+function setup_icon(userID) {
+
+    // Attach profileDropdown event listener
+    const profileDropdown = document.querySelector('#profileDropdown');
+    if (profileDropdown) {
+        profileDropdown.addEventListener('click', function (event) {
             event.preventDefault(); // Prevent default link behavior
             const dropdownMenu = this.nextElementSibling; // Get the dropdown menu
             // Toggle visibility
-            if (dropdownMenu.style.display === 'block') {
-                dropdownMenu.style.display = 'none';
-            } else {
-                dropdownMenu.style.display = 'block';
-            }
+            dropdownMenu.style.display = 
+                dropdownMenu.style.display === 'block' ? 'none' : 'block';
         });
-        
-        // Optional: Close the dropdown if the user clicks outside
+
+        // Close dropdown if clicking outside
         document.addEventListener('click', function (event) {
             const dropdown = document.querySelector('.dropdown-menu');
-            const profileDropdown = document.querySelector('#profileDropdown');
-            if (!profileDropdown.contains(event.target) && !dropdown.contains(event.target)) {
+            if (dropdown && !profileDropdown.contains(event.target) && !dropdown.contains(event.target)) {
                 dropdown.style.display = 'none';
             }
-        });        
+        });
     }
 }
 
