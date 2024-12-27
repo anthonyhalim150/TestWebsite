@@ -510,3 +510,15 @@ input[type="number"] {
 #profileDropdown::after {
     display: none; /* Hides the down arrow */
 }
+
+.like-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.like-icon img {
+    width: 24px;
+    height: 24px;
+}

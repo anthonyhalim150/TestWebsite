@@ -808,6 +808,7 @@ app.post('/train-AI', async (req, res) => {
 
 app.post('/add-like', async (req, res) => {
     const { userID, itemID } = req.body;
+    console.log('Add like request:', userID, itemID); // Debug log
 
     if (!userID || !itemID) {
         return res.status(400).json({ success: false, error: 'User ID and Item ID are required' });
@@ -841,6 +842,7 @@ app.post('/add-like', async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to like item' });
     }
 });
+
 
 // API to unlike an item
 app.delete('/delete-like', async (req, res) => {

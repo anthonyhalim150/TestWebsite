@@ -2,6 +2,7 @@ const API_URL = 'http://localhost:3000/items';
 const API_add_cart = 'http://localhost:3000/cart';
 let items = [];
 let cartItems = {};  // To store the quantities of items in the cart
+let likedItems = [];
 
 // Function to update the login state
 async function update_login() {
@@ -40,7 +41,7 @@ async function update_login() {
             </li>
         </ul>
         `;
-
+        show_likes(userID);
         clear_login();
     } else {
         // User is logged out
@@ -67,19 +68,43 @@ async function update_login() {
             </li>
         </ul>
         `;
-        const cartNav = document.getElementById('cart_nav');
+        prevent_cart(userID);
+   
+    }
+    setup_icon(); 
+}
+function show_likes(userID){
+    const likesNav = document.getElementById('likes_nav');
+        if (likesNav) {
+            likesNav.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent navigation
+                if (!userID) {//Jangan sampe masuk sini
+                    window.location.href = 'signup.html';
+                    alert('You must be logged in to access likes. Alert Developer of this error!');
+                    return;
+                }
+                const heading = document.querySelector('h2');
+                if (heading) {
+                    heading.textContent = 'Liked Items'; // Change the text to 'Liked Items'
+                }
+                renderItems(likedItems);
+
+            });
+        }
+}
+
+function prevent_cart(userID){
+    const cartNav = document.getElementById('cart_nav');
         if (cartNav) {
             cartNav.addEventListener('click', (event) => {
                 event.preventDefault(); // Prevent navigation
                 if (!userID) {
                     window.location.href = 'signup.html';
                     alert('You must be logged in to access your cart.');
+                    return;
                 }
             });
         }
-   
-    }
-    setup_icon(); 
 }
 
 function setup_icon() {
@@ -234,17 +259,25 @@ function searchItems() {
     // Render the filtered items
     renderItems(filteredItems);
 }
-// Render shop items with updated stock
+// Render shop items with updated stock, //Event propagation stops it from displaying the showItemOverview for specific buttons
 function renderItems(filteredItems = null) {
     const itemsToRender = filteredItems || items; // Use filtered items if provided, otherwise render all items
     const itemsContainer = document.getElementById('items');
     if (!itemsContainer) return;
-    itemsContainer.innerHTML = itemsToRender.map(item => { 
+
+    itemsContainer.innerHTML = itemsToRender.map(item => {
         const cartQuantity = cartItems[item.id] || 0; // Quantity of the item in the cart
         const availableStock = item.stock - cartQuantity; // Stock available after subtracting cart quantity
+
+        // Check if the item is liked (use `likedItems` to track liked items)
+        const isLiked = likedItems.some(liked => liked.id === item.id); // `likedItems` is a Set of liked item IDs
+
         return `
             <div class="col-md-4 mb-4">
                 <div class="card" onclick="showItemOverview(${item.id})">
+                    <div class="like-icon" onclick="event.stopPropagation(); toggleLike(${item.id})">
+                        <img src="${isLiked ? 'Icons/red-heart.png' : 'Icons/white-heart.png'}" alt="Like" />
+                    </div>
                     <img src="${item.image}" class="card-img-top" alt="${item.name}">
                     <div class="card-body text-center">
                         <h5 class="card-title">${item.name}</h5>
@@ -252,16 +285,17 @@ function renderItems(filteredItems = null) {
                         <p class="card-text">Stock: ${availableStock}</p>
                         <div class="quantity-control">
                             <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity(${item.id}, -1)">-</button>
-                            <input type="number" id="quantity-${item.id}" value="1" min="1" max="${availableStock}" class="quantity-input"  onchange="updateQuantity('${item.id}', ${availableStock})"  onclick="event.stopPropagation();">
+                            <input type="number" id="quantity-${item.id}" value="1" min="1" max="${availableStock}" class="quantity-input" onchange="updateQuantity('${item.id}', ${availableStock})" onclick="event.stopPropagation();">
                             <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity(${item.id}, 1)">+</button>
                         </div>
                         <button class="btn btn-primary mt-2" onclick="event.stopPropagation(); addToCart(${item.id})">Add to Cart</button>
                     </div>
                 </div>
             </div>
-        `; //Event propagation stops it from displaying the showItemOverview for specific buttons
+        `;
     }).join('');
 }
+
 async function updateQuantity(itemID, stock) {
     const quantityInput = document.getElementById(`quantity-${itemID}`);
     const newQuantity = parseInt(quantityInput.value);
@@ -347,6 +381,7 @@ function customer_support(){
 document.addEventListener('DOMContentLoaded', async () => {
     await update_login();
     fetchItems(); // Fetch items when page loads
+    fetchLikedItems().then(() => renderItems());
     customer_support();
 });
 
@@ -357,3 +392,66 @@ if (searchBar) {
         searchItems(); 
     });
 } 
+
+
+
+// Fetch liked items on page load
+async function fetchLikedItems() {
+    const currentUserID = localStorage.getItem('userID');
+    try {
+        const response = await fetch(`http://localhost:3000/like-list?userID=${currentUserID}`);
+        const data = await response.json();
+        if (data.success) {
+            likedItems = data.likedItems;
+        }
+    } catch (error) {
+        console.error('Error fetching liked items:', error);
+    }
+}
+
+
+async function toggleLike(itemID) {
+    const isLiked = likedItems.some(item => item.id === itemID);
+    const currentUserID = localStorage.getItem('userID');
+    if (!currentUserID){
+        alert('Login to like an item!');
+        window.location.href = 'signup.html';
+        return;
+    }
+    try {
+        if (isLiked) {
+            // Unlike the item
+            const response = await fetch('http://localhost:3000/delete-like', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userID: currentUserID, itemID }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                likedItems = likedItems.filter(item => item.id !== itemID); // Remove item with matching ID
+            } else {
+                console.error(data.error);
+            }
+        } else {
+            // Like the item
+            const response = await fetch('http://localhost:3000/add-like', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userID: currentUserID, itemID }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                likedItems.push({ id: itemID});
+            } else {
+                console.error(data.error);
+            }
+        }
+
+        // Re-render items to update like icons
+        renderItems();
+    } catch (error) {
+        console.error('Error toggling like:', error);
+    }
+}
