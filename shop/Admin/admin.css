@@ -199,10 +199,17 @@
 .hidden {
     display: none;
 }
+td .product-image {
+    text-align: center; /* Centers the content horizontally */
+    vertical-align: middle; /* Centers the content vertically */
+    margin-left: 5px;
+}
 
 /* Product Overview Styles */
 .product-overview {
     position: fixed;
+    text-align: center;
+    align-items: center;
     top: 50%; /* Center vertically */
     left: 50%; /* Center horizontally */
     transform: translate(-50%, -50%); /* Adjust for width/height */
@@ -240,6 +247,7 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     resize: none;
+    text-align: center; /*Change this if you want the text inside the text area to not be centered */
 }
 
 .product-overview button {
@@ -301,6 +309,16 @@
     color: #ff6600; /* Darker orange on hover */
     background-color: rgba(255, 136, 0, 0.1);
 }
+
+.product-image, .product-overview .product-image{
+    display: block;
+    width: 50px !important;
+    height: 50px !important;
+}
+
+
+
+
 
 .comment-rating {
     display: flex;

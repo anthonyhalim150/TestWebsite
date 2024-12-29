@@ -343,19 +343,33 @@ function showItemOverview(itemId) {
     const overviewContainer = document.getElementById('item-overview');
     overviewContainer.innerHTML = `
         <h3>${item.name}</h3>
-        <img src="${item.image}" alt="${item.name}" style="width: 200px; height: 200px; object-fit: cover; margin-bottom: 15px;">
+        <img src="${item.image}" alt="${item.name}" style="width: 180px; height: 180px; margin-bottom: 15px;">
         <p><strong>Description:</strong> ${item.description}</p>
         <p><strong>Price:</strong> $${item.price}</p>
         <p><strong>Stock:</strong> ${item.stock}</p>
         <p><strong>Category:</strong> ${item.category || 'N/A'}</p>
-        <button class="btn btn-secondary" onclick="closeItemOverview()">Close</button>
+        <button class="close-btn" onclick="closeItemOverview()">Close</button>
     `;
-    overviewContainer.classList.add('visible');
+    overviewContainer.style.display = 'block';
 }
+
+document.addEventListener('click', (event) => {
+    const overviewSection = document.getElementById('item-overview');
+    const isInsideOverview = overviewSection && overviewSection.contains(event.target);
+    const isCloseButton = event.target.closest('.close-btn');
+    const isTriggerElement = event.target.closest('.card'); // Adjust trigger as needed
+
+    if (isTriggerElement) {
+        const itemId = parseInt(isTriggerElement.dataset.itemId, 10);
+        showItemOverview(itemId);
+    } else if (!isInsideOverview || isCloseButton) {
+        closeItemOverview();
+    }
+});
 
 function closeItemOverview() {
     const overviewContainer = document.getElementById('item-overview');
-    overviewContainer.classList.remove('visible');
+    overviewContainer.style.display = 'none';
 }
 
 function customer_support(){

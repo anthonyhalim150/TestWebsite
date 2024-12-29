@@ -14,10 +14,10 @@ async function fetch_products(sorted_items = null) {
             }
 
             const productContainer = document.getElementById('product-container-tbody');
-            productContainer.innerHTML = items.map(product => {
+            productContainer.innerHTML = items.map(product => {//Used to access product ID
                 return `
-                <tr data-id="${product.id}">
-                    <td><img src="../${product.image}" alt="Not Found!" style="width: 200px; height: 200px; object-fit: cover;"></td>
+              <tr data-id="${product.id}">
+                    <td><img src="../${product.image}" alt="Not Found!" class="product-image"></td>
                     <td>${product.name}</td>
                     <td>$${product.price}</td>
                     <td>${product.stock}</td>
@@ -144,7 +144,7 @@ function displayProductOverview(product) {
     overviewSection.style.display = 'block';
 
     // Populate the overview card with product details
-    document.getElementById('product-image').src = product.image;
+    document.getElementById('product-image').src = '../'+ product.image;
     document.getElementById('product-name').value = product.name;
     document.getElementById('product-price').value = product.price;
     document.getElementById('product-stock').value = product.stock;
