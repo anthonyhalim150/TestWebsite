@@ -592,6 +592,45 @@ app.post('/add-new-product', async (req, res) => {
     }
 });
 
+app.post('/remove-product', async (req, res) => {
+    const { productId } = req.body;
+
+    // Validate required fields, jangan sampe masuk sini
+    if (!productId) {
+        return res.status(400).json({ success: false, error: 'Product ID is required.' });
+    }
+
+    // Ensure `productId` is a valid number, jangan sampe masuk sini
+    if (isNaN(productId)) {
+        return res.status(400).json({ success: false, error: 'Product ID must be a valid number.' });
+    }
+
+    try {
+        const connection = await pool.getConnection(); // Get a connection from the pool
+        try {
+            // SQL query to remove the product from the database
+            const query = `DELETE FROM items WHERE id = ?`;
+            const values = [productId];
+
+            // Execute the query
+            const result = await connection.query(query, values);
+
+            // Check if a product was actually removed
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, error: 'Product not found.' });
+            }
+
+            res.status(200).json({ success: true, message: 'Product removed successfully!' });
+        } finally {
+            connection.release(); // Always release the connection back to the pool
+        }
+    } catch (error) {
+        console.error('Error removing product:', error);
+        res.status(500).json({ success: false, error: 'Internal server error.' });
+    }
+});
+
+
 app.post('/add-new-user', async (req, res) => {
     const { username, password, role, email} = req.body;
 

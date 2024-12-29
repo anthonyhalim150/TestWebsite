@@ -257,6 +257,25 @@
     background-color: #ff6600;
 }
 
+
+.product-overview #delete-button {
+    background-color: pink;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.product-overview #delete-button:hover {
+    background-color: red;
+    color: #fefefe;
+}
+
+
 .product-overview .close-btn {
     position: absolute;
     top: 0;

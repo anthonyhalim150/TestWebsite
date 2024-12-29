@@ -98,7 +98,6 @@ async function saveProductChanges(productId) {
 
         if (response.ok) {
             alert('Product updated successfully!');
-            document.getElementById('product-overview').classList.add('hidden');
             fetch_products(); // Refresh the list
         } else {
             alert('Failed to update the product.');
@@ -109,7 +108,38 @@ async function saveProductChanges(productId) {
     }
 }
 
-function displayProductOverview(product, rowElement) {
+
+async function delete_product(productId) {
+    const confirmed = confirm('Are you sure you want to delete the product?');
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('http://localhost:3000/remove-product', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId: parseInt(productId) }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert("Product deleted successfully!");
+            const overviewSection = document.getElementById('product-overview');
+            overviewSection.style.display = 'none'; //Harus dipisah, klo digabung gabisa
+            fetch_products(); // Refresh the list
+            
+        } else {
+            alert(`Error: ${result.error}`);
+        }
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('An error occurred while trying to delete the product.');
+    }
+};
+
+function displayProductOverview(product) {
     const overviewSection = document.getElementById('product-overview');
     overviewSection.style.display = 'block';
 
@@ -123,6 +153,7 @@ function displayProductOverview(product, rowElement) {
 
     // Add a save button listener
     document.getElementById('save-button').onclick = () => saveProductChanges(product.id);
+    document.getElementById('delete-button').onclick = () => delete_product(product.id);
 }
 
 // Hide product overview when clicking outside
