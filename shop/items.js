@@ -278,7 +278,7 @@ function renderItems(filteredItems = null) {
                     <div class="like-icon" onclick="event.stopPropagation(); toggleLike(${item.id})">
                         <img src="${isLiked ? 'Icons/red-heart.png' : 'Icons/white-heart.png'}" alt="Like" />
                     </div>
-                    <img src="${item.image}" class="card-img-top" alt="${item.name}">
+                    <img src="${item.image}" class="card-img-top" alt="${item.name} ">
                     <div class="card-body text-center">
                         <h5 class="card-title">${item.name}</h5>
                         <p class="card-text">$${item.price}</p>
@@ -338,7 +338,7 @@ function showItemOverview(itemId) {
     const overviewContainer = document.getElementById('item-overview');
     overviewContainer.innerHTML = `
         <h3>${item.name}</h3>
-        <img src="${item.image}" alt="${item.name}" style="max-width: 100%; margin-bottom: 15px;">
+        <img src="${item.image}" alt="${item.name}" style="width: 200px; height: 200px; object-fit: cover; margin-bottom: 15px;">
         <p><strong>Description:</strong> ${item.description}</p>
         <p><strong>Price:</strong> $${item.price}</p>
         <p><strong>Stock:</strong> ${item.stock}</p>

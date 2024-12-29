@@ -17,7 +17,7 @@ async function fetch_products(sorted_items = null) {
             productContainer.innerHTML = items.map(product => {
                 return `
                 <tr data-id="${product.id}">
-                    <td><img src="${product.image}" alt="Not Found!" style="width: 200px; height: 200px; object-fit: cover;"></td>
+                    <td><img src="../${product.image}" alt="Not Found!" style="width: 200px; height: 200px; object-fit: cover;"></td>
                     <td>${product.name}</td>
                     <td>$${product.price}</td>
                     <td>${product.stock}</td>

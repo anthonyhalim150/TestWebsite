@@ -1,5 +1,5 @@
 API_URL = 'http://localhost:3000/add-new-product';
-async function addProduct(){
+async function addProduct(event) {
     event.preventDefault(); // Prevent form reload
 
     // Get form data
@@ -7,24 +7,28 @@ async function addProduct(){
     const price = parseFloat(document.getElementById('product-price').value);
     const description = document.getElementById('product-description').value;
     const stock = parseInt(document.getElementById('product-stock').value);
-    const image = document.getElementById('product-image').value;
+    const imageFile = document.getElementById('product-image').files[0]; // Get the selected file
     const category = document.getElementById('product-category').value;
 
     // Validate form inputs
-    if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !image || !category) {
+    if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !imageFile || !category) {
         alert('All fields are required, and price/stock must be positive numbers.');
         return;
     }
 
-    const newProduct = { name, category, price, stock, image, description};
+    // Create FormData object to send data, including the image file
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('stock', stock);
+    formData.append('product-image', imageFile); // Key must match the backend's expected key
+    formData.append('category', category);
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(API_URL, { // Adjust the endpoint as needed
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newProduct),
+            body: formData, // FormData includes all fields and the file
         });
 
         const result = await response.json();
@@ -38,6 +42,7 @@ async function addProduct(){
         alert('An error occurred. Please try again later.');
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const product_form = document.getElementById('product-form');

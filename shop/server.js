@@ -6,6 +6,21 @@ const cors = require('cors');//Buat cross-port
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const axios = require('axios'); // For AI
+const multer = require('multer');//For picture upload
+const path = require('path');
+
+// Configure storage for multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'Products/'); // Directory to save uploaded files
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Unique file name
+    }
+});
+
+// Initialize upload place
+const upload = multer({ storage });
 
 // Secret key
 const JWT_SECRET = 'Testrandom2000';
@@ -553,15 +568,12 @@ app.get('/shop-metrics', async (req, res) => {
 
 
 
-
-
-
-
-app.post('/add-new-product', async (req, res) => {
-    const { name, category, price, stock, image, description } = req.body;
+app.post('/add-new-product', upload.single('product-image'), async (req, res) => {
+    const { name, category, price, stock, description } = req.body;
+    const imagePath = req.file ? req.file.path : null;
 
     // Validate required fields
-    if (!name || !category || !price || !stock || !image || !description) {
+    if (!name || !category || !price || !stock || !imagePath || !description) {
         return res.status(400).json({ success: false, error: 'All fields are required.' });
     }
 
@@ -578,7 +590,7 @@ app.post('/add-new-product', async (req, res) => {
                 INSERT INTO items (name, category, price, stock, image, description) 
                 VALUES (?, ?, ?, ?, ?, ?)
             `;
-            const values = [name, category, price, stock, image, description];
+            const values = [name, category, price, stock, imagePath, description];
 
             // Execute the query
             await connection.query(query, values);
