@@ -3,8 +3,8 @@ let selectedRating = 0;
 async function submitComment(event) {
     event.preventDefault(); // Prevent form reload
     const userID = localStorage.getItem('userID');
-    if (!userID){
-        alert('You must be logged in to give a comment!');
+    if (!userID){//Jangan sampe masuk sini, error handling is present when the user presses the feedback button.
+        alert('You must be logged in to give a comment! Alert Developer of this error!');
         window.location.href = 'login.html'
         return;
     }
@@ -62,6 +62,12 @@ function updateStars(rating, stars) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+    const userID = localStorage.getItem('userID');
+    if (!userID){
+        alert('You must be logged in to give a comment!');
+        window.location.href = 'login.html'
+        return;
+    }
     const commentForm = document.getElementById('comment-form');
     if (commentForm) {
         commentForm.addEventListener('submit', submitComment);

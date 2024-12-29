@@ -3,7 +3,6 @@ const API_add_cart = 'http://localhost:3000/cart';
 let items = [];
 let cartItems = {};  // To store the quantities of items in the cart
 let likedItems = [];
-
 // Function to update the login state
 async function update_login() {
     const navbarLinks = document.getElementById('navbar-links');
@@ -87,6 +86,8 @@ function show_likes(userID){
                 if (heading) {
                     heading.textContent = 'Liked Items'; // Change the text to 'Liked Items'
                 }
+                console.log(likedItems);
+                //ERROR: Sampe sini cuma ngestore id doang
                 renderItems(likedItems);
 
             });
@@ -229,8 +230,14 @@ function searchItems() {
         location.reload();
         return;
     }
+    const heading = document.querySelector('h2');
+    let searched_items = [];
+    searched_items = Array.from(items);
+    if (heading.textContent == 'Liked Items') {
+        searched_items = Array.from(likedItems);
+    }
     // Filter and sort items based on the query
-    const filteredItems = items
+    const filteredItems = searched_items
         .map(item => {
             // Calculate the match score based on the name and description
             const nameMatch = (item.name.toLowerCase().includes(query) ? 1 : 0);
@@ -240,7 +247,6 @@ function searchItems() {
             if (item.category !== null){
                 category_match = (item.category.toLowerCase().includes(query) ? 1 : 0);
             }
-            console.log(category_match);
 
             // Total match score
             const matchScore = nameMatch + desc_match + category_match;
@@ -260,7 +266,7 @@ function searchItems() {
     renderItems(filteredItems);
 }
 // Render shop items with updated stock, //Event propagation stops it from displaying the showItemOverview for specific buttons
-function renderItems(filteredItems = null) {
+async function renderItems(filteredItems = null) {
     const itemsToRender = filteredItems || items; // Use filtered items if provided, otherwise render all items
     const itemsContainer = document.getElementById('items');
     if (!itemsContainer) return;
@@ -379,9 +385,17 @@ function customer_support(){
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', async () => {
+    const heading = document.querySelector('h2');
+    await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
-    fetchItems(); // Fetch items when page loads
-    fetchLikedItems().then(() => renderItems());
+    await fetchItems(); // Fetch items when page loads
+    if (heading.textContent == 'Liked Items') {
+        const userID = localStorage.getItem('userID');
+        show_likes(userID);
+    }
+    else{
+        await renderItems();
+    }
     customer_support();
 });
 
@@ -444,6 +458,7 @@ async function toggleLike(itemID) {
             const data = await response.json();
             if (data.success) {
                 likedItems.push({ id: itemID});
+                await fetchLikedItems();
             } else {
                 console.error(data.error);
             }
