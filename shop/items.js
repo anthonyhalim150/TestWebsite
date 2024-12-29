@@ -40,7 +40,13 @@ async function update_login() {
             </li>
         </ul>
         `;
-        show_likes(userID);
+        const likesNav = document.getElementById('likes_nav');
+        if (likesNav) {
+            likesNav.addEventListener('click', (event) => {
+                event.preventDefault(); 
+                show_likes(userID);
+            })
+        }
         clear_login();
     } else {
         // User is logged out
@@ -73,25 +79,18 @@ async function update_login() {
     setup_icon(); 
 }
 function show_likes(userID){
-    const likesNav = document.getElementById('likes_nav');
-        if (likesNav) {
-            likesNav.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent navigation
-                if (!userID) {//Jangan sampe masuk sini
-                    window.location.href = 'signup.html';
-                    alert('You must be logged in to access likes. Alert Developer of this error!');
-                    return;
-                }
-                const heading = document.querySelector('h2');
-                if (heading) {
-                    heading.textContent = 'Liked Items'; // Change the text to 'Liked Items'
-                }
-                console.log(likedItems);
-                //ERROR: Sampe sini cuma ngestore id doang
-                renderItems(likedItems);
-
-            });
-        }
+    if (!userID) {//Jangan sampe masuk sini
+        window.location.href = 'signup.html';
+        alert('You must be logged in to access likes. Alert Developer of this error!');
+        return;
+    }
+    // Save the current view as "likedItems"
+    localStorage.setItem('currentView', 'likedItems');
+    const heading = document.querySelector('h2');
+    if (heading) {
+        heading.textContent = 'Liked Items'; // Change the text to 'Liked Items'
+    }
+    renderItems(likedItems);
 }
 
 function prevent_cart(userID){
@@ -385,12 +384,12 @@ function customer_support(){
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', async () => {
-    const heading = document.querySelector('h2');
     await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
     await fetchItems(); // Fetch items when page loads
-    if (heading.textContent == 'Liked Items') {
-        const userID = localStorage.getItem('userID');
+    const userID = localStorage.getItem('userID');
+    const current_view = localStorage.getItem('currentView')
+    if (current_view == 'likedItems') {
         show_likes(userID);
     }
     else{
@@ -458,7 +457,7 @@ async function toggleLike(itemID) {
             const data = await response.json();
             if (data.success) {
                 likedItems.push({ id: itemID});
-                await fetchLikedItems();
+                await fetchLikedItems();//Klo ga ada ini, nnti pas ke like pertama kali, bakal blm ke fetch liked itemsnya, karena di array cuma store id.
             } else {
                 console.error(data.error);
             }
