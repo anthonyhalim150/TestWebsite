@@ -17,7 +17,10 @@ async function fetch_products(sorted_items = null) {
             productContainer.innerHTML = items.map(product => {//Used to access product ID
                 return `
               <tr data-id="${product.id}">
-                    <td><img src="../${product.image}" alt="Not Found!" class="product-image"></td>
+                    <td>
+                        <img src="../${product.image}" alt="Not Found!" 
+                        original-image="${product.image}" class="product-image">
+                    </td>
                     <td>${product.name}</td>
                     <td>$${product.price}</td>
                     <td>${product.stock}</td>
@@ -77,23 +80,31 @@ function searchItems() {
 }
 
 async function saveProductChanges(productId) {
-    const updatedProduct = {
-        id: productId,
-        name: document.getElementById('product-name').value,
-        price: parseFloat(document.getElementById('product-price').value),
-        stock: parseInt(document.getElementById('product-stock').value, 10),
-        description: document.getElementById('product-description').value,
-        category: document.getElementById('product-category').value,
-    };
+    const formData = new FormData();
+    formData.append('id', productId);
+    formData.append('name', document.getElementById('product-name').value);
+    formData.append('price', parseFloat(document.getElementById('product-price').value));
+    formData.append('stock', parseInt(document.getElementById('product-stock').value, 10));
+    formData.append('description', document.getElementById('product-description').value);
+    formData.append('category', document.getElementById('product-category').value);
 
+    const imageFile = document.getElementById('image-form').files[0];
+    if (imageFile) {
+        formData.append('product-image', imageFile); // Add the image file if it exists, avoids overwriting
+    }
+    else {
+         // Retrieve the original image from the `data-original-image` attribute
+         const productRow = document.querySelector(`tr[data-id="${productId}"]`);
+         const originalImage = productRow.querySelector('img').getAttribute('original-image');
+         formData.append('product-image', originalImage);
+    }
     const confirmed = confirm('Are you sure you want to save these changes?');
     if (!confirmed) return;
 
     try {
         const response = await fetch(`${API_URL}/${productId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedProduct),
+            method: 'PUT',//Do not put headers: application/JSON as it conflicts with the formData body
+            body: formData, //Form data object is specifically designed to handle form submissions. It encodes data as multipart/form-data, which is the correct format for sending files along with other data to the server.
         });
 
         if (response.ok) {

@@ -37,7 +37,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Database connection pool
-const pool = mysql.createPool({
+const pool = mysql.createPool({//Reuses existing connections with cache instead of establishing new connections, preventing bottleneck
     host: 'localhost',
     user: 'root',
     password: 'Vvs319338',
@@ -704,11 +704,12 @@ app.post('/add-new-comment', async (req, res) => {
     }
 });
 
-app.put('/items/:id', async (req, res) => {
+app.put('/items/:id', upload.single('product-image'), async (req, res) => {
     const productId = req.params.id;
-    const { name, price, stock, description, category } = req.body;
-
-    if (!name || price === undefined || stock === undefined || !description || !category) {
+    const { name, price, stock, description, category, 'product-image': originalImage } = req.body;
+    const imagePath = req.file ? req.file.path : originalImage;//Cannot use product-image as there is a hyphen, thus JavaScript treats it as a variable name rather than a string key
+    //Cannot use 'product-image': imagePath. If a new file is uploaded, the imagePath in the destructured assignment will already hold the value from req.body['product-image'], but it should instead prioritize the file path from req.file.path. 
+    if (!name || price === undefined || stock === undefined || !description || !category || !imagePath) {
         return res.status(400).json({ success: false, error: 'All fields are required.' });
     }
 
@@ -717,10 +718,10 @@ app.put('/items/:id', async (req, res) => {
         try {
             const query = `
                 UPDATE items
-                SET name = ?, price = ?, stock = ?, description = ?, category = ?
+                SET name = ?, price = ?, stock = ?, description = ?, category = ?, image = ?
                 WHERE id = ?
             `;
-            const [result] = await connection.query(query, [name, price, stock, description, category, productId]);
+            const [result] = await connection.query(query, [name, price, stock, description, category, imagePath, productId]);
 
             if (result.affectedRows === 0) {
                 return res.status(404).json({ success: false, error: 'Product not found.' });
