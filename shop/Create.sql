@@ -21,6 +21,14 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     role ENUM('user', 'admin') DEFAULT 'user'
 );
+
+CREATE TABLE user_settings (
+    user_id INT PRIMARY KEY,
+    dark_mode BOOLEAN DEFAULT FALSE,
+    color_scheme VARCHAR(20) DEFAULT 'default',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 use ecommerce;
 
 CREATE TABLE likes (

@@ -29,7 +29,8 @@ async function update_login() {
                     <img src="Icons/profile.png" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                <li><a class="dropdown-item" id="likes_nav" href="#">Likes</a></li>
+                    <li><a class="dropdown-item" id="settings_nav" href="settings.html">Settings</a></li>
+                    <li><a class="dropdown-item" id="likes_nav" href="#">Likes</a></li>
                     <li><a class="dropdown-item" id="logout_nav" href="#">Logout</a></li>
                 </ul>
             </li>
