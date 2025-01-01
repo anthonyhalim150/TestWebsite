@@ -46,6 +46,7 @@ async function update_login() {
             likesNav.addEventListener('click', (event) => {
                 event.preventDefault(); 
                 show_likes(userID);
+                window.location.href = 'like.html';
             })
         }
         clear_login();
@@ -84,12 +85,6 @@ function show_likes(userID){
         window.location.href = 'signup.html';
         alert('You must be logged in to access likes. Alert Developer of this error!');
         return;
-    }
-    // Save the current view as "likedItems"
-    localStorage.setItem('currentView', 'likedItems');
-    const heading = document.querySelector('h2');
-    if (heading) {
-        heading.textContent = 'Liked Items'; // Change the text to 'Liked Items'
     }
     renderItems(likedItems);
 }
@@ -404,8 +399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await update_login();
     await fetchItems(); // Fetch items when page loads
     const userID = localStorage.getItem('userID');
-    const current_view = localStorage.getItem('currentView')
-    if (current_view == 'likedItems') {
+    if (window.location.pathname.includes('like.html')) {
         show_likes(userID);
     }
     else{
