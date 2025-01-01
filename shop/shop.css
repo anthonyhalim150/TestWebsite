@@ -15,27 +15,6 @@ body {
     color: var(--text-color);
 }
 
-/* Dark mode styles */
-body.dark-mode {
-    background-color: #2c3e50; /* Dark background */
-    color: #ecf0f1; /* Light text */
-}
-
-body.dark-mode .navbar {
-    background-color: #34495e;
-    border-bottom-color: #2c3e50;
-}
-
-body.dark-mode .card-body {
-    background-color: #2c3e50;
-    color: #ecf0f1;
-}
-
-body.dark-mode .btn-primary {
-    background-color: #3498db;
-    color: #ecf0f1;
-}
-
 
 .nav-item a {
     font-size: 1rem;
@@ -48,10 +27,10 @@ h2, h3 {
     text-align: center;
     color: var(--primary-color);
 }
-
+/* The space below navbar */
 .navbar {
     background-color: var(--primary-color);
-    border-bottom: 3px solid var(--highlight-color);
+    border-bottom: 3px solid var(--secondary-color);
 }
 
 .navbar-brand {
@@ -352,7 +331,7 @@ input[type="number"] {
     font-size: 1rem;
     border: 2px solid var(--primary-color);
     border-radius: 8px;
-    background-color: var(--secondary-color);
+    background-color: white;
     color: var(--text-color);
     resize: none;
     transition: border-color 0.3s ease;

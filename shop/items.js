@@ -399,6 +399,7 @@ function customer_support(){
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', async () => {
+    await loadUserSettings();
     await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
     await fetchItems(); // Fetch items when page loads
@@ -411,7 +412,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await renderItems();
     }
     customer_support();
-    loadUserSettings();
 });
 
 

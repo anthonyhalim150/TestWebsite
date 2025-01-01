@@ -26,21 +26,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error loading settings:', error);
     }
 });
-
-//To apply initial color theme
+//To save the settings when the user revisits the page
 function applySettings(darkMode, colorScheme) {
     // Apply color scheme
     document.documentElement.style.setProperty('--primary-color', colorScheme);
 
-    // Toggle dark mode
-    if (darkMode) {
-        document.documentElement.style.setProperty('--secondary-color', dark_mode ? '#333' : 'light');
-    } 
-    // Update toggle and color scheme select
+    // Apply dark mode
+    document.body.classList.toggle('dark-mode', darkMode);
+
+    // Update controls to reflect the settings
     document.getElementById('dark-mode-toggle').checked = darkMode;
     document.getElementById('color-scheme').value = colorScheme;
 }
-//Change the color theme as it goes
+
+// Change settings dynamically
 document.getElementById('dark-mode-toggle').addEventListener('change', () => {
     const isDarkMode = document.getElementById('dark-mode-toggle').checked;
     document.body.classList.toggle('dark-mode', isDarkMode);
@@ -51,6 +50,7 @@ document.getElementById('color-scheme').addEventListener('input', () => {
     document.documentElement.style.setProperty('--primary-color', newColorScheme);
 });
 
+// Save settings to the server
 document.getElementById('save-settings').addEventListener('click', async () => {
     const isDarkMode = document.getElementById('dark-mode-toggle').checked;
     const newColorScheme = document.getElementById('color-scheme').value;
