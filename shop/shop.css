@@ -129,14 +129,27 @@ footer {
 
 /* Cart Page */
 .empty-cart {
-    text-align: center;
-    margin-top: 50px;
+    display: flex; /* Enables flexbox for centering */
+    flex-direction: column; /* Stacks the image and text vertically */
+    align-items: center; /* Centers items horizontally */
+    justify-content: center; /* Centers items vertically */
+    height: 50%; /* Ensures the container takes full viewport height */
+    text-align: center; /* Centers text alignment */
+    font-weight: bold; /* Makes the text bold */
+    color: red; /* Applies the text color variable */
 }
 
 .empty-cart img {
-    max-width: 300px;
+    width: 20%;
+    height: 30%;
     margin-bottom: 20px;
+    margin-right: 3%;
 }
+
+.empty-cart p {
+    margin-left: 2%; /* Removes default paragraph margins */
+}
+
 
 .list-group-item {
     border: none;

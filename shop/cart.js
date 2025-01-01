@@ -11,8 +11,8 @@ async function renderCart() {
         if (!result.success || !result.cartItems || result.cartItems.length === 0) {
             cartContent.innerHTML = `
                 <div class="empty-cart text-center">
-                    <img src="https://via.placeholder.com/200" alt="Empty Cart" class="mb-3">
-                    <p>Your cart is empty.</p>
+                    <img src="icons/empty-cart.png" alt="Empty Cart" class="empty-cart">
+                    <p>Your cart is empty!</p>
                 </div>
             `;
             return;
