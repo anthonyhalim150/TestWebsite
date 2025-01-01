@@ -411,6 +411,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await renderItems();
     }
     customer_support();
+    loadUserSettings();
 });
 
 
@@ -482,5 +483,25 @@ async function toggleLike(itemID) {
         renderItems();
     } catch (error) {
         console.error('Error toggling like:', error);
+    }
+}
+async function loadUserSettings() {
+    const userID = localStorage.getItem('userID');
+    if (!userID) return;
+    try {
+        const response = await fetch('http://localhost:3000/get-user-settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userID }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            // Apply the settings
+            const { dark_mode, color_scheme } = data.settings;
+            document.documentElement.style.setProperty('--primary-color', color_scheme);
+            document.documentElement.style.setProperty('--secondary-color', dark_mode ? '#333' : 'light');
+        }
+    } catch (error) {
+        console.error('Error fetching user settings:', error);
     }
 }

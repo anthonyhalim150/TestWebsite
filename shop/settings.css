@@ -5,12 +5,6 @@
     --text-color: #2c3e50;
     --highlight-color: #ffefd5;
     --success-color: #60c657; /* Success Green */
-
-    /* Dark Mode Variables */
-    --dark-background: #2c3e50;
-    --dark-card: #34495e;
-    --dark-text: #ecf0f1;
-    --dark-highlight: #60c657;
 }
 
 body {
@@ -22,10 +16,6 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-body.dark-mode {
-    background-color: var(--dark-background);
-    color: var(--dark-text);
-}
 
 .settings-container {
     max-width: 800px; /* Increased size for future settings */
@@ -34,14 +24,11 @@ body.dark-mode {
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: white;
+    background-color: var(--secondary-color);
     position: relative;
     transition: background-color 0.3s;
 }
 
-body.dark-mode .settings-container {
-    background-color: var(--dark-card);
-}
 
 h1 {
     text-align: center;
@@ -61,9 +48,6 @@ label {
     color: var(--text-color);
 }
 
-body.dark-mode label {
-    color: var(--dark-text);
-}
 
 select {
     padding: 10px;

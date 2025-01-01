@@ -27,22 +27,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+//To apply initial color theme
 function applySettings(darkMode, colorScheme) {
     // Apply color scheme
     document.documentElement.style.setProperty('--primary-color', colorScheme);
 
     // Toggle dark mode
     if (darkMode) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
-
+        document.documentElement.style.setProperty('--secondary-color', dark_mode ? '#333' : 'light');
+    } 
     // Update toggle and color scheme select
     document.getElementById('dark-mode-toggle').checked = darkMode;
     document.getElementById('color-scheme').value = colorScheme;
 }
-
+//Change the color theme as it goes
 document.getElementById('dark-mode-toggle').addEventListener('change', () => {
     const isDarkMode = document.getElementById('dark-mode-toggle').checked;
     document.body.classList.toggle('dark-mode', isDarkMode);
