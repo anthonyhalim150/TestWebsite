@@ -19,31 +19,34 @@ async function renderCart() {
         }
 
         const cartItems = result.cartItems;
-
+        //You can use the functions from another js file as long as your html has it.
         cartContent.innerHTML = `
             <ul class="list-group">
                 ${cartItems.map(item => `
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <img src="${item.image}" alt="${item.name}" class="img-thumbnail me-3" style="width: 50px; height: 50px;">
-                            <div>
-                                <p class="mb-0"><strong>${item.name}</strong></p>
-                                <small>Price: $${item.price}</small>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <div class="quantity-container me-3">
-                                <div class="quantity-control">
-                                    <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', -1, ${item.stock})">-</button>
-                                    <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="1" max="${item.stock}" class="quantity-input" onchange="updateQuantity('${item.id}', ${item.stock})">
-                                    <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', 1, ${item.stock})">+</button>
+                    <div class="card" onclick="showItemOverview(${item.id})">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <img src="${item.image}" alt="${item.name}" class="img-thumbnail me-3" style="width: 50px; height: 50px;">
+                                <div>
+                                    <p class="mb-0"><strong>${item.name}</strong></p>
+                                    <small>Price: $${item.price}</small>
                                 </div>
                             </div>
-                            <div class="price-container me-3">
-                                <span class="price-text">$${(item.price * item.quantity).toFixed(2)}</span>
+                            <div class="d-flex align-items-center">
+                                <div class="quantity-container me-3">
+                                    <div class="quantity-control">
+                                        <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', -1, ${item.stock})">-</button>
+                                        <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="1" max="${item.stock}" class="quantity-input" onclick="event.stopPropagation();" onchange="updateQuantity('${item.id}', ${item.stock})">
+                                        <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', 1, ${item.stock})">+</button>
+                                    </div>
+                                </div>
+                                <div class="price-container me-3">
+                                    <span class="price-text" onclick="event.stopPropagation();">$${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                                <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); removeItem('${item.id}')">Remove All</button>
                             </div>
-                            <button class="btn btn-sm btn-danger" onclick="removeItem('${item.id}')">Remove All</button>
                         </div>
+                        
 
 
                     </li>

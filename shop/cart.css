@@ -11,7 +11,13 @@ body {
 main {
     flex: 1;
 }
+.card{
+    border: none;
+}
 
+.card:hover {
+    transform: scale(1.05);
+}
 .empty-cart {
     display: flex; /* Enables flexbox for centering */
     flex-direction: column; /* Stacks the image and text vertically */
