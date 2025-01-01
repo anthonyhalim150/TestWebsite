@@ -1,64 +1,76 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const colorSchemeSelect = document.getElementById('color-scheme');
-    const saveSettingsButton = document.getElementById('save-settings');
+const userID = localStorage.getItem('userID');
 
-    // Load settings from local storage
-    const loadSettings = () => {
-        const darkMode = localStorage.getItem('darkMode') === 'true';
-        const colorScheme = localStorage.getItem('colorScheme') || '#f8a488';
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!userID) {
+        alert('User not logged in.');
+        window.location.href = './login.html';
+        return;
+    }
 
-        darkModeToggle.checked = darkMode;
-        document.body.classList.toggle('dark-mode', darkMode);
-        document.documentElement.style.setProperty('--primary-color', colorScheme);
-        colorSchemeSelect.value = colorScheme;
-    };
+    try {
+        // Fetch user settings from the server
+        const response = await fetch('http://localhost:3000/get-user-settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userID }),
+        });
 
-    // Apply changes locally
-    const applySettings = () => {
-        const darkMode = darkModeToggle.checked;
-        const colorScheme = colorSchemeSelect.value;
-
-        document.body.classList.toggle('dark-mode', darkMode);
-        document.documentElement.style.setProperty('--primary-color', colorScheme);
-
-        // Save to local storage for immediate application
-        localStorage.setItem('darkMode', darkMode);
-        localStorage.setItem('colorScheme', colorScheme);
-    };
-
-    // Save settings to the database
-    const saveSettings = async () => {
-        const darkMode = darkModeToggle.checked;
-        const colorScheme = colorSchemeSelect.value;
-
-        try {
-            const response = await fetch('/api/save-settings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    darkMode,
-                    colorScheme,
-                }),
-            });
-
-            if (response.ok) {
-                alert('Settings saved successfully.');
-            } else {
-                alert('Failed to save settings.');
-            }
-        } catch (error) {
-            console.error('Error saving settings:', error);
-            alert('An error occurred while saving settings.');
+        const data = await response.json();
+        if (data.success) {
+            const { dark_mode, color_scheme } = data.settings;
+            applySettings(dark_mode, color_scheme);
+        } else {
+            console.error(data.message);
         }
-    };
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    }
+});
 
-    // Event listeners
-    darkModeToggle.addEventListener('change', applySettings);
-    colorSchemeSelect.addEventListener('change', applySettings);
-    saveSettingsButton.addEventListener('click', saveSettings);
+function applySettings(darkMode, colorScheme) {
+    // Apply color scheme
+    document.documentElement.style.setProperty('--primary-color', colorScheme);
 
-    loadSettings();
+    // Toggle dark mode
+    if (darkMode) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+
+    // Update toggle and color scheme select
+    document.getElementById('dark-mode-toggle').checked = darkMode;
+    document.getElementById('color-scheme').value = colorScheme;
+}
+
+document.getElementById('dark-mode-toggle').addEventListener('change', () => {
+    const isDarkMode = document.getElementById('dark-mode-toggle').checked;
+    document.body.classList.toggle('dark-mode', isDarkMode);
+});
+
+document.getElementById('color-scheme').addEventListener('input', () => {
+    const newColorScheme = document.getElementById('color-scheme').value;
+    document.documentElement.style.setProperty('--primary-color', newColorScheme);
+});
+
+document.getElementById('save-settings').addEventListener('click', async () => {
+    const isDarkMode = document.getElementById('dark-mode-toggle').checked;
+    const newColorScheme = document.getElementById('color-scheme').value;
+
+    try {
+        const response = await fetch('http://localhost:3000/save-user-settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userID, dark_mode: isDarkMode, color_scheme: newColorScheme }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert('Settings saved successfully!');
+        } else {
+            console.error(data.message);
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+    }
 });

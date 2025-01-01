@@ -952,6 +952,65 @@ app.get('/like-list', async (req, res) => {
 });
 
 
+app.post('/get-user-settings', async (req, res) => {
+    const { userID } = req.body;
+
+    if (!userID) {
+        return res.status(400).json({ success: false, message: 'UserID is required.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const [rows] = await connection.query(
+                'SELECT dark_mode, color_scheme FROM user_settings WHERE user_id = ?',
+                [userID]
+            );
+
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Settings not found.' });
+            }
+
+            res.status(200).json({ success: true, settings: rows[0] });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching settings:', error);
+        res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+});
+
+app.post('/save-user-settings', async (req, res) => {
+    const { userID, dark_mode, color_scheme } = req.body;
+
+    if (!userID || dark_mode === undefined || !color_scheme) {
+        return res.status(400).json({ success: false, message: 'All fields are required.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            await connection.query(
+                `INSERT INTO user_settings (user_id, dark_mode, color_scheme)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE dark_mode = ?, color_scheme = ?`,
+                [userID, dark_mode, color_scheme, dark_mode, color_scheme]
+            );
+
+            res.status(200).json({ success: true, message: 'Settings saved successfully!' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+});
+
+
+
+
 
 
 

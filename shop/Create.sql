@@ -25,7 +25,7 @@ CREATE TABLE users (
 CREATE TABLE user_settings (
     user_id INT PRIMARY KEY,
     dark_mode BOOLEAN DEFAULT FALSE,
-    color_scheme VARCHAR(20) DEFAULT 'default',
+    color_scheme VARCHAR(20) DEFAULT '#f8a488',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
