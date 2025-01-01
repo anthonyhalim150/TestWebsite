@@ -127,46 +127,6 @@ footer {
     text-align: center;
 }
 
-/* Cart Page */
-.empty-cart {
-    display: flex; /* Enables flexbox for centering */
-    flex-direction: column; /* Stacks the image and text vertically */
-    align-items: center; /* Centers items horizontally */
-    justify-content: center; /* Centers items vertically */
-    height: 50%; /* Ensures the container takes full viewport height */
-    text-align: center; /* Centers text alignment */
-    font-weight: bold; /* Makes the text bold */
-    color: red; /* Applies the text color variable */
-}
-
-.empty-cart img {
-    width: 20%;
-    height: 30%;
-    margin-bottom: 20px;
-    margin-right: 3%;
-}
-
-.empty-cart p {
-    margin-left: 2%; /* Removes default paragraph margins */
-}
-
-
-.list-group-item {
-    border: none;
-    font-size: 1rem;
-    padding: 10px 15px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    background-color: var(--highlight-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.list-group-item span {
-    font-weight: bold;
-    color: var(--success-color);
-}
 
 .quantity-control {
     display: flex;
@@ -196,12 +156,6 @@ footer {
     border-radius: 5px;
     padding: 5px;
 }
-.price-container {
-    display: flex;
-    align-items: center; /* Vertically align the price */
-    min-width: 90px; /* Ensure the price container has a consistent width */
-    justify-content: center; /* Align price to the right */
-}
 
 
 /* Center the checkout and total section */
@@ -216,7 +170,7 @@ footer {
     display: block;
     width: 200px;
     margin: 20px auto;
-    background-color: var(--success-color);
+    background-color: var(--primary-color);
     color: white;
     padding: 10px 0;
     border: none;
@@ -229,6 +183,11 @@ footer {
 .btn-success:hover {
     background-color: var(--highlight-color);
     color: var(--text-color);
+}
+
+.list-group-item span {
+    font-weight: bold;
+    color: var(--success-color);
 }
 
 /*Kalo ga ada bawah ini, bakal ada ^ down arrow pas change quantity*/
