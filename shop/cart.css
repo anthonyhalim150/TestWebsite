@@ -16,6 +16,7 @@ main {
 }
 
 .card:hover {
+    cursor: pointer;
     transform: scale(1.05);
 }
 .empty-cart {
