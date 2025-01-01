@@ -315,14 +315,14 @@ input[type="number"] {
 }
 
 .submit-comment {
-    align-self: flex-end;
+    align-self: center; /* Center the button horizontally */
     padding: 0.8rem 1.5rem;
     font-size: 1rem;
     font-weight: bold;
     background-color: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 25px;/* Makes it rounder even though border is none, border adds a line or a style around the element*/
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
