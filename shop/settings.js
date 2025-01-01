@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
         if (data.success) {
             const { dark_mode, color_scheme } = data.settings;
-            applySettings(dark_mode, color_scheme);
+            apply_initial_settings(dark_mode, color_scheme);
         } else {
             console.error(data.message);
         }
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 //To save the settings when the user revisits the page
-function applySettings(darkMode, colorScheme) {
+function apply_initial_settings(darkMode, colorScheme) {
     // Apply color scheme
     document.documentElement.style.setProperty('--primary-color', colorScheme);
 
