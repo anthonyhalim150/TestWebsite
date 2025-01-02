@@ -365,7 +365,9 @@ document.addEventListener('click', (event) => {
 
 function closeItemOverview() {
     const overviewContainer = document.getElementById('item-overview');
-    overviewContainer.style.display = 'none';
+    if (overviewContainer){
+        overviewContainer.style.display = 'none';
+    }
 }
 
 function customer_support(){
