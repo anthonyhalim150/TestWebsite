@@ -36,7 +36,7 @@ async function renderCart() {
                                 <div class="quantity-container me-3">
                                     <div class="quantity-control">
                                         <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', -1, ${item.stock})">-</button>
-                                        <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="1" max="${item.stock}" class="quantity-input" onclick="event.stopPropagation();" onchange="updateQuantity('${item.id}', ${item.stock})">
+                                        <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="0" max="${item.stock}" class="quantity-input" onclick="event.stopPropagation();" onchange="updateQuantity('${item.id}', ${item.stock})">
                                         <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity('${item.id}', 1, ${item.stock})">+</button>
                                     </div>
                                 </div>
@@ -69,23 +69,41 @@ async function changeQuantity(itemID, delta, stock) {//From +-
     const quantityInput = document.getElementById(`quantity-${itemID}`);
     const newQuantity = parseInt(quantityInput.value) + delta;
 
-    if (newQuantity < 1 || newQuantity > stock) return;
+    if (newQuantity < 0 || newQuantity > stock) return;
 
     quantityInput.value = newQuantity;
-    await updateCart(itemID, newQuantity);
+    if (newQuantity === 0){
+        const removed = await removeItem(itemID); // Await cannot use let, must use const
+        if (!removed){
+            quantityInput.value = 1; 
+        }
+    }
+    else{
+        await updateCart(itemID, newQuantity);
+    }
 }
 
 
 async function updateQuantity(itemID, stock) {
     const quantityInput = document.getElementById(`quantity-${itemID}`);
     const newQuantity = parseInt(quantityInput.value);
-
-    if (newQuantity < 1 || newQuantity > stock) {
+    if (newQuantity < 0){//Note: Cannot use !newQuantity here as it will think 0 is false
+        quantityInput.value = 1; 
+        return;
+    }
+    if (newQuantity > stock) {
         quantityInput.value = stock; // Reset to max kalo invalid, this is from input.
         return;
     }
-
-    await updateCart(itemID, newQuantity);
+    if (newQuantity === 0 || !newQuantity){
+        const removed = await removeItem(itemID); // Await cannot use let, must use const
+        if (!removed){
+            quantityInput.value = 1; 
+        }
+    }
+    else{
+        await updateCart(itemID, newQuantity);
+    }
 }
 
 // Function to update the cart on the backend
@@ -104,6 +122,7 @@ async function updateCart(itemID, newQuantity) {
             alert('Failed to update cart. Please try again.');
         } else {
             renderCart(); // Refresh cart
+            return true;
         }
     } catch (error) {
         console.error('Error updating cart:', error);
@@ -112,7 +131,11 @@ async function updateCart(itemID, newQuantity) {
 }
 
 async function removeItem(itemID) {
+    let user_response = confirm('Are you sure to remove this item?');
     const userID = localStorage.getItem('userID');
+    if (!user_response){
+        return false;
+    }
     try {
         const response = await fetch('http://localhost:3000/remove-cart-item', {
             method: 'POST',
