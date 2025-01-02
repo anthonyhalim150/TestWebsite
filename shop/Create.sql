@@ -1,7 +1,12 @@
 CREATE DATABASE ecommerce;
 USE ecommerce;
 
+-- Since id cannot be reused, 
+-- e.g. If itemID 5 is deleted, database will never go to itemID 5
+-- Hence, I removed itemID as a referential integrity constraint
 
+
+ALTER TABLE sale_items DROP FOREIGN KEY fk_sale_items_item_id;
 
 
 CREATE TABLE items (
@@ -45,8 +50,9 @@ CREATE TABLE Cart (
     user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(id)
+    FOREIGN KEY (user_id) REFERENCES Users(id)  ON DELETE CASCADE
 );
+
 
 -- CartItems Table
 CREATE TABLE CartItems (
@@ -56,8 +62,10 @@ CREATE TABLE CartItems (
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (cart_id) REFERENCES Cart(cart_id),
-    FOREIGN KEY (item_id) REFERENCES Items(id)
+    FOREIGN KEY (item_id) REFERENCES Items(id)  ON DELETE CASCADE
 );
+
+
 CREATE TABLE  TRANSACTIONS(
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -74,8 +82,7 @@ CREATE TABLE sale_items (
     item_id INT NOT NULL,
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,  -- The price at the time of sale
-    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id),
-    FOREIGN KEY (item_id) REFERENCES items(id)
+    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
 );
 
 
