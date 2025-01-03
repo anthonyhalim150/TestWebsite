@@ -634,7 +634,7 @@ app.post('/remove-product', async (req, res) => {
                 return res.status(404).json({ success: false, error: 'Product not found.' });
             }
 
-            res.status(200).json({ success: true, message: 'Product removed successfully!' });
+            res.status(201).json({ success: true, message: 'Product removed successfully!' });
         } finally {
             connection.release(); // Always release the connection back to the pool
         }
