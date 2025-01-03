@@ -25,12 +25,12 @@ async function addProduct(event) {
     formData.append('product-image', imageFile); // Key must match the backend's expected key
     formData.append('category', category);
 
-    try {
-        const response = await fetch(API_URL, { // Adjust the endpoint as needed
-            method: 'POST',
-            body: formData, // FormData includes all fields and the file
-        });
+    const response = await fetch(API_URL, { // Adjust the endpoint as needed
+        method: 'POST',
+        body: formData, // FormData includes all fields and the file
+    });
 
+    try {
         const result = await response.json();
         if (result.success) {
             alert('Product added successfully!');
@@ -39,7 +39,7 @@ async function addProduct(event) {
         }
     } catch (error) {
         console.error('Error adding product:', error);
-        alert('An error occurred. Please try again later.');
+        alert('Failed to add product. lalalaa.');
     }
 }
 

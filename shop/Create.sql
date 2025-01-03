@@ -9,7 +9,7 @@ USE ecommerce;
 ALTER TABLE sale_items DROP FOREIGN KEY fk_sale_items_item_id;
 
 
-CREATE TABLE items (
+CREATE TABLE ITEMS (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -18,7 +18,7 @@ CREATE TABLE items (
     stock INT NOT NULL,
     image VARCHAR(255)
 );
-CREATE TABLE users (
+CREATE TABLE USERS(
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -27,42 +27,42 @@ CREATE TABLE users (
     role ENUM('user', 'admin') DEFAULT 'user'
 );
 
-CREATE TABLE user_settings (
+CREATE TABLE USER_SETTINGS (
     user_id INT PRIMARY KEY,
     dark_mode BOOLEAN DEFAULT FALSE,
     color_scheme VARCHAR(20) DEFAULT '#f8a488',
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE
 );
 
-use ecommerce;
 
-CREATE TABLE likes (
+
+CREATE TABLE LIKES (
     user_id INT,
 	item_id INT,
     PRIMARY KEY (user_id, item_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- The constraint is a powerful feature in SQL that ensures referential integrity by automatically deleting rows in a child table when the corresponding rows in the parent table are deleted
-    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE, -- The constraint is a powerful feature in SQL that ensures referential integrity by automatically deleting rows in a child table when the corresponding rows in the parent table are deleted
+    FOREIGN KEY (item_id) REFERENCES ITEMS(id) ON DELETE CASCADE
 );
 
 -- Carts Table
-CREATE TABLE Cart (
+CREATE TABLE CART(
     cart_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(id)  ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES USERS(id)  ON DELETE CASCADE
 );
 
 
 -- CartItems Table
-CREATE TABLE CartItems (
+CREATE TABLE CARTITEMS (
     cart_item_id INT AUTO_INCREMENT PRIMARY KEY,
     cart_id INT NOT NULL,
     item_id INT NOT NULL,
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (cart_id) REFERENCES Cart(cart_id),
-    FOREIGN KEY (item_id) REFERENCES Items(id)  ON DELETE CASCADE
+    FOREIGN KEY (cart_id) REFERENCES CART(cart_id),
+    FOREIGN KEY (item_id) REFERENCES ITEMS(id)  ON DELETE CASCADE
 );
 
 
@@ -71,38 +71,38 @@ CREATE TABLE  TRANSACTIONS(
     user_id INT NOT NULL,
     total_amount DECIMAL(10, 2) NOT NULL,   -- Total price of the transaction
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES USERS(id)
 );
 
 
 
-CREATE TABLE sale_items (
+CREATE TABLE SALE_ITEMS (
     sales_id INT AUTO_INCREMENT PRIMARY KEY,
     transaction_id INT NOT NULL,
     item_id INT NOT NULL,
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,  -- The price at the time of sale
-    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
+    FOREIGN KEY (transaction_id) REFERENCES TRANSACTIONS(transaction_id)
 );
 
 
-CREATE TABLE comments(
+CREATE TABLE COMMENTS(
 	comments_id INT AUTO_INCREMENT PRIMARY KEY,
     comment TEXT,
     user_id INT NOT NULL,
     website_rating INT,
     importance_rating INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (user_id) REFERENCES users(id)
+	FOREIGN KEY (user_id) REFERENCES USERS(id)
 );
 
-CREATE TABLE feedback (
+CREATE TABLE FEEDBACK (
     feedback_id INT AUTO_INCREMENT PRIMARY KEY,
     comments_id INT NOT NULL,
     true_importance INT,
     true_quality INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (comments_id) REFERENCES comments(comments_id)
+    FOREIGN KEY (comments_id) REFERENCES COMMENTS(comments_id)
 );
 drop table comments;
 use ecommerce;
@@ -113,8 +113,8 @@ INSERT INTO items (name, description, category, price, stock, image) VALUES
 INSERT INTO items (name, category, description, price, stock, image) VALUES 
 ('Laptop', 'I am a laptop', 'Electronics', 1000.00, 10, 'https://via.placeholder.com/300');
 
-INSERT INTO users (username, email, password) VALUES ('testuser', 'test@example.com', 'hashedpassword');
-UPDATE users
+INSERT INTO USERS (username, email, password) VALUES ('testuser', 'test@example.com', 'hashedpassword');
+UPDATE USERS
 SET role = 'admin'
 WHERE id = 1;
 

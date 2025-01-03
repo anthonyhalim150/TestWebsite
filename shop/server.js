@@ -38,7 +38,7 @@ app.use(bodyParser.json());
 
 // Database connection pool
 const pool = mysql.createPool({//Reuses existing connections with cache instead of establishing new connections, preventing bottleneck
-    host: 'localhost',
+    host: '34.67.118.54',
     user: 'root',
     password: 'Vvs319338',
     database: 'ecommerce',
@@ -63,7 +63,7 @@ app.post('/signup', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const connection = await pool.getConnection();
         try {
-            const query = `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`;
+            const query = `INSERT INTO USERS (username, email, password) VALUES (?, ?, ?)`;
             await connection.query(query, [username, email, hashedPassword]);
             res.json({ success: true });
         } finally {
@@ -82,7 +82,7 @@ app.post('/login', async (req, res) => {
         const connection = await pool.getConnection();
         try {
             // Fetch the user by username
-            const query = `SELECT * FROM users WHERE username = ?`;
+            const query = `SELECT * FROM USERS WHERE username = ?`;
             const [results] = await connection.query(query, [username]);
 
             // Check if the user exists
@@ -128,7 +128,7 @@ app.get('/items', async (req, res) => {
     try {
         const connection = await pool.getConnection();
         try {
-            const query = `SELECT * FROM items`;
+            const query = `SELECT * FROM ITEMS`;
             const [results] = await connection.query(query);
             res.json({ success: true, items: results });
         } finally {
@@ -144,7 +144,7 @@ app.get('/users', async (req, res) => {
     try {
         const connection = await pool.getConnection();
         try {
-            const query = `SELECT * FROM users`;
+            const query = `SELECT * FROM USERS`;
             const [results] = await connection.query(query);
             res.json({ success: true, items: results });
         } finally {
@@ -167,7 +167,7 @@ app.get('/cart-items', async (req, res) => {
         const connection = await pool.getConnection();
         try {
             const [cart] = await connection.query(
-                'SELECT cart_id FROM Cart WHERE user_id = ?',
+                'SELECT cart_id FROM CART WHERE user_id = ?',
                 [userID]
             );
 
@@ -178,8 +178,8 @@ app.get('/cart-items', async (req, res) => {
             const cartID = cart[0].cart_id;
             const [cartItems] = await connection.query(
                 `SELECT i.id, ci.cart_item_id, ci.item_id, i.name, ci.quantity, ci.price, i.stock, i.image
-                 FROM CartItems ci
-                 JOIN Items i ON ci.item_id = i.id
+                 FROM CARTITEMS ci
+                 JOIN ITEMS i ON ci.item_id = i.id
                  WHERE ci.cart_id = ?`,
                 [cartID]
             );
@@ -207,7 +207,7 @@ app.post('/cart', async (req, res) => {
         await connection.beginTransaction();
 
         const [existingCart] = await connection.query(
-            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            'SELECT cart_id FROM CART WHERE user_id = ?',
             [userID]
         );
 
@@ -216,19 +216,19 @@ app.post('/cart', async (req, res) => {
             cartID = existingCart[0].cart_id;
         } else {
             const [cartResult] = await connection.query(
-                'INSERT INTO Cart (user_id) VALUES (?)',
+                'INSERT INTO CART (user_id) VALUES (?)',
                 [userID]
             );
             cartID = cartResult.insertId;
         }
 
         const [existingCartItem] = await connection.query(
-            'SELECT cart_item_id, quantity FROM CartItems WHERE cart_id = ? AND item_id = ?',
+            'SELECT cart_item_id, quantity FROM CARTITEMS WHERE cart_id = ? AND item_id = ?',
             [cartID, itemID]
         );
 
         const [itemDetails] = await connection.query(
-            'SELECT price FROM Items WHERE id = ?',
+            'SELECT price FROM ITEMS WHERE id = ?',
             [itemID]
         );
         if (itemDetails.length === 0) {
@@ -240,12 +240,12 @@ app.post('/cart', async (req, res) => {
         if (existingCartItem.length > 0) {
             const newQuantity = existingCartItem[0].quantity + quantity;
             await connection.query(
-                'UPDATE CartItems SET quantity = ?, price = ? WHERE cart_item_id = ?',
+                'UPDATE CARTITEMS SET quantity = ?, price = ? WHERE cart_item_id = ?',
                 [newQuantity, newQuantity * price, existingCartItem[0].cart_item_id]
             );
         } else {
             await connection.query(
-                'INSERT INTO CartItems (cart_id, item_id, quantity, price) VALUES (?, ?, ?, ?)',
+                'INSERT INTO CARTITEMS (cart_id, item_id, quantity, price) VALUES (?, ?, ?, ?)',
                 [cartID, itemID, quantity, quantity * price]
             );
         }
@@ -274,7 +274,7 @@ app.post('/clear-cart', async (req, res) => {
 
         // Check if the user has a cart
         const [existingCart] = await connection.query(
-            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            'SELECT cart_id FROM CART WHERE user_id = ?',
             [userID]
         );
 
@@ -286,11 +286,11 @@ app.post('/clear-cart', async (req, res) => {
 
         // Delete all items from the cart
         await connection.query(
-            'DELETE FROM CartItems WHERE cart_id = ?',
+            'DELETE FROM CARTITEMS WHERE cart_id = ?',
             [cartID]
         );
         await connection.query(
-            'DELETE FROM Cart WHERE cart_id = ?',
+            'DELETE FROM CART WHERE cart_id = ?',
             [cartID]
         );
 
@@ -317,7 +317,7 @@ app.post('/remove-cart-item', async (req, res) => {
 
         // Check if the user has a cart
         const [existingCart] = await connection.query(
-            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            'SELECT cart_id FROM CART WHERE user_id = ?',
             [userID]
         );
 
@@ -329,7 +329,7 @@ app.post('/remove-cart-item', async (req, res) => {
         console.log(cartID);
         // Check if the item exists in the cart
         const [existingItem] = await connection.query(
-            'SELECT cart_item_id FROM CartItems WHERE cart_id = ? AND item_id = ?',
+            'SELECT cart_item_id FROM CARTITEMS WHERE cart_id = ? AND item_id = ?',
             [cartID, itemID]
         );
 
@@ -338,7 +338,7 @@ app.post('/remove-cart-item', async (req, res) => {
         }
 
         await connection.query(
-            'DELETE FROM CartItems WHERE cart_id = ? AND item_id = ?',
+            'DELETE FROM CARTITEMS WHERE cart_id = ? AND item_id = ?',
             [cartID, itemID]
         );
 
@@ -367,7 +367,7 @@ app.post('/update-cart-item', async (req, res) => {
 
         // Check if the user has a cart
         const [existingCart] = await connection.query(
-            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            'SELECT cart_id FROM CART WHERE user_id = ?',
             [userID]
         );
 
@@ -379,7 +379,7 @@ app.post('/update-cart-item', async (req, res) => {
 
         // Check if the item exists in the cart
         const [existingItem] = await connection.query(
-            'SELECT cart_item_id FROM CartItems WHERE cart_id = ? AND item_id = ?',
+            'SELECT cart_item_id FROM CARTITEMS WHERE cart_id = ? AND item_id = ?',
             [cartID, itemID]
         );
 
@@ -389,7 +389,7 @@ app.post('/update-cart-item', async (req, res) => {
 
         // Update the quantity of the item
         await connection.query(
-            'UPDATE CartItems SET quantity = ? WHERE cart_id = ? AND item_id = ?',
+            'UPDATE CARTITEMS SET quantity = ? WHERE cart_id = ? AND item_id = ?',
             [quantity, cartID, itemID]
         );
 
@@ -419,7 +419,7 @@ app.post('/checkout', async (req, res) => {
 
         // 1. Retrieve the user's cart
         const [cart] = await connection.query(
-            'SELECT cart_id FROM Cart WHERE user_id = ?',
+            'SELECT cart_id FROM CART WHERE user_id = ?',
             [userID]
         );
 
@@ -431,7 +431,7 @@ app.post('/checkout', async (req, res) => {
 
         // 2. Get the items from the cart
         const [cartItems] = await connection.query(
-            'SELECT item_id, quantity, price FROM CartItems WHERE cart_id = ?',
+            'SELECT item_id, quantity, price FROM CARTITEMS WHERE cart_id = ?',
             [cartID]
         );
 
@@ -442,7 +442,7 @@ app.post('/checkout', async (req, res) => {
         const totalAmount = cartItems.reduce((total, item) => total + (item.quantity * item.price), 0);
 
         const [transactionResult] = await connection.query(
-            'INSERT INTO transactions (user_id, total_amount) VALUES (?, ?)',
+            'INSERT INTO TRANSACTIONS (user_id, total_amount) VALUES (?, ?)',
             [userID, totalAmount]
         );
 
@@ -450,17 +450,17 @@ app.post('/checkout', async (req, res) => {
 
         for (const item of cartItems) {
             await connection.query(
-                'INSERT INTO sale_items (transaction_id, item_id, quantity, price) VALUES (?, ?, ?, ?)',
+                'INSERT INTO SALE_ITEMS (transaction_id, item_id, quantity, price) VALUES (?, ?, ?, ?)',
                 [transactionID, item.item_id, item.quantity, item.price]
             );
             await connection.query(
-                'UPDATE items SET stock = stock - ? WHERE id = ?',
+                'UPDATE ITEMS SET stock = stock - ? WHERE id = ?',
                 [item.quantity, item.item_id]
             );
         }
 
-        await connection.query('DELETE FROM CartItems WHERE cart_id = ?', [cartID]);
-        await connection.query('DELETE FROM Cart WHERE cart_id = ?', [cartID]);
+        await connection.query('DELETE FROM CARTITEMS WHERE cart_id = ?', [cartID]);
+        await connection.query('DELETE FROM CART WHERE cart_id = ?', [cartID]);
 
         await connection.commit(); //Commit to the database, biar kalo ada error di tengah bisa di rollback, sblm dicommit
         res.json({ success: true, message: 'Checkout completed successfully.' });
@@ -483,11 +483,11 @@ app.get('/shop-metrics', async (req, res) => {
 
         // Add conditions based on query parameters
         if (startDate) {
-            conditions.push('transactions.created_at >= ?');
+            conditions.push('TRANSACTIONS.created_at >= ?');
             values.push(startDate);
         }
         if (endDate) {
-            conditions.push('transactions.created_at <= ?');
+            conditions.push('TRANSACTIONS.created_at <= ?');
             values.push(endDate);
         }
 
@@ -496,43 +496,43 @@ app.get('/shop-metrics', async (req, res) => {
 
         // Query for sales over time
         const [salesOverTime] = await connection.query(`
-            SELECT DATE(transactions.created_at) AS timeLabel, 
-                   COUNT(transactions.transaction_id) AS totalTransactions,
-                   SUM(transactions.total_amount) AS totalAmounts
-            FROM transactions
+            SELECT DATE(TRANSACTIONS.created_at) AS timeLabel, 
+                   COUNT(TRANSACTIONS.transaction_id) AS totalTransactions,
+                   SUM(TRANSACTIONS.total_amount) AS totalAmounts
+            FROM TRANSACTIONS
             ${whereClause}
-            GROUP BY DATE(transactions.created_at)
-            ORDER BY DATE(transactions.created_at)
+            GROUP BY DATE(TRANSACTIONS.created_at)
+            ORDER BY DATE(TRANSACTIONS.created_at)
         `, values);
 
         // Query for product metrics over time
         const [productMetricsOverTime] = await connection.query(`
-            SELECT DATE(transactions.created_at) AS timeLabel,
-                   SUM(sale_items.quantity) AS itemsSold,
-                   IFNULL(SUM(items.stock), 0) AS stockRemaining
-            FROM sale_items
-            JOIN items ON sale_items.item_id = items.id
-            JOIN transactions ON sale_items.transaction_id = transactions.transaction_id
+            SELECT DATE(TRANSACTIONS.created_at) AS timeLabel,
+                   SUM(SALE_ITEMS.quantity) AS itemsSold,
+                   IFNULL(SUM(ITEMS.stock), 0) AS stockRemaining
+            FROM SALE_ITEMS
+            JOIN ITEMS ON SALE_ITEMS.item_id = ITEMS.id
+            JOIN TRANSACTIONS ON SALE_ITEMS.transaction_id = TRANSACTIONS.transaction_id
             ${whereClause}
-            GROUP BY DATE(transactions.created_at)
-            ORDER BY DATE(transactions.created_at)
+            GROUP BY DATE(TRANSACTIONS.created_at)
+            ORDER BY DATE(TRANSACTIONS.created_at)
         `, values);
 
         // Query for product comparison
         const [productComparison] = await connection.query(`
-            SELECT items.name AS productName,
-                   SUM(sale_items.quantity) AS itemsSold
-            FROM sale_items
-            JOIN items ON sale_items.item_id = items.id
+            SELECT ITEMS.name AS productName,
+                   SUM(SALE_ITEMS.quantity) AS itemsSold
+            FROM SALE_ITEMS
+            JOIN ITEMS ON SALE_ITEMS.item_id = ITEMS.id
             ${whereClause}
-            GROUP BY items.name
-            ORDER BY items.name
+            GROUP BY ITEMS.name
+            ORDER BY ITEMS.name
         `, values);
 
         // Construct and send the response
         const [userRegistrations] = await connection.query(`
             SELECT DATE(created_at) AS timeLabel, COUNT(id) AS newUsers
-            FROM users
+            FROM USERS
             ${startDate || endDate ? `WHERE ${startDate ? 'created_at >= ?' : ''} ${endDate ? (startDate ? 'AND created_at <= ?' : 'created_at <= ?') : ''}` : ''}
             GROUP BY DATE(created_at)
             ORDER BY DATE(created_at)
@@ -584,24 +584,26 @@ app.post('/add-new-product', upload.single('product-image'), async (req, res) =>
 
     try {
         const connection = await pool.getConnection(); // Get a connection from the pool
+
         try {
             // SQL query to insert the product into the database
             const query = `
-                INSERT INTO items (name, category, price, stock, image, description) 
+                INSERT INTO ITEMS (name, category, price, stock, image, description) 
                 VALUES (?, ?, ?, ?, ?, ?)
             `;
             const values = [name, category, price, stock, imagePath, description];
-
+    
             // Execute the query
             await connection.query(query, values);
-            res.status(201).json({ success: true, message: 'Product added successfully!' });
+            res.status(200).json({ success: true, message: 'Product added successfully!' });
         } finally {
             connection.release(); // Always release the connection back to the pool
         }
     } catch (error) {
-        console.error('Error adding product:', error);
-        res.status(500).json({ success: false, error: 'Internal server error.' });
+        console.error('Error adding product:', error.message);  // More detailed error logging
+        res.status(500).json({ success: false, error: 'Internal server error.', details: error.message });
     }
+    
 });
 
 app.post('/remove-product', async (req, res) => {
@@ -621,7 +623,7 @@ app.post('/remove-product', async (req, res) => {
         const connection = await pool.getConnection(); // Get a connection from the pool
         try {
             // SQL query to remove the product from the database
-            const query = `DELETE FROM items WHERE id = ?`;
+            const query = `DELETE FROM ITEMS WHERE id = ?`;
             const values = [productId];
 
             // Execute the query
@@ -656,7 +658,7 @@ app.post('/add-new-user', async (req, res) => {
         try {
             // SQL query to insert the product into the database
             const query = `
-                INSERT INTO users (username, email, password, role) 
+                INSERT INTO USERS (username, email, password, role) 
                 VALUES (?, ?, ?, ?)
             `;
             const values = [username, email, password, role];
@@ -687,7 +689,7 @@ app.post('/add-new-comment', async (req, res) => {
         try {
             // SQL query to insert the product into the database
             const query = `
-                INSERT INTO comments(comment, user_id, website_rating)
+                INSERT INTO COMMENTS(comment, user_id, website_rating)
                 VALUES (?, ?, ?)
             `;
             const values = [comment_text, userID, selectedRating];
@@ -717,7 +719,7 @@ app.put('/items/:id', upload.single('product-image'), async (req, res) => {
         const connection = await pool.getConnection();
         try {
             const query = `
-                UPDATE items
+                UPDATE ITEMS
                 SET name = ?, price = ?, stock = ?, description = ?, category = ?, image = ?
                 WHERE id = ?
             `;
@@ -748,10 +750,10 @@ app.get('/transactions', async (req, res) => {
                     t.total_amount, 
                     t.created_at,
                     GROUP_CONCAT(CONCAT('Item: ', i.name, ', Quantity: ', s.quantity, ', Price: $', s.price) SEPARATOR '\n') AS description
-                FROM transactions t
-                JOIN users u ON t.user_id = u.id
-                JOIN sale_items s ON t.transaction_id = s.transaction_id
-                JOIN items i ON s.item_id = i.id
+                FROM TRANSACTIONS t
+                JOIN USERS u ON t.user_id = u.id
+                JOIN SALE_ITEMS s ON t.transaction_id = s.transaction_id
+                JOIN ITEMS i ON s.item_id = i.id
                 GROUP BY t.transaction_id
                 ORDER BY t.created_at DESC;
             `;
@@ -776,8 +778,8 @@ app.get('/comments', async (req, res) => {
                     c.comments_id,
                     c.comment, 
                     c.created_at
-                FROM comments c
-                JOIN users u ON c.user_id = u.id
+                FROM COMMENTS c
+                JOIN USERS u ON c.user_id = u.id
                 ORDER BY c.created_at DESC;
             `;
             const [results] = await connection.query(query);
@@ -802,7 +804,7 @@ app.post('/feedback', async (req, res) => {
         const connection = await pool.getConnection();
         try {
             const query = `
-                INSERT INTO feedback (comments_id, true_importance, true_quality) 
+                INSERT INTO FEEDBACK (comments_id, true_importance, true_quality) 
                 VALUES (?, ?, ?)
             `;
             await connection.query(query, [comments_id, true_importance, true_quality]);
@@ -871,7 +873,7 @@ app.post('/add-like', async (req, res) => {
         try {
             // Check if the like already exists
             const [existingLike] = await connection.query(
-                'SELECT * FROM likes WHERE user_id = ? AND item_id = ?',
+                'SELECT * FROM LIKES WHERE user_id = ? AND item_id = ?',
                 [userID, itemID]
             );
 
@@ -881,7 +883,7 @@ app.post('/add-like', async (req, res) => {
 
             // Insert the like
             await connection.query(
-                'INSERT INTO likes (user_id, item_id) VALUES (?, ?)',
+                'INSERT INTO LIKES (user_id, item_id) VALUES (?, ?)',
                 [userID, itemID]
             );
 
@@ -908,7 +910,7 @@ app.delete('/delete-like', async (req, res) => {
         const connection = await pool.getConnection();
         try {
             await connection.query(
-                'DELETE FROM likes WHERE user_id = ? AND item_id = ?',
+                'DELETE FROM LIKES WHERE user_id = ? AND item_id = ?',
                 [userID, itemID]
             );
 
@@ -935,8 +937,8 @@ app.get('/like-list', async (req, res) => {
         try {
             const [likedItems] = await connection.query(
                 `SELECT i.id, i.name, i.description, i.category, i.price, i.stock, i.image
-                 FROM likes l
-                 JOIN items i ON l.item_id = i.id
+                 FROM  LIKES l
+                 JOIN ITEMS i ON l.item_id = i.id
                  WHERE l.user_id = ?`,
                 [userID]
             );
@@ -963,7 +965,7 @@ app.post('/get-user-settings', async (req, res) => {
         const connection = await pool.getConnection();
         try {
             const [rows] = await connection.query(
-                'SELECT dark_mode, color_scheme FROM user_settings WHERE user_id = ?',
+                'SELECT dark_mode, color_scheme FROM USER_SETTINGS WHERE user_id = ?',
                 [userID]
             );
 
@@ -992,7 +994,7 @@ app.post('/save-user-settings', async (req, res) => {
         const connection = await pool.getConnection();
         try {
             await connection.query(
-                `INSERT INTO user_settings (user_id, dark_mode, color_scheme)
+                `INSERT INTO USER_SETTINGS (user_id, dark_mode, color_scheme)
                  VALUES (?, ?, ?)
                  ON DUPLICATE KEY UPDATE dark_mode = ?, color_scheme = ?`,
                 [userID, dark_mode, color_scheme, dark_mode, color_scheme]
