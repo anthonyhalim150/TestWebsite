@@ -38,7 +38,7 @@ async function addProduct(event) {
             alert('Failed to add product. Please try again.');
         }
     } catch (error) {
-        alert('Product added successfully!');//Have to be changed later
+        alert('Failed to add product. Please try again.');//Have to be changed later
     }
 }
 

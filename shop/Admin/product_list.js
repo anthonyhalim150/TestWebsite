@@ -18,7 +18,7 @@ async function fetch_products(sorted_items = null) {
                 return `
               <tr data-id="${product.id}">
                     <td>
-                        <img src="../${product.image}" alt="Not Found!" 
+                        <img src="${product.image}" alt="Not Found!" 
                         original-image="${product.image}" class="product-image">
                     </td>
                     <td>${product.name}</td>
