@@ -1,5 +1,5 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app/items';
-const API_add_cart = 'http://localhost:3000/cart';
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
+
 let items = [];
 let cartItems = {};  // To store the quantities of items in the cart
 let likedItems = [];
@@ -140,7 +140,7 @@ function clear_login() {
 // Fetch items from the backend
 async function fetchItems() {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}/items`);//Since it is a part of async function
         const data = await response.json();
 
         if (data.success && data.items) {
@@ -161,7 +161,7 @@ async function fetchCartItems() {
     if (!userID) return; // If the user is not logged in, skip fetching cart items
 
     try {
-        const response = await fetch(`http://localhost:3000/cart-items?userID=${userID}`);
+        const response = await fetch(`${API_URL}/cart-items?userID=${userID}`);
         const data = await response.json();
 
         if (data.success && data.cartItems) {
@@ -196,7 +196,7 @@ async function addToCart(itemID) {
     }
 
     try {
-        const response = await fetch('http://localhost:3000/cart', {
+        const response = await fetch(`${API_URL}/cart`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -424,7 +424,7 @@ if (searchBar) {
 async function fetchLikedItems() {
     const currentUserID = localStorage.getItem('userID');
     try {
-        const response = await fetch(`http://localhost:3000/like-list?userID=${currentUserID}`);
+        const response = await fetch(`${API_URL}/like-list?userID=${currentUserID}`);
         const data = await response.json();
         if (data.success) {
             likedItems = data.likedItems;
@@ -446,7 +446,7 @@ async function toggleLike(itemID) {
     try {
         if (isLiked) {
             // Unlike the item
-            const response = await fetch('http://localhost:3000/delete-like', {
+            const response = await fetch(`${API_URL}/delete-like`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userID: currentUserID, itemID }),
@@ -460,7 +460,7 @@ async function toggleLike(itemID) {
             }
         } else {
             // Like the item
-            const response = await fetch('http://localhost:3000/add-like', {
+            const response = await fetch(`${API_URL}/add-like` , {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userID: currentUserID, itemID }),
@@ -485,7 +485,7 @@ async function loadUserSettings() {
     const userID = localStorage.getItem('userID');
     if (!userID) return;
     try {
-        const response = await fetch('http://localhost:3000/get-user-settings', {
+        const response = await fetch(`${API_URL}/get-user-settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID }),
