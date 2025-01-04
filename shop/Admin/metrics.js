@@ -1,4 +1,4 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app/comments';
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app/shop-metrics';
 
 document.getElementById('filter-button').addEventListener('click', fetchFilteredMetrics);
 
