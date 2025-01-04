@@ -32,18 +32,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 //To save the settings when the user revisits the page
 async function apply_initial_settings(darkMode, colorScheme) {
+    return new Promise((resolve) => {
     // Apply color scheme
-    document.documentElement.style.setProperty('--primary-color', colorScheme);
+        document.documentElement.style.setProperty('--primary-color', colorScheme);
 
-    // Apply dark mode
-    document.body.classList.toggle('dark-mode', darkMode);
+        // Apply dark mode
+        document.body.classList.toggle('dark-mode', darkMode);
 
-    // Update controls to reflect the settings
-    document.getElementById('dark-mode-toggle').checked = darkMode;
-    document.getElementById('color-scheme').value = colorScheme;
-    document.body.classList.add('loading');
-    apply_settings().then(()=>{
-        document.body.classList.remove('loading');
+        // Update controls to reflect the settings
+        document.getElementById('dark-mode-toggle').checked = darkMode;
+        document.getElementById('color-scheme').value = colorScheme;
+        document.body.classList.add('loading');
+        apply_settings().then(()=>{
+            document.body.classList.remove('loading');
+        });
+        resolve();
     });
 }
 
