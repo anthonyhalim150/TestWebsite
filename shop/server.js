@@ -1,52 +1,66 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2/promise'); // Using promise-based API, biar gampang tau yng perlu aja
+const mysql = require('mysql2/promise'); // Promise-based MySQL
 const bodyParser = require('body-parser');
-const cors = require('cors');//Buat cross-port
+const cors = require('cors'); // Handle cross-origin requests
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const axios = require('axios'); // For AI
-const multer = require('multer');//For picture upload
+const multer = require('multer'); // For file uploads
 const path = require('path');
+const { Storage } = require('@google-cloud/storage');
+const { NONAME } = require('dns');
 
-// Configure storage for multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'Products/'); // Directory to save uploaded files
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique file name
-    }
+// Secret key for JWT
+const JWT_SECRET = process.env.JWT_SECRET || 'blabla729wwdee302!2-';
+
+// Path to the service account key file
+const keyFilePath = path.join(__dirname, 'keyfile.json');
+
+// Bucket configuration
+const bucketName = 'my-product-images-shop'; // Replace with your bucket name
+
+// Initialize Google Cloud Storage
+
+// Google Cloud Storage setup
+const storage = new Storage({ keyFilename: keyFilePath });
+const bucket = storage.bucket(bucketName);
+
+// Multer setup for local file handling
+const upload = multer({
+    storage: multer.memoryStorage(), // Temporarily store files in memory
 });
 
-// Initialize upload place
-const upload = multer({ storage });
-
-// Secret key
-const JWT_SECRET = 'Testrandom2000';
 
 
+// Express app setup
 const app = express();
+
+// CORS configuration
 app.use(cors({
-    origin: ['http://localhost:5500', 'http://127.0.0.1:5500'],  // Harus diganti nanti
+    origin: (origin, callback) => {
+        if (!origin || origin.startsWith('https://')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
 }));
-const port = 3000;
+
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Database connection pool
-const pool = mysql.createPool({//Reuses existing connections with cache instead of establishing new connections, preventing bottleneck
-    host: '34.67.118.54',
-    user: 'root',
-    password: 'Vvs319338',
-    database: 'ecommerce',
-    port: 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+const pool = mysql.createPool({
+    host: '34.67.118.54'||process.env.DB_HOST,
+    user: 'root'||process.env.DB_USER,
+    password: 'Vvs319338'||process.env.DB_PASSWORD,
+    database: 'ecommerce'||process.env.DB_NAME,
+    port: '3306'||process.env.DB_PORT,
 });
+
 
 
 // Sign-up route
@@ -570,10 +584,9 @@ app.get('/shop-metrics', async (req, res) => {
 
 app.post('/add-new-product', upload.single('product-image'), async (req, res) => {
     const { name, category, price, stock, description } = req.body;
-    const imagePath = req.file ? req.file.path : null;
 
     // Validate required fields
-    if (!name || !category || !price || !stock || !imagePath || !description) {
+    if (!name || !category || !price || !stock || !req.file || !description) {
         return res.status(400).json({ success: false, error: 'All fields are required.' });
     }
 
@@ -583,27 +596,52 @@ app.post('/add-new-product', upload.single('product-image'), async (req, res) =>
     }
 
     try {
-        const connection = await pool.getConnection(); // Get a connection from the pool
+        // Generate a unique file name
+        const uniqueName = `Products/${Date.now()}${path.extname(req.file.originalname)}`;
+        
+        // Upload the file to Google Cloud Storage
+        const blob = bucket.file(uniqueName);
+        const blobStream = blob.createWriteStream({
+            metadata: {
+                contentType: req.file.mimetype, // Set the content type
+            },
+        });
 
-        try {
-            // SQL query to insert the product into the database
-            const query = `
-                INSERT INTO ITEMS (name, category, price, stock, image, description) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            `;
-            const values = [name, category, price, stock, imagePath, description];
-    
-            // Execute the query
-            await connection.query(query, values);
-            res.status(200).json({ success: true, message: 'Product added successfully!' });
-        } finally {
-            connection.release(); // Always release the connection back to the pool
-        }
+        blobStream.on('error', (error) => {
+            console.error('Upload failed:', error.message);
+            res.status(500).json({ success: false, error: 'Upload failed.', details: error.message });
+        });
+
+        blobStream.on('finish', async () => {
+            const imagePath = `https://storage.googleapis.com/${bucketName}/${uniqueName}`;
+            
+            try {
+                const connection = await pool.getConnection();
+
+                try {
+                    // Insert product details into the database
+                    const query = `
+                        INSERT INTO ITEMS (name, category, price, stock, image, description) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    `;
+                    const values = [name, category, price, stock, imagePath, description];
+
+                    await connection.query(query, values);
+                    res.status(200).json({ success: true, message: 'Product added successfully!' });
+                } finally {
+                    connection.release();
+                }
+            } catch (error) {
+                console.error('Database error:', error.message);
+                res.status(500).json({ success: false, error: 'Internal server error.', details: error.message });
+            }
+        });
+
+        blobStream.end(req.file.buffer); // End the stream and upload the file
     } catch (error) {
-        console.error('Error adding product:', error.message);  // More detailed error logging
+        console.error('Error handling request:', error.message);
         res.status(500).json({ success: false, error: 'Internal server error.', details: error.message });
     }
-    
 });
 
 app.post('/remove-product', async (req, res) => {
@@ -709,7 +747,7 @@ app.post('/add-new-comment', async (req, res) => {
 app.put('/items/:id', upload.single('product-image'), async (req, res) => {
     const productId = req.params.id;
     const { name, price, stock, description, category, 'product-image': originalImage } = req.body;
-    const imagePath = req.file ? req.file.path : originalImage;//Cannot use product-image as there is a hyphen, thus JavaScript treats it as a variable name rather than a string key
+    const imagePath = `https://storage.googleapis.com/${bucketName}/${req.file.filename}`;
     //Cannot use 'product-image': imagePath. If a new file is uploaded, the imagePath in the destructured assignment will already hold the value from req.body['product-image'], but it should instead prioritize the file path from req.file.path. 
     if (!name || price === undefined || stock === undefined || !description || !category || !imagePath) {
         return res.status(400).json({ success: false, error: 'All fields are required.' });
@@ -815,48 +853,6 @@ app.post('/feedback', async (req, res) => {
     } catch (error) {
         console.error('Error inserting feedback:', error);
         res.status(500).json({ success: false, error: 'Failed to add feedback.' });
-    }
-});
-app.post('/analyze-comments', async (req, res) => {
-    try {
-        const comments = req.body.comments || []; // Ensure comments are passed, klo empty error
-        console.log('Sending comments to Flask for analysis:', comments);
-
-        const flaskResponse = await axios.post('http://127.0.0.1:5000/analyze', req.body);//Gabisa pake localhost
-
-        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
-
-        // Check if the response from Flask is valid JSON
-        if (flaskResponse.data && flaskResponse.data.status === 'success') {
-            res.status(flaskResponse.status).json(flaskResponse.data);
-        } else {
-            throw new Error('Invalid response from Flask');
-        }
-    } catch (error) {
-        console.error('Error communicating with Flask:', error.message);
-        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
-    }
-});
-
-
-app.post('/train-AI', async (req, res) => {
-    try {
-        const comments = req.body.comments || []; // Ensure comments are passed
-        console.log('Sending comments to Flask for analysis:', comments);
-
-        const flaskResponse = await axios.post('http://127.0.0.1:5000/train-enhanced', req.body);//Gabisa pake localhost
-
-        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
-
-        // Check if the response from Flask is valid JSON
-        if (flaskResponse.data && flaskResponse.data.status === 'success') {
-            res.status(flaskResponse.status).json(flaskResponse.data);
-        } else {
-            throw new Error('Invalid response from Flask');
-        }
-    } catch (error) {
-        console.error('Error communicating with Flask:', error.message);
-        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
     }
 });
 
@@ -1023,33 +1019,8 @@ app.post('/save-user-settings', async (req, res) => {
 
 
 
-
-
-// Draft
-const stripe = require('stripe')('your_secret_key');
-
-app.post('/create-checkout-session', async (req, res) => {
-    const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [{
-            price_data: {
-                currency: 'usd',
-                product_data: {
-                    name: 'T-shirt',
-                },
-                unit_amount: 2000,
-            },
-            quantity: 1,
-        }],
-        mode: 'payment',
-        success_url: 'http://127.0.0.1:5500/shop/index.html',
-        cancel_url: 'http://127.0.0.1:5500/shop/index.html',
-    });
-    res.json({ id: session.id });
-});
-
-
 // Start server
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+const PORT = 8080||process.env.PORT; // Cloud Run will use the PORT environment variable
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });

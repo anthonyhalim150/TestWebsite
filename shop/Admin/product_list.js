@@ -126,7 +126,7 @@ async function delete_product(productId) {
 
     try {
         const response = await fetch(`${API_URL}/remove-product`, {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
