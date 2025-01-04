@@ -24,11 +24,12 @@ async function apply_initial_settings() {
 
         const data = await response.json();
         if (data.success) {
-            document.documentElement.style.setProperty('--primary-color', colorScheme);
-            document.body.classList.toggle('dark-mode', darkMode);
+            const { dark_mode, color_scheme } = data.settings;
+            document.documentElement.style.setProperty('--primary-color', color_scheme);
+            document.body.classList.toggle('dark-mode', dark_mode);
             // Update controls to reflect the settings
-            document.getElementById('dark-mode-toggle').checked = darkMode;
-            document.getElementById('color-scheme').value = colorScheme;
+            document.getElementById('dark-mode-toggle').checked = dark_mode;
+            document.getElementById('color-scheme').value = color_scheme;
             document.body.classList.add('loading');
             apply_settings().then(()=>{
                 document.body.classList.remove('loading');
