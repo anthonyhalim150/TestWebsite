@@ -20,11 +20,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.success) {
             const { dark_mode, color_scheme } = data.settings;
             document.body.classList.add('loading');
-                apply_initial_settings(dark_mode, color_scheme).then(() => {
-                    apply_settings().then(()=>{
-                        document.body.classList.remove('loading');
-                    });
+            apply_initial_settings(dark_mode, color_scheme)
+                .then(() => apply_settings())
+                .then(() => {
+                    document.body.classList.remove('loading');
+                })
+                .catch((error) => {
+                    console.error('Error applying settings:', error);
+                    document.body.classList.remove('loading');
+                });
+            /*
+            apply_initial_settings(dark_mode, color_scheme).then(() => {
+                apply_settings().then(()=>{
+                    document.body.classList.remove('loading');
+                });
             });
+            */
         } else {
             console.error(data.message);
         }
@@ -46,22 +57,29 @@ async function apply_initial_settings(darkMode, colorScheme) {
 }
 
 // Change settings dynamically
-function apply_settings(){
-    const dark_mode_toggle = document.getElementById('dark-mode-toggle');
-    if (dark_mode_toggle){
-        dark_mode_toggle.addEventListener('change', () => {
-            const isDarkMode = document.getElementById('dark-mode-toggle').checked;
-            document.body.classList.toggle('dark-mode', isDarkMode);
-        });
-    }
-    const color_scheme = document.getElementById('color-scheme');
-    if(color_scheme){
-        document.getElementById('color-scheme').addEventListener('input', () => {
-            const newColorScheme = document.getElementById('color-scheme').value;
-            document.documentElement.style.setProperty('--primary-color', newColorScheme);
-        });
-    }
+function apply_settings() {
+    return new Promise((resolve) => {
+        const dark_mode_toggle = document.getElementById('dark-mode-toggle');
+        if (dark_mode_toggle) {
+            dark_mode_toggle.addEventListener('change', () => {
+                const isDarkMode = dark_mode_toggle.checked;
+                document.body.classList.toggle('dark-mode', isDarkMode);
+            });
+        }
+
+        const color_scheme = document.getElementById('color-scheme');
+        if (color_scheme) {
+            color_scheme.addEventListener('input', () => {
+                const newColorScheme = color_scheme.value;
+                document.documentElement.style.setProperty('--primary-color', newColorScheme);
+            });
+        }
+
+        // Resolve the Promise once the settings are applied
+        resolve();
+    });
 }
+
 
 // Save settings to the server
 const save_settings = document.getElementById('save-settings');
