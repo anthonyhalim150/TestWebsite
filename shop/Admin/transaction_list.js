@@ -1,9 +1,9 @@
-const API_URL = 'http://localhost:3000/transactions'; // Correct endpoint
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 let items = []; // Stores the transactions fetched from the server
 
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}/transactions`);
         const data = await response.json();
 
         if (Array.isArray(data)) { // Check if data is an array of transactions

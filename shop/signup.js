@@ -1,4 +1,5 @@
 const sign_up_form = document.getElementById('sign-up-form');
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 if (sign_up_form){
     sign_up_form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -19,11 +20,10 @@ if (sign_up_form){
         const user = { username, email, password };
     
         // Define API URL (update nnti klo hosted on a server)
-        const API_URL = 'http://localhost:3000/signup';
     
         try {
             // Send data to the server
-            const response = await fetch(API_URL, {
+            const response = await fetch(`${API_URL}/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(user),

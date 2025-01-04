@@ -1,4 +1,4 @@
-API_URL = 'http://localhost:3000/add-new-user';
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 async function addProduct(){
     event.preventDefault(); // Prevent form reload??
 
@@ -21,7 +21,7 @@ async function addProduct(){
     const new_user = {username, password, role, email};
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(`${API_URL}/add-new-user`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

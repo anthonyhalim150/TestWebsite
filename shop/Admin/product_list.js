@@ -1,10 +1,10 @@
 // Existing API URL and items array remain unchanged
-const API_URL = 'http://localhost:3000/items';
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 let items = [];
 
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}/items`);
         const data = await response.json();
 
         if (data.success && data.items) {
@@ -102,7 +102,7 @@ async function saveProductChanges(productId) {
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`${API_URL}/${productId}`, {
+        const response = await fetch(`${API_URL}/items/${productId}`, {
             method: 'PUT',//Do not put headers: application/JSON as it conflicts with the formData body
             body: formData, //Form data object is specifically designed to handle form submissions. It encodes data as multipart/form-data, which is the correct format for sending files along with other data to the server.
         });
@@ -125,7 +125,7 @@ async function delete_product(productId) {
     if (!confirmed) return;
 
     try {
-        const response = await fetch('http://localhost:3000/remove-product', {
+        const response = await fetch(`${API_URL}/remove-product`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

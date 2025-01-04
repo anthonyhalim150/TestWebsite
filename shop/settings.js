@@ -1,3 +1,4 @@
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 const userID = localStorage.getItem('userID');
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -9,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // Fetch user settings from the server
-        const response = await fetch('http://localhost:3000/get-user-settings', {
+        const response = await fetch(`${API_URL}/get-user-settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID }),
@@ -56,7 +57,7 @@ document.getElementById('save-settings').addEventListener('click', async () => {
     const newColorScheme = document.getElementById('color-scheme').value;
 
     try {
-        const response = await fetch('http://localhost:3000/save-user-settings', {
+        const response = await fetch(`${API_URL}/save-user-settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID, dark_mode: isDarkMode, color_scheme: newColorScheme }),

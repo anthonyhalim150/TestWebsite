@@ -1,4 +1,4 @@
-API_URL = 'http://localhost:3000/add-new-product';
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 async function addProduct(event) {
     event.preventDefault(); // Prevent form reload
 
@@ -27,7 +27,7 @@ async function addProduct(event) {
 
 
     try {
-        const response = await fetch(API_URL, { // Adjust the endpoint as needed
+        const response = await fetch(`${API_URL}/add-new-product`, { // Adjust the endpoint as needed
             method: 'POST',
             body: formData, // FormData includes all fields and the file
         });

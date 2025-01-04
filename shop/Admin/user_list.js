@@ -1,8 +1,8 @@
-const API_URL = 'http://localhost:3000/users'
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 let items = [];
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}/users`);
         const data = await response.json();
 
         if (data.success && data.items) {

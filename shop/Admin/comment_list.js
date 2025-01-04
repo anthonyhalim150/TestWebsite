@@ -1,11 +1,11 @@
-const API_URL = 'http://localhost:3000/comments';
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 let items = [];
 
 // Add flag button functionality
 // Modify fetch_products to include red triangle warning
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}/comments`);
         const data = await response.json();
 
         if (data.success && data.items) {
@@ -112,7 +112,7 @@ function open_feedback_page(comment) {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/feedback', {
+            const response = await fetch(`${API_URL}/feedback`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -191,7 +191,7 @@ function renderExclamationMarks(rating) {
 // Function to fetch AI analysis results from the server
 async function fetchAnalysisResults() {
     try {
-        const response = await fetch('http://localhost:3000/analyze-comments', {
+        const response = await fetch(`${API_URL}/analyze-comments`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         });

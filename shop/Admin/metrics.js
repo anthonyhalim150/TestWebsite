@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/shop-metrics';
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app/comments';
 
 document.getElementById('filter-button').addEventListener('click', fetchFilteredMetrics);
 

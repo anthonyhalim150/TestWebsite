@@ -1,4 +1,4 @@
-const COMMENTS_API_URL = 'http://localhost:3000/add-new-comment';
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 let selectedRating = 0;
 async function submitComment(event) {
     event.preventDefault(); // Prevent form reload
@@ -25,7 +25,7 @@ async function submitComment(event) {
     const newComment = {userID, comment_text, selectedRating};
 
     try {
-        const response = await fetch(COMMENTS_API_URL, {
+        const response = await fetch(`${API_URL}/add-new-comment`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
