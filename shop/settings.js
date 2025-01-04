@@ -20,9 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.success) {
             const { dark_mode, color_scheme } = data.settings;
             document.body.classList.add('loading');
-            await apply_initial_settings(dark_mode, color_scheme);
-            await apply_settings();
-            document.body.classList.remove('loading');
+            apply_initial_settings(dark_mode, color_scheme).then(() => {
+                document.body.classList.remove('loading');
+            });
         } else {
             console.error(data.message);
         }
@@ -41,6 +41,10 @@ async function apply_initial_settings(darkMode, colorScheme) {
     // Update controls to reflect the settings
     document.getElementById('dark-mode-toggle').checked = darkMode;
     document.getElementById('color-scheme').value = colorScheme;
+    document.body.classList.add('loading');
+    apply_settings().then(()=>{
+        document.body.classList.remove('loading');
+    });
 }
 
 // Change settings dynamically
