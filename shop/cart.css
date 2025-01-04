@@ -13,6 +13,7 @@ main {
 }
 .card{
     border: none;
+    background-color: var(--secondary-color);/*Margin color for child element(If no background-color for card element, then it is going to be transparent, mixing up the colors for dark mode*/
 }
 
 .card:hover {
@@ -44,7 +45,8 @@ main {
     border: none;
     font-size: 1rem;
     padding: 10px 15px;
-    border-radius: 20px;
+    border-radius: 30px;
+    margin-bottom: 10px;
     background-color: var(--highlight-color);
     display: flex;
     justify-content: space-between;
