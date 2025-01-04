@@ -1,6 +1,6 @@
 function crawler_check(){
     const userRole = localStorage.getItem('role'); 
-    if (window.location.pathname.includes('/shop/admin') || (userRole !== 'admin' || get_user_role()!== 'admin')) {
+    if (window.location.pathname.includes('/shop/admin')) {
         console.log('tes');
         window.location.href = '../index.html';  // Redirect to non-admins to homepage
     }
