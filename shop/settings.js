@@ -20,22 +20,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.success) {
             const { dark_mode, color_scheme } = data.settings;
             document.body.classList.add('loading');
-            apply_initial_settings(dark_mode, color_scheme)
-                .then(() => apply_settings())
-                .then(() => {
-                    document.body.classList.remove('loading');
-                })
-                .catch((error) => {
-                    console.error('Error applying settings:', error);
-                    document.body.classList.remove('loading');
-                });
-            /*
             apply_initial_settings(dark_mode, color_scheme).then(() => {
                 apply_settings().then(()=>{
                     document.body.classList.remove('loading');
                 });
             });
-            */
         } else {
             console.error(data.message);
         }
