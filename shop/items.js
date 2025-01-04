@@ -496,6 +496,7 @@ async function loadUserSettings() {
             const { dark_mode, color_scheme } = data.settings;
             document.documentElement.style.setProperty('--primary-color', color_scheme);
             document.documentElement.style.setProperty('--secondary-color', dark_mode ? '#333' : 'light');
+            document.documentElement.style.setProperty('--text-color', dark_mode ? '#FFFFFF' : 'black');
         }
     } catch (error) {
         console.error('Error fetching user settings:', error);

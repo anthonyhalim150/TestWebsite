@@ -60,3 +60,7 @@ main {
     min-width: 90px; /* Ensure the price container has a consistent width */
     justify-content: center; /* Align price to the right */
 }
+
+.h4{
+    color: var(--text-color);
+}
