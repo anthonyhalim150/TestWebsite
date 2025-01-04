@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/items';
+const API_URL = 'https://anthonyhalim-150-lu32dxaw4a-uc.a.run.app/items';
 const API_add_cart = 'http://localhost:3000/cart';
 let items = [];
 let cartItems = {};  // To store the quantities of items in the cart
