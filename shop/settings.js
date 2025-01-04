@@ -7,7 +7,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = './login.html';
         return;
     }
-
+    document.body.classList.add('loading');
+    apply_initial_settings().then(() => {
+        document.body.classList.remove('loading');
+    });
+});
+//To save the settings when the user revisits the page
+async function apply_initial_settings() {
     try {
         // Fetch user settings from the server
         const response = await fetch(`${API_URL}/get-user-settings`, {
@@ -18,9 +24,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const data = await response.json();
         if (data.success) {
-            const { dark_mode, color_scheme } = data.settings;
+            document.documentElement.style.setProperty('--primary-color', colorScheme);
+            document.body.classList.toggle('dark-mode', darkMode);
+            // Update controls to reflect the settings
+            document.getElementById('dark-mode-toggle').checked = darkMode;
+            document.getElementById('color-scheme').value = colorScheme;
             document.body.classList.add('loading');
-            apply_initial_settings(dark_mode, color_scheme).then(() => {
+            apply_settings().then(()=>{
                 document.body.classList.remove('loading');
             });
         } else {
@@ -29,25 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error('Error loading settings:', error);
     }
-});
-//To save the settings when the user revisits the page
-async function apply_initial_settings(darkMode, colorScheme) {
-    return new Promise((resolve) => {
-    // Apply color scheme
-        document.documentElement.style.setProperty('--primary-color', colorScheme);
-
-        // Apply dark mode
-        document.body.classList.toggle('dark-mode', darkMode);
-
-        // Update controls to reflect the settings
-        document.getElementById('dark-mode-toggle').checked = darkMode;
-        document.getElementById('color-scheme').value = colorScheme;
-        document.body.classList.add('loading');
-        apply_settings().then(()=>{
-            document.body.classList.remove('loading');
-        });
-        resolve();
-    });
 }
 
 // Change settings dynamically
