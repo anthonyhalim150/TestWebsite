@@ -110,7 +110,7 @@ async function updateQuantity(itemID, stock) {
 async function updateCart(itemID, newQuantity) {
     const userID = localStorage.getItem('userID');
     try {
-        const response = await fetch('${API_URL}/update-cart-item', {
+        const response = await fetch(`${API_URL}/update-cart-item`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID, itemID, quantity: newQuantity })
@@ -137,7 +137,7 @@ async function removeItem(itemID) {
         return false;
     }
     try {
-        const response = await fetch('${API_URL}/remove-cart-item', {
+        const response = await fetch(`${API_URL}/remove-cart-item`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID, itemID })
@@ -162,7 +162,7 @@ async function clearCart() {
     if (!userID) return;
 
     try {
-        const response = await fetch('${API_URL}/clear-cart', {
+        const response = await fetch(`${API_URL}/clear-cart`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID })
@@ -190,7 +190,7 @@ async function checkout() {
     }
 
     try {
-        const response = await fetch('${API_URL}/checkout', {
+        const response = await fetch(`${API_URL}/checkout`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID })
@@ -218,7 +218,7 @@ async function create_checkout_page(){
 
     try {
         // Create a checkout session
-        const response = await fetch('${API_URL}/create-checkout-session', {
+        const response = await fetch(`${API_URL}/create-checkout-session`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID }),

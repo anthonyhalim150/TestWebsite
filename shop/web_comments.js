@@ -73,10 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
         commentForm.addEventListener('submit', submitComment);
     }
     const stars = document.querySelectorAll('#star-rating span');
+    if (stars){
         stars.forEach(star => {
             star.addEventListener('click', () => {
                 selectedRating = parseFloat(star.dataset.value);
                 updateStars(selectedRating, stars);
             });
         });
+    }
 });

@@ -644,43 +644,54 @@ app.post('/add-new-product', upload.single('product-image'), async (req, res) =>
     }
 });
 
-app.post('/remove-product', async (req, res) => {
+app.delete('/remove-product', async (req, res) => {
     const { productId } = req.body;
 
-    // Validate required fields, jangan sampe masuk sini
+    // Validate required fields
     if (!productId) {
         return res.status(400).json({ success: false, error: 'Product ID is required.' });
     }
 
-    // Ensure `productId` is a valid number, jangan sampe masuk sini
+    // Ensure `productId` is a valid number
     if (isNaN(productId)) {
         return res.status(400).json({ success: false, error: 'Product ID must be a valid number.' });
     }
 
     try {
-        const connection = await pool.getConnection(); // Get a connection from the pool
+        const connection = await pool.getConnection();
+
         try {
-            // SQL query to remove the product from the database
-            const query = `DELETE FROM ITEMS WHERE id = ?`;
-            const values = [productId];
+            // Retrieve the image URL for the product
+            const [rows] = await connection.query('SELECT image FROM ITEMS WHERE id = ?', [productId]);
 
-            // Execute the query
-            const result = await connection.query(query, values);
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Product not found.' });
+            }
 
-            // Check if a product was actually removed
+            const imageUrl = rows[0].image;
+            const imageName = imageUrl.split('/').slice(-2).join('/'); // Extract the file name from the URL
+
+            // Delete the product from the database
+            const deleteQuery = 'DELETE FROM ITEMS WHERE id = ?';
+            const [result] = await connection.query(deleteQuery, [productId]);
+
             if (result.affectedRows === 0) {
                 return res.status(404).json({ success: false, error: 'Product not found.' });
             }
 
-            res.status(201).json({ success: true, message: 'Product removed successfully!' });
+            // Delete the image from Google Cloud Storage
+            await bucket.file(imageName).delete();
+
+            res.status(200).json({ success: true, message: 'Product and its image removed successfully!' });
         } finally {
-            connection.release(); // Always release the connection back to the pool
+            connection.release();
         }
     } catch (error) {
-        console.error('Error removing product:', error);
-        res.status(500).json({ success: false, error: 'Internal server error.' });
+        console.error('Error removing product:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to remove product.', details: error.message });
     }
 });
+
 
 
 app.post('/add-new-user', async (req, res) => {
@@ -746,36 +757,77 @@ app.post('/add-new-comment', async (req, res) => {
 
 app.put('/items/:id', upload.single('product-image'), async (req, res) => {
     const productId = req.params.id;
-    const { name, price, stock, description, category, 'product-image': originalImage } = req.body;
-    const imagePath = `https://storage.googleapis.com/${bucketName}/${req.file.filename}`;
-    //Cannot use 'product-image': imagePath. If a new file is uploaded, the imagePath in the destructured assignment will already hold the value from req.body['product-image'], but it should instead prioritize the file path from req.file.path. 
-    if (!name || price === undefined || stock === undefined || !description || !category || !imagePath) {
-        return res.status(400).json({ success: false, error: 'All fields are required.' });
-    }
+    const { name, price, stock, description, category } = req.body;
 
     try {
         const connection = await pool.getConnection();
+
         try {
-            const query = `
+            // Fetch the existing image URL
+            const [rows] = await connection.query('SELECT image FROM ITEMS WHERE id = ?', [productId]);
+
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Product not found.' });
+            }
+
+            const oldImageUrl = rows[0].image;
+            const oldImageName = oldImageUrl ? oldImageUrl.split('/').slice(-2).join('/') : null; // Extract the file name from the URL
+
+            // Handle new image upload
+            let newImagePath = oldImageUrl;
+            if (req.file) {
+                const uniqueName = `Products/${Date.now()}${path.extname(req.file.originalname)}`;
+                const blob = bucket.file(uniqueName);
+                const blobStream = blob.createWriteStream({
+                    metadata: { contentType: req.file.mimetype },
+                });
+
+                await new Promise((resolve, reject) => {
+                    blobStream.on('error', reject);
+                    blobStream.on('finish', resolve);
+                    blobStream.end(req.file.buffer);
+                });
+
+                newImagePath = `https://storage.googleapis.com/${bucketName}/${uniqueName}`;
+
+                // Remove the old image from Google Cloud Storage
+                if (oldImageName) {
+                    await bucket.file(oldImageName).delete().catch((err) => {
+                        console.error('Error deleting old image:', err.message);
+                    });
+                }
+            }
+
+            // Update product details in the database
+            const updateQuery = `
                 UPDATE ITEMS
                 SET name = ?, price = ?, stock = ?, description = ?, category = ?, image = ?
                 WHERE id = ?
             `;
-            const [result] = await connection.query(query, [name, price, stock, description, category, imagePath, productId]);
+            const [result] = await connection.query(updateQuery, [
+                name,
+                price,
+                stock,
+                description,
+                category,
+                newImagePath,
+                productId,
+            ]);
 
             if (result.affectedRows === 0) {
                 return res.status(404).json({ success: false, error: 'Product not found.' });
             }
 
-            res.json({ success: true, message: 'Product updated successfully.' });
+            res.status(200).json({ success: true, message: 'Product updated successfully!' });
         } finally {
             connection.release();
         }
     } catch (error) {
-        console.error('Error updating product:', error);
-        res.status(500).json({ success: false, error: 'Failed to update product.' });
+        console.error('Error updating product:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to update product.', details: error.message });
     }
 });
+
 
 app.get('/transactions', async (req, res) => {
     try {
