@@ -394,7 +394,7 @@ function customer_support(){
     }  
 }
 
-await loadUserSettings();
+loadUserSettings();
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchLikedItems(); //To show whats liked and whats not
