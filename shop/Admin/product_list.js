@@ -155,7 +155,7 @@ function displayProductOverview(product) {
     overviewSection.style.display = 'block';
 
     // Populate the overview card with product details
-    document.getElementById('product-image').src = '../'+ product.image;
+    document.getElementById('product-image').src = product.image;
     document.getElementById('product-name').value = product.name;
     document.getElementById('product-price').value = product.price;
     document.getElementById('product-stock').value = product.stock;
