@@ -14,6 +14,20 @@ body {
     padding: 0;
     color: var(--text-color);
 }
+body.loading {
+    visibility: hidden; /* Prevent the page from showing unstyled */
+}
+
+body.loading::before {
+    visibility: visible;
+    content: 'Loading...';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+}
+
 
 
 .nav-item a {
