@@ -20,11 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.success) {
             const { dark_mode, color_scheme } = data.settings;
             document.body.classList.add('loading');
-            apply_initial_settings(dark_mode, color_scheme).then(() => {
-                apply_settings().then(()=>{
-                    document.body.classList.remove('loading');
-                });
-            });
+            await apply_initial_settings(dark_mode, color_scheme);
+            await apply_settings();
+            document.body.classList.remove('loading');
         } else {
             console.error(data.message);
         }
@@ -46,7 +44,7 @@ async function apply_initial_settings(darkMode, colorScheme) {
 }
 
 // Change settings dynamically
-function apply_settings() {
+async function apply_settings() {
     return new Promise((resolve) => {
         const dark_mode_toggle = document.getElementById('dark-mode-toggle');
         if (dark_mode_toggle) {
