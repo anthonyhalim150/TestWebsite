@@ -1059,7 +1059,48 @@ app.post('/save-user-settings', async (req, res) => {
 });
 
 
+app.post('/analyze-comments', async (req, res) => {
+    try {
+        const comments = req.body.comments || []; // Ensure comments are passed, klo empty error
+        console.log('Sending comments to Flask for analysis:', comments);
 
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/analyze', req.body);//Gabisa pake localhost
+
+        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
+
+        // Check if the response from Flask is valid JSON
+        if (flaskResponse.data && flaskResponse.data.status === 'success') {
+            res.status(flaskResponse.status).json(flaskResponse.data);
+        } else {
+            throw new Error('Invalid response from Flask');
+        }
+    } catch (error) {
+        console.error('Error communicating with Flask:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
+    }
+});
+
+
+app.post('/train-AI', async (req, res) => {
+    try {
+        const comments = req.body.comments || []; // Ensure comments are passed
+        console.log('Sending comments to Flask for analysis:', comments);
+
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/train-enhanced', req.body);//Gabisa pake localhost
+
+        console.log('Response from Flask:', flaskResponse.data);  // Log the response data
+
+        // Check if the response from Flask is valid JSON
+        if (flaskResponse.data && flaskResponse.data.status === 'success') {
+            res.status(flaskResponse.status).json(flaskResponse.data);
+        } else {
+            throw new Error('Invalid response from Flask');
+        }
+    } catch (error) {
+        console.error('Error communicating with Flask:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to analyze comments.' });
+    }
+});
 
 
 
