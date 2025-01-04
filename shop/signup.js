@@ -1,5 +1,4 @@
 const sign_up_form = document.getElementById('sign-up-form');
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 if (sign_up_form){
     sign_up_form.addEventListener('submit', async (event) => {
         event.preventDefault();

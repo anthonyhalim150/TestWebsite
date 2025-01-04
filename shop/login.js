@@ -1,14 +1,10 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
-
 document.getElementById('login_form').addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
-
-    const API_URL = `${API_URL}/login`;
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(`${API_URL}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })

@@ -1,4 +1,4 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
+
 let selectedRating = 0;
 async function submitComment(event) {
     event.preventDefault(); // Prevent form reload
