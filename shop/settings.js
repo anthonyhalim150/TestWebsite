@@ -19,21 +19,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
         if (data.success) {
             const { dark_mode, color_scheme } = data.settings;
-            apply_initial_settings(dark_mode, color_scheme)
-                .then(() => apply_settings())
-                .then(() => document.body.classList.remove('loading'))
-                .catch((error) => {
-                    console.error("Error:", error);
-                    document.body.classList.remove('loading');
-                });
-            /* The top is basically this one but less confusing
             document.body.classList.add('loading');
                 apply_initial_settings(dark_mode, color_scheme).then(() => {
                     apply_settings().then(()=>{
                         document.body.classList.remove('loading');
                     });
             });
-            */
         } else {
             console.error(data.message);
         }
