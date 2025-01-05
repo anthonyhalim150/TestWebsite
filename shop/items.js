@@ -503,7 +503,7 @@ async function loadUserSettings() {
             document.documentElement.style.setProperty('--text-color', dark_mode ? '#FFFFFF' : 'black');
         }
         else{
-            //To prevent error message when user does not have settings
+            return;//To prevent error message when user does not have settings
         }
     } catch (error) {
         console.error('Error fetching user settings:', error);

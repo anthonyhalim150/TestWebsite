@@ -35,7 +35,7 @@ async function apply_initial_settings() {
                 document.body.classList.remove('loading');
             });
         } else {
-            //To prevent error message when user does not have settings
+            return;//To prevent error message when user does not have initial settings.
         }
     } catch (error) {
         console.error('Error loading settings:', error);
