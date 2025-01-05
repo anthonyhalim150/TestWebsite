@@ -37,7 +37,10 @@ async function submitComment(event) {
         if (result.success) {
             alert('Comment submitted successfully!');
             document.getElementById('comment-form').reset(); // Clear the form
-            updateStars(0);
+            const stars = document.querySelectorAll('#star-rating span');
+            if (stars){ //Refresh stars
+                updateStars(0, stars);
+            }
             selectedRating = 0;
         } else {
             alert('Failed to submit comment. Please try again.');
@@ -49,14 +52,16 @@ async function submitComment(event) {
 }
 
 function updateStars(rating, stars) {
-    stars.forEach(star => {
-        const starValue = parseFloat(star.dataset.value);
-        if (starValue <= rating) {
-            star.classList.add('active');
-        } else {
-            star.classList.remove('active');
-        }
-    });
+    if (stars){
+        stars.forEach(star => {
+            const starValue = parseFloat(star.dataset.value);
+            if (starValue <= rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+    }
 }
 
 
