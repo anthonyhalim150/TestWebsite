@@ -494,13 +494,6 @@ async function loadUserSettings() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID }),
         });
-        if (!response.ok) {
-            if (response.status === 404) {
-                // Silently handle 404 error
-                return; // Skip processing for not found
-            }
-            throw new Error(`Fetch error! status: ${response.status}`);
-        }
         const data = await response.json();
         if (data.success) {
             // Apply the settings
@@ -508,6 +501,9 @@ async function loadUserSettings() {
             document.documentElement.style.setProperty('--primary-color', color_scheme);
             document.documentElement.style.setProperty('--secondary-color', dark_mode ? '#333' : 'light');
             document.documentElement.style.setProperty('--text-color', dark_mode ? '#FFFFFF' : 'black');
+        }
+        else{
+            console.error(data.message);
         }
     } catch (error) {
         console.error('Error fetching user settings:', error);

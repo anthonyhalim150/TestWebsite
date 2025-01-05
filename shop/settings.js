@@ -21,13 +21,7 @@ async function apply_initial_settings() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID }),
         });
-        if (!response.ok) {
-            if (response.status === 404) {
-                // Silently handle 404 error
-                return; // Skip processing for not found
-            }
-            throw new Error(`Fetch error! status: ${response.status}`);
-        }
+
         const data = await response.json();
         if (data.success) {
             const { dark_mode, color_scheme } = data.settings;
@@ -40,6 +34,8 @@ async function apply_initial_settings() {
             apply_settings().then(()=>{
                 document.body.classList.remove('loading');
             });
+        } else {
+            console.error(data.message);
         }
     } catch (error) {
         console.error('Error loading settings:', error);
