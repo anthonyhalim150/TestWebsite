@@ -431,7 +431,8 @@ async function fetchLikedItems() {
             likedItems = data.likedItems;
         }
         else{
-            likedItems = [];
+            likedItems.length = 0;
+            //likedItems = []; This does not clear it in all references
         }
     } catch (error) {
         console.error('Error fetching liked items:', error);
