@@ -35,9 +35,9 @@ async function renderCart() {
                             <div class="d-flex align-items-center">
                                 <div class="quantity-container me-3">
                                     <div class="quantity-control">
-                                        <button class="btn btn-secondary" onclick="event.stopPropagation(); handleClick('${item.id}', -1, ${item.stock})">-</button>
+                                        <button class="btn btn-secondary" onclick="handleClick(event,'${item.id}', -1, ${item.stock})">-</button>
                                         <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="0" max="${item.stock}" class="quantity-input" onclick="event.stopPropagation();" onchange="updateQuantity('${item.id}', ${item.stock})">
-                                        <button class="btn btn-secondary" onclick="event.stopPropagation();  handleClick('${item.id}', 1, ${item.stock})">+</button>
+                                        <button class="btn btn-secondary" onclick="handleClick(event, '${item.id}', 1, ${item.stock})">+</button>
                                     </div>
                                 </div>
                                 <div class="price-container me-3">

@@ -458,7 +458,7 @@ async function toggleLike(itemID) {
 
             const data = await response.json();
             if (data.success) {
-                if (likedItems.length == 0){
+                if (likedItems.length == 1){
                     location.reload();
                 }
                 else{
