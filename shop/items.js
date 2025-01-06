@@ -459,6 +459,7 @@ async function toggleLike(itemID) {
             const data = await response.json();
             if (data.success) {
                 if (likedItems.length == 1){
+                    document.body.classList.add('loading');
                     location.reload();
                 }
                 else{
