@@ -1,4 +1,4 @@
-const API_URL = 'https://ai-723848267249.us-central1.run.app';
+const API_URL = 'https://anthonyhalim-150-lu32dxaw4a-uc.a.run.app';
 
 let analyze_btn = document.querySelector('.analyze-btn');
 if (analyze_btn){
