@@ -404,16 +404,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
     await fetchItems(); // Fetch items when page loads
-    const userID = localStorage.getItem('userID');
-    if (window.location.pathname.includes('like.html')) {
-        show_likes(userID);
-    }
-    else{
-        await renderItems();
-    }
     customer_support();
 });
 
+const userID = localStorage.getItem('userID');
+if (window.location.pathname.includes('like.html')) {
+    show_likes(userID);
+}
+else{
+    await renderItems();
+}//To fix bug where if there is only one last liked item and it is removed, it goes back to the available items.
 
 const searchBar = document.getElementById('search-bar');
 if (searchBar) {

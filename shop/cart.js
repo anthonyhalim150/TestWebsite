@@ -35,9 +35,9 @@ async function renderCart() {
                             <div class="d-flex align-items-center">
                                 <div class="quantity-container me-3">
                                     <div class="quantity-control">
-                                        <button class="btn btn-secondary" onclick="event.stopPropagation();  setTimeout(() => changeQuantity('${item.id}', -1, ${item.stock}), 1000)">-</button>
+                                        <button class="btn btn-secondary" onclick="event.stopPropagation(); handleClick('${item.id}', -1, ${item.stock})">-</button>
                                         <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="0" max="${item.stock}" class="quantity-input" onclick="event.stopPropagation();" onchange="updateQuantity('${item.id}', ${item.stock})">
-                                        <button class="btn btn-secondary" onclick="event.stopPropagation();  setTimeout(() => changeQuantity('${item.id}', -1, ${item.stock}), 1000)">+</button>
+                                        <button class="btn btn-secondary" onclick="event.stopPropagation();  handleClick('${item.id}', 1, ${item.stock})">+</button>
                                     </div>
                                 </div>
                                 <div class="price-container me-3">
@@ -63,6 +63,25 @@ async function renderCart() {
         cartContent.innerHTML = `<p class="text-danger">Failed to load cart. Please try again later.</p>`;
     }
 }
+
+let timeoutID = null;
+
+function handleClick(itemId, change, stock) {
+    const button = event.target;
+    button.disabled = true;  // Disable the button
+
+    // Clear any existing timeouts
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+    }
+
+    // Schedule the changeQuantity function
+    timeoutId = setTimeout(() => {
+        changeQuantity(itemId, change, stock);
+        button.disabled = false;  // Re-enable the button after the delay
+    }, 1000);  // Delay of 1000 milliseconds (1 second)
+}
+
 
 
 async function changeQuantity(itemID, delta, stock) {//From +-
