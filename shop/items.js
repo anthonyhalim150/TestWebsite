@@ -458,9 +458,11 @@ async function toggleLike(itemID) {
 
             const data = await response.json();
             if (data.success) {
-                likedItems = likedItems.filter(item => item.id !== itemID); // Remove item with matching ID
                 if (likedItems.length == 0){
                     location.reload();
+                }
+                else{
+                    likedItems = likedItems.filter(item => item.id !== itemID); // Remove item with matching ID
                 }
             } else {
                 console.error(data.error);

@@ -66,8 +66,9 @@ async function renderCart() {
 
 let timeoutID = null;
 
-function handleClick(itemId, change, stock) {
+function handleClick(event ,itemId, change, stock) {
     const button = event.target;
+    event.stopPropagation();
     button.disabled = true;  // Disable the button
 
     // Clear any existing timeouts
@@ -79,7 +80,7 @@ function handleClick(itemId, change, stock) {
     timeoutID = setTimeout(() => {
         changeQuantity(itemId, change, stock);
         button.disabled = false;  // Re-enable the button after the delay
-    }, 600);  // Delay of 1000 milliseconds (1 second)
+    }, 200);  // Delay of 1000 milliseconds (1 second)
 }
 
 
