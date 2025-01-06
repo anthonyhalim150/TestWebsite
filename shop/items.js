@@ -222,7 +222,7 @@ function searchItems() {
     let desc_match = 0;
     let category_match = 0;
     if (query === ''){//Biar kalo ga ada search barnya, itemnya ga ke sort lgi
-        location.reload();
+        renderItems()
         return;
     }
     const heading = document.querySelector('h2');
@@ -421,9 +421,6 @@ if (searchBar) {
         searchItems(); 
     });
 } 
-
-
-
 // Fetch liked items on page load
 async function fetchLikedItems() {
     const currentUserID = localStorage.getItem('userID');
