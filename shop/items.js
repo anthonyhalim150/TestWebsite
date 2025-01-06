@@ -430,6 +430,9 @@ async function fetchLikedItems() {
         if (data.success) {
             likedItems = data.likedItems;
         }
+        else{
+            likedItems = [];
+        }
     } catch (error) {
         console.error('Error fetching liked items:', error);
     }
