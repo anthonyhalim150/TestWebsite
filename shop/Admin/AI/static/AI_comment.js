@@ -1,39 +1,46 @@
-document.querySelector('.analyze-btn').addEventListener('click', function (e) {
-    e.preventDefault();
+const API_URL = 'https://ai-723848267249.us-central1.run.app';
 
-    // Collect comments (you can change this to dynamically fetch from input fields)
-    
-    // Send POST request to Node.js server
-    fetch('http://localhost:3000/analyze-comments', {  // Point to the Node.js server
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            displayAnalysisResults(data.ratings);  // Display results from Flask
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => alert('Error: ' + error.message));
-});
+let analyze_btn = document.querySelector('.analyze-btn');
+if (analyze_btn){
+    analyze_btn.addEventListener('click', function (e) {
+        e.preventDefault();
 
-document.querySelector('.train-btn').addEventListener('click', function (e) {
-    e.preventDefault();
-    fetch('http://localhost:3000/train-AI', {
-        method: 'POST',
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('Model trained successfully!');
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => alert('Error: ' + error));
-});
+        // Collect comments (you can change this to dynamically fetch from input fields)
+        
+        // Send POST request to Node.js server
+        fetch(`${API_URL}/analyze-comments`, {  // Point to the Node.js server
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                displayAnalysisResults(data.ratings);  // Display results from Flask
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => alert('Error: ' + error.message));
+    });
+}
+let train_btn = document.querySelector('.train-btn');
+if (train_btn){
+    train_btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        fetch(`${API_URL}/train-AI`, {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Model trained successfully!');
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => alert('Error: ' + error));
+    });
+}
 
 // Function to display analysis results
 function displayAnalysisResults(ratings) {
