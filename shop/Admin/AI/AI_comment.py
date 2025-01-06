@@ -40,7 +40,7 @@ def fetch_comments_from_db():
     try:
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT comment, website_rating FROM comments")
+        cursor.execute("SELECT comment, website_rating FROM COMMENTS")
         comments = cursor.fetchall()
         connection.close()
         return comments
@@ -53,7 +53,7 @@ def fetch_feedback_from_db():
     try:
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT c.comment, f.true_importance, f.true_quality FROM feedback f INNER JOIN comments c ON f.comments_id = c.comments_id")
+        cursor.execute("SELECT c.comment, f.true_importance, f.true_quality FROM FEEDBACK f INNER JOIN COMMENTS c ON f.comments_id = c.comments_id")
         feedback = cursor.fetchall()
         connection.close()
         return feedback
