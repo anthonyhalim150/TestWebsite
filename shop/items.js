@@ -370,7 +370,7 @@ function closeItemOverview() {
     }
 }
 
-function customer_support(){
+async function customer_support(){
     customer_support_button = document.getElementById('customer-support');
     if (customer_support_button){
         customer_support_button.addEventListener('click', function () {
@@ -397,13 +397,11 @@ function customer_support(){
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', async () => {
-    await fetchLikedItems(); //To show whats liked and whats not
     document.body.classList.add('loading');
-        loadUserSettings().then(() => {
-            document.body.classList.remove('loading');
-    });
+    await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
     await fetchItems(); // Fetch items when page loads
+    await loadUserSettings();
     const userID = localStorage.getItem('userID');
     if (window.location.pathname.includes('like.html')) {
         show_likes(userID);
@@ -411,7 +409,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     else{
         await renderItems();
     }
-    customer_support();
+    customer_support().then(() => {
+        document.body.classList.remove('loading');
+    });
 });
 
 
@@ -460,7 +460,6 @@ async function toggleLike(itemID) {
             if (data.success) {
                 if (likedItems.length == 1){
                     location.reload();
-                    document.body.classList.add('loading');
                 }
                 else{
                     likedItems = likedItems.filter(item => item.id !== itemID); // Remove item with matching ID
