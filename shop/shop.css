@@ -322,6 +322,9 @@ input[type="number"] {
     filter: invert(100%);
     transition: transform 0.3s ease;
 }
+.item-description{
+    color:black;
+}
 
 .feedback-link:hover .feedback-icon {
     transform: scale(1.2);

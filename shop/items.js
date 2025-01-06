@@ -340,10 +340,10 @@ function showItemOverview(itemId) {
     overviewContainer.innerHTML = `
         <h3>${item.name}</h3>
         <img src="${item.image}" alt="${item.name}" style="width: 180px; height: 180px; margin-bottom: 15px;">
-        <p><strong>Description:</strong> ${item.description}</p>
-        <p><strong>Price:</strong> $${item.price}</p>
-        <p><strong>Stock:</strong> ${item.stock}</p>
-        <p><strong>Category:</strong> ${item.category || 'N/A'}</p>
+        <p class="item-description"><strong>Description:</strong> ${item.description}</p>
+        <p class="item-description"><strong>Price:</strong> $${item.price}</p>
+        <p class="item-description"><strong>Stock:</strong> ${item.stock}</p>
+        <p class="item-description"><strong>Category:</strong> ${item.category || 'N/A'}</p>
         <button class="close-btn" onclick="closeItemOverview()">Close</button>
     `;
     overviewContainer.style.display = 'block';
@@ -459,7 +459,6 @@ async function toggleLike(itemID) {
             const data = await response.json();
             if (data.success) {
                 if (likedItems.length == 1){
-                    document.body.classList.add('loading');
                     location.reload();
                 }
                 else{
