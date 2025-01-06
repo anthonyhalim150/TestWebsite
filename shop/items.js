@@ -222,7 +222,7 @@ function searchItems() {
     let desc_match = 0;
     let category_match = 0;
     if (query === ''){//Biar kalo ga ada search barnya, itemnya ga ke sort lgi
-        renderItems()
+        renderItems();
         return;
     }
     const heading = document.querySelector('h2');
@@ -404,17 +404,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
     await fetchItems(); // Fetch items when page loads
-    if (!window.location.pathname.includes('like.html')){
-        renderItems();
+    const userID = localStorage.getItem('userID');
+    if (window.location.pathname.includes('like.html')) {
+        show_likes(userID);
+    }
+    else{
+        await renderItems();
     }
     customer_support();
 });
 
-const userID = localStorage.getItem('userID');
-if (window.location.pathname.includes('like.html')) {
-    show_likes(userID);
-}
-//To fix bug where if there is only one last liked item and it is removed, it goes back to the available items.
 
 const searchBar = document.getElementById('search-bar');
 if (searchBar) {
@@ -422,6 +421,9 @@ if (searchBar) {
         searchItems(); 
     });
 } 
+
+
+
 // Fetch liked items on page load
 async function fetchLikedItems() {
     const currentUserID = localStorage.getItem('userID');
@@ -457,7 +459,9 @@ async function toggleLike(itemID) {
             const data = await response.json();
             if (data.success) {
                 likedItems = likedItems.filter(item => item.id !== itemID); // Remove item with matching ID
-                await fetchLikedItems();
+                if (likedItems.length == 0){
+                    location.reload();
+                }
             } else {
                 console.error(data.error);
             }

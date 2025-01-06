@@ -71,15 +71,15 @@ function handleClick(itemId, change, stock) {
     button.disabled = true;  // Disable the button
 
     // Clear any existing timeouts
-    if (timeoutId) {
-        clearTimeout(timeoutId);
+    if (timeoutID) {
+        clearTimeout(timeoutID);
     }
 
     // Schedule the changeQuantity function
-    timeoutId = setTimeout(() => {
+    timeoutID = setTimeout(() => {
         changeQuantity(itemId, change, stock);
         button.disabled = false;  // Re-enable the button after the delay
-    }, 1000);  // Delay of 1000 milliseconds (1 second)
+    }, 600);  // Delay of 1000 milliseconds (1 second)
 }
 
 
