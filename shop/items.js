@@ -430,10 +430,6 @@ async function fetchLikedItems() {
         if (data.success) {
             likedItems = data.likedItems;
         }
-        else{
-            likedItems.length = 0;
-            //likedItems = []; This does not clear it in all references
-        }
     } catch (error) {
         console.error('Error fetching liked items:', error);
     }
@@ -460,6 +456,7 @@ async function toggleLike(itemID) {
             const data = await response.json();
             if (data.success) {
                 likedItems = likedItems.filter(item => item.id !== itemID); // Remove item with matching ID
+                await fetchLikedItems();
             } else {
                 console.error(data.error);
             }
