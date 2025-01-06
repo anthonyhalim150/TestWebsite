@@ -1,0 +1,50 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1f1c2c, #928dab);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .auction-container {
+    text-align: center;
+    max-width: 500px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #ffcc00;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  }
+  
+  .item {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .timer {
+    margin-top: 20px;
+    font-size: 32px;
+    color: #ffcc00;
+  }
+  
+  .hammer {
+    width: 100px;
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: top 1s ease-in-out;
+  }
+  
+  .countdown {
+    margin-top: 20px;
+    font-size: 48px;
+    color: #ff4444;
+    font-weight: bold;
+    display: none;
+  }
+  
