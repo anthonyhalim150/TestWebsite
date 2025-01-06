@@ -397,11 +397,11 @@ function customer_support(){
 
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', async () => {
+    await fetchLikedItems(); //To show whats liked and whats not
     document.body.classList.add('loading');
         loadUserSettings().then(() => {
             document.body.classList.remove('loading');
     });
-    await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
     await fetchItems(); // Fetch items when page loads
     const userID = localStorage.getItem('userID');
@@ -460,6 +460,7 @@ async function toggleLike(itemID) {
             if (data.success) {
                 if (likedItems.length == 1){
                     location.reload();
+                    document.body.classList.add('loading');
                 }
                 else{
                     likedItems = likedItems.filter(item => item.id !== itemID); // Remove item with matching ID

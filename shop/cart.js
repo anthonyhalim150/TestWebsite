@@ -80,7 +80,7 @@ function handleClick(event ,itemId, change, stock) {
     timeoutID = setTimeout(() => {
         changeQuantity(itemId, change, stock);
         button.disabled = false;  // Re-enable the button after the delay
-    }, 200);  // Delay of 1000 milliseconds (1 second)
+    }, 500);  // Delay of 1000 milliseconds (1 second)
 }
 
 
