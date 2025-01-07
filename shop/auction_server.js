@@ -61,6 +61,24 @@ app.post("/auction", (req, res) => {
   });
 });
 
+app.post("/start-auction", (req, res) => {
+  const { item_name, starting_price, time } = req.body;
+
+  if (!item_name || !starting_price || !time) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const query = "INSERT INTO auction_items (starting_time) VALUES (?)";
+  db.query(query, [start_time], (err, result) => {
+    if (err) {
+      console.error("Error adding auction item:", err);
+      res.status(500).json({ error: "Database query failed" });
+    } else {
+      res.status(201).json({ message: "Auction Started Successfully!", itemID: result.insertId });
+    }
+  });
+});
+
 // Delete an auction item
 app.delete("/auction/:id", (req, res) => {
   const { id } = req.params;
