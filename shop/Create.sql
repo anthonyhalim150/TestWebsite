@@ -104,6 +104,29 @@ CREATE TABLE FEEDBACK (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (comments_id) REFERENCES COMMENTS(comments_id)
 );
+
+CREATE TABLE auction_items (
+    itemID INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(255) NOT NULL,
+    starting_price DECIMAL(10, 2) NOT NULL,
+    time INT NOT NULL -- Time in seconds for the auction
+);
+
+drop table auction_items;
+CREATE TABLE auction_items (
+    itemID INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(255) NOT NULL,
+    image VARCHAR(255),
+    starting_price DECIMAL(10, 2) NOT NULL,
+    time INT NOT NULL -- Time in seconds for the auction
+);
+-- Example data
+INSERT INTO auction_items (item_name, starting_price, time)
+VALUES 
+('Vintage Watch', 100.00, 1),
+('Antique Vase', 200.00, 1),
+('Signed Baseball', 150.00, 1);
+
 drop table comments;
 use ecommerce;
 INSERT INTO items (name, description, category, price, stock, image) VALUES 

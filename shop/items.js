@@ -401,7 +401,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
     await fetchItems(); // Fetch items when page loads
-    await loadUserSettings();
     const userID = localStorage.getItem('userID');
     if (window.location.pathname.includes('like.html')) {
         show_likes(userID);
@@ -409,9 +408,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     else{
         await renderItems();
     }
-    customer_support().then(() => {
+    loadUserSettings().then(() => {
         document.body.classList.remove('loading');
     });
+    customer_support();
 });
 
 
