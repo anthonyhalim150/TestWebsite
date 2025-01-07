@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         id: item.itemID,
         name: item.item_name,
         startingPrice: item.starting_price,
-        timeLeft: item.time
+        timeLeft: item.duration
       }));
       initializeAuction();
     } catch (error) {

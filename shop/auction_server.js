@@ -50,7 +50,7 @@ app.post("/auction", (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const query = "INSERT INTO auction_items (item_name, starting_price, time) VALUES (?, ?, ?)";
+  const query = "INSERT INTO auction_items (item_name, starting_price, duration) VALUES (?, ?, ?)";
   db.query(query, [item_name, starting_price, time], (err, result) => {
     if (err) {
       console.error("Error adding auction item:", err);
