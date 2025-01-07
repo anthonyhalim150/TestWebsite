@@ -8,8 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const hammerElement = document.getElementById("hammer");
   const countdownElement = document.getElementById("countdown");
   const itemElement = document.getElementById("item");
-  const auctionContainer = document.querySelector(".auction-container");
-
   // Fetch all auction items from the server
   const fetchAuctionItems = async () => {
     try {
