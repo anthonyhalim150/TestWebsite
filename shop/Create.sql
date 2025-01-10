@@ -106,7 +106,7 @@ CREATE TABLE FEEDBACK (
 );
 
 
-drop table auction_items;
+drop table AUCTION_ITEMS;
 CREATE TABLE AUCTION_ITEMS(
 	id INT AUTO_INCREMENT PRIMARY KEY,
     item_name VARCHAR(255) NOT NULL,

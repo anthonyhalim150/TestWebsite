@@ -21,12 +21,12 @@ async function addProduct(event) {
     const formData = new FormData();
     formData.append('name', name);
     formData.append('price', price);
+    formData.append('starting_time', starting_time);
     formData.append('description', description);
     formData.append('stock', stock);
     formData.append('product-image', imageFile); // Key must match the backend's expected key
     formData.append('category', category);
     formData.append('duration', duration);
-    formData.append('starting_time', starting_time);
 
 
     try {
