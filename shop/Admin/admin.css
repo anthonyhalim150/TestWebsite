@@ -238,6 +238,10 @@ td .product-image {
     color: #ff8800; /* Orange text */
     margin-top: 10px;
 }
+.product-overview .details {
+    max-height: 300px;          /* Limit the height of the details container */
+    overflow-y: auto;           /* Scroll only the details section if content overflows */
+}
 
 .product-overview .details input,
 .product-overview .details textarea {
