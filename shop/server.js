@@ -692,6 +692,80 @@ app.delete('/remove-product', async (req, res) => {
     }
 });
 
+app.put('/auction-items/:id', upload.single('auction-image'), async (req, res) => {
+    const auctionItemId = req.params.id;
+    const { item_name, starting_price, stock, description, duration, starting_time } = req.body;
+    try {
+        const connection = await pool.getConnection();
+
+        try {
+            // Fetch the existing image URL
+            const [rows] = await connection.query('SELECT image FROM AUCTION_ITEMS WHERE itemID = ?', [auctionItemId]);
+
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Auction item not found.' });
+            }
+
+            const oldImageUrl = rows[0].image;
+            const oldImageName = oldImageUrl ? oldImageUrl.split('/').slice(-2).join('/') : null; // Extract the file name from the URL
+
+            // Handle new image upload
+            let newImagePath = oldImageUrl;
+            if (req.file) {
+                const uniqueName = `AuctionItems/${Date.now()}${path.extname(req.file.originalname)}`;
+                const blob = bucket.file(uniqueName);
+                const blobStream = blob.createWriteStream({
+                    metadata: { contentType: req.file.mimetype },
+                });
+
+                await new Promise((resolve, reject) => {
+                    blobStream.on('error', reject);
+                    blobStream.on('finish', resolve);
+                    blobStream.end(req.file.buffer);
+                });
+
+                newImagePath = `https://storage.googleapis.com/${bucketName}/${uniqueName}`;
+
+                // Remove the old image from Google Cloud Storage
+                if (oldImageName) {
+                    await bucket.file(oldImageName).delete().catch((err) => {
+                        console.error('Error deleting old image:', err.message);
+                    });
+                }
+            }
+
+            // Update auction item details in the database
+            const updateQuery = `
+                UPDATE AUCTION_ITEMS
+                SET item_name = ?, starting_price = ?, stock = ?, description = ?, duration = ?, image = ?, starting_time = ?
+                WHERE itemID = ?
+            `;
+            const [result] = await connection.query(updateQuery, [
+                item_name,
+                starting_price,
+                stock,
+                description,
+                duration,
+                newImagePath,
+                starting_time || null,
+                auctionItemId,
+            ]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, error: 'Auction item not found.' });
+            }
+
+            res.status(200).json({ success: true, message: 'Auction item updated successfully!' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error updating auction item:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to update auction item.', details: error.message });
+    }
+});
+
+
 app.get("/auction", async (req, res) => {
     try {
       const connection = await pool.getConnection();
@@ -737,8 +811,8 @@ app.post("/add-new-auction", upload.single("product-image"), async (req, res) =>
           const connection = await pool.getConnection();
           try {
             const query = `
-              INSERT INTO AUCTION_ITEMS (item_name, stock, description, image, starting_price, starting_time, duration) 
-              VALUES (?, ?, ?, ?, ?, NOW(), ?)
+              INSERT INTO AUCTION_ITEMS (item_name, stock, description, image, starting_price, duration) 
+              VALUES (?, ?, ?, ?, ?,  ?)
             `;
             const values = [name, stock, description, imageUrl, price, duration];
   
