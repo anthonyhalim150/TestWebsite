@@ -220,7 +220,7 @@ td .product-image {
     padding: 20px;
     z-index: 1000;
     display: none; /* Hidden by default */
-    max-width: 400px;
+    max-width: 500px;
     width: 100%; /* Responsive width */
 }
 
@@ -239,8 +239,8 @@ td .product-image {
     margin-top: 10px;
 }
 .product-overview .details {
-    max-height: 400px;          /* Limit the height of the details container */
-    max-width: 400px;          /* Limit the height of the details container */
+    max-height: 500px;          /* Limit the height of the details container */
+    max-width: 500px;          /* Limit the height of the details container */
     overflow-y: auto;           /* Scroll only the details section if content overflows */
 }
 
