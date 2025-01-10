@@ -14,7 +14,8 @@ async function fetch_products(sorted_items = null) {
             }
 
             const productContainer = document.getElementById('product-container-tbody');
-            productContainer.innerHTML = items.map(product => {//Used to access product ID
+            productContainer.innerHTML = items.map(product => {
+                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
                 return `
               <tr data-id="${product.id}">
                     <td>
@@ -27,7 +28,7 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.description || 'N/A'}</td>
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
-                    <td>${product.starting_time|| 'N/A'}</td>
+                    <td>${formattedStartingTime|| 'N/A'}</td>
                 </tr>`;
             }).join('');
 
@@ -158,6 +159,21 @@ async function delete_product(productId) {
     }
 };
 
+function formatDateTime(dateTime) {
+    const date = new Date(dateTime);
+
+    const options = {
+        month: '2-digit', 
+        day: '2-digit', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: true // To use AM/PM format
+    };
+
+    return date.toLocaleString('en-US', options).replace(',', '');
+}
+
 function displayProductOverview(product) {
     const overviewSection = document.getElementById('product-overview');
     overviewSection.style.display = 'block';
@@ -172,11 +188,15 @@ function displayProductOverview(product) {
     document.getElementById('product-duration').value = product.duration;
     const startingTime = new Date(product.starting_time);
 
-// Format the date to match the input's expected format (YYYY-MM-DDTHH:MM)
-    const formattedTime = startingTime.toISOString().slice(0, 16);
+    // Adjust to local time
+    const localTime = new Date(startingTime.toLocaleString());
 
-    // Set the formatted value to the datetime-local input
+    // Format the local time to match the input's expected format (YYYY-MM-DDTHH:MM)
+    const formattedTime = localTime.toISOString().slice(0, 16);
+
+    // Set the formatted value to the datetime-local input, so that when product-overview is opened, it is not blank.
     document.getElementById('product-start').value = formattedTime;
+
     // Add a save button listener
     document.getElementById('save-button').onclick = () => saveProductChanges(product.id);
     document.getElementById('delete-button').onclick = () => delete_product(product.id);
