@@ -1,102 +1,148 @@
-document.addEventListener("DOMContentLoaded", () => {
-  let auctionItems = []; // Array to store auction items
-  let timerIntervals = []; // Store timers for auction items
+let auctionItems = []; // Array to store auction items
+let filteredItems = []; // Array to store filtered items
+let timerIntervals = []; // Store timers for auction items
 
-  // Fetch auction items from the server
-  const fetchAuctionItems = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/auction");
-      const data = await response.json();
+// Fetch auction items from the server
+const fetchAuctionItems = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/auction");
+    const data = await response.json();
 
-      auctionItems = data.map(item => ({
-        id: item.id,
-        name: item.item_name,
-        stock: item.stock,
-        description: item.description,
-        category: item.category,
-        image: item.image,
-        startingPrice: item.starting_price,
-        duration: item.duration,
-        startingTime: new Date(item.starting_time), // Convert to Date object
-      }));
+    auctionItems = data.map(item => ({
+      id: item.id,
+      name: item.item_name,
+      stock: item.stock,
+      description: item.description,
+      category: item.category,
+      image: item.image,
+      startingPrice: item.starting_price,
+      duration: item.duration,
+      startingTime: new Date(item.starting_time), // Convert to Date object
+    }));
 
-      renderAuctionItems();
-    } catch (error) {
-      console.error("Error fetching auction items:", error);
+    // Initialize filtered items with all auction items
+    filteredItems = [...auctionItems];
+
+    renderAuctionItems();
+  } catch (error) {
+    console.error("Error fetching auction items:", error);
+  }
+};
+
+// Render auction items to the page
+const renderAuctionItems = (items = filteredItems) => {
+  const auctionContainer = document.getElementById("auction-items");
+  auctionContainer.innerHTML = ""; // Clear existing items
+
+  items.forEach(item => {
+    const itemElement = document.createElement("div");
+    itemElement.classList.add("auction-item");
+    itemElement.dataset.id = item.id;
+
+    itemElement.innerHTML = `
+      <img src="${item.image}" alt="${item.name}" class="item-image">
+      <h3>${item.name}</h3>
+      <p>Starting Price: $${item.startingPrice}</p>
+      <p class="timer" id="timer-${item.id}"></p>
+    `;
+
+    auctionContainer.appendChild(itemElement);
+
+    startItemTimer(item); // Start countdown for each item
+
+    // Add click event to display product overview
+    itemElement.addEventListener("click", () => showProductOverview(item));
+  });
+};
+
+// Start timer for a specific auction item
+const startItemTimer = (item) => {
+  const timerElement = document.getElementById(`timer-${item.id}`);
+  const endTime = new Date(item.startingTime.getTime() + item.duration * 1000); // Add duration to starting time
+
+  const interval = setInterval(() => {
+    const currentTime = new Date();
+    const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
+
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      timerElement.textContent = "Auction ended";
+    } else {
+      const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+      const seconds = (timeLeft % 60).toString().padStart(2, "0");
+      timerElement.textContent = `${minutes}:${seconds}`;
     }
-  };
+  }, 1000);
 
-  // Render auction items to the page
-  const renderAuctionItems = () => {
-    const auctionContainer = document.getElementById("auction-items");
-    auctionContainer.innerHTML = ""; // Clear existing items
+  timerIntervals.push(interval);
+};
 
-    auctionItems.forEach(item => {
-      const itemElement = document.createElement("div");
-      itemElement.classList.add("auction-item");
-      itemElement.dataset.id = item.id;
+// Show product overview in a popup
+const showProductOverview = (item) => {
+  const overviewSection = document.getElementById("product-overview");
+  overviewSection.style.display = "block";
 
-      itemElement.innerHTML = `
-        <img src="${item.image}" alt="${item.name}" class="item-image">
-        <h3>${item.name}</h3>
-        <p>Starting Price: $${item.startingPrice}</p>
-        <p class="timer" id="timer-${item.id}"></p>
-      `;
+  // Fill in product details
+  document.getElementById("product-name").value = item.name;
+  document.getElementById("product-price").value = item.startingPrice;
+  document.getElementById("product-stock").value = item.stock;
+  document.getElementById("product-description").value = item.description;
+  document.getElementById("product-category").value = item.category;
 
-      auctionContainer.appendChild(itemElement);
+  const productImage = document.getElementById("product-image");
+  productImage.src = item.image || "placeholder.jpg"; // Fallback if no image is provided
 
-      startItemTimer(item); // Start countdown for each item
+  // Add event listener to close button
+  document.querySelector(".close-btn").addEventListener("click", () => {
+    overviewSection.style.display = "none";
+  });
+};
 
-      // Add click event to display product overview
-      itemElement.addEventListener("click", () => showProductOverview(item));
-    });
-  };
+// Apply search and sort together
+const applySearchAndSort = () => {
+  const searchInput = document.getElementById("search-input").value.toLowerCase();
+  const sortCriteria = document.getElementById("sort-select").value;
 
-  // Start timer for a specific auction item
-  const startItemTimer = (item) => {
-    const timerElement = document.getElementById(`timer-${item.id}`);
-    const endTime = new Date(item.startingTime.getTime() + item.duration * 1000); // Add duration to starting time
+  // Filter items by search term
+  filteredItems = auctionItems.filter(item =>
+    item.name.toLowerCase().includes(searchInput) ||
+    item.description.toLowerCase().includes(searchInput)
+  );
 
-    const interval = setInterval(() => {
-      const currentTime = new Date();
-      const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
+  // Sort filtered items
+  switch (sortCriteria) {
+    case "price-asc":
+      filteredItems.sort((a, b) => a.startingPrice - b.startingPrice);
+      break;
+    case "price-desc":
+      filteredItems.sort((a, b) => b.startingPrice - a.startingPrice);
+      break;
+    case "name-asc":
+      filteredItems.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case "name-desc":
+      filteredItems.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+    default:
+      break;
+  }
 
-      if (timeLeft <= 0) {
-        clearInterval(interval);
-        timerElement.textContent = "Auction ended";
-      } else {
-        const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-        const seconds = (timeLeft % 60).toString().padStart(2, "0");
-        timerElement.textContent = `${minutes}:${seconds}`;
-      }
-    }, 1000);
+  renderAuctionItems();
+};
 
-    timerIntervals.push(interval);
-  };
+// Attach event listeners for search and sort
+const attachEventListeners = () => {
+  const searchInput = document.getElementById("search-input");
+  const sortSelect = document.getElementById("sort-select");
 
-  // Show product overview in a popup
-  const showProductOverview = (item) => {
-    const overviewSection = document.getElementById("product-overview");
-    overviewSection.style.display = "block";
+  searchInput.addEventListener("input", applySearchAndSort);
+  sortSelect.addEventListener("change", applySearchAndSort);
+};
 
-    // Fill in product details
-    document.getElementById("product-name").value = item.name;
-    document.getElementById("product-price").value = item.startingPrice;
-    document.getElementById("product-stock").value = item.stock;
-    document.getElementById("product-description").value = item.description;
-    document.getElementById("product-category").value = item.category;
-
-    // Format starting time to local time for displa
-
-    const productImage = document.getElementById("product-image");
-    productImage.src = item.image || "placeholder.jpg"; // Fallback if no image is provided
-
-    // Add event listener to close button
-    document.querySelector(".close-btn").addEventListener("click", () => {
-      overviewSection.style.display = "none";
-    });
-  };
-
-  // Initialize auction
+// Initialize auction
+const initializeAuction = () => {
   fetchAuctionItems();
-});
+  attachEventListeners();
+};
+
+document.addEventListener("DOMContentLoaded", initializeAuction);
