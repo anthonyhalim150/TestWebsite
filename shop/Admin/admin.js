@@ -44,6 +44,15 @@ function createSidebar() {
                     </ul>
                 </li>
                 <li class="dropdown">
+                    <a href="#" class="nav-item dropdown-toggle">
+                        Auctions <span class="arrow">▼</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="add_new_auction.html" class="nav-item">Add Auction</a></li>
+                        <li><a href="auction_list.html" class="nav-item">Auction List</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
                     <a href="#" class="nav-user dropdown-toggle">
                         Users <span class="arrow">▼</span>
                     </a>

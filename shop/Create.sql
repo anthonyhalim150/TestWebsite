@@ -107,14 +107,16 @@ CREATE TABLE FEEDBACK (
 
 
 drop table auction_items;
-CREATE TABLE auction_items (
+CREATE TABLE AUCTION_ITEMS(
     itemID INT AUTO_INCREMENT PRIMARY KEY,
     item_name VARCHAR(255) NOT NULL,
+    stock INT NOT NULL,
+    description TEXT,
     image VARCHAR(255),
     starting_price DECIMAL(10, 2) NOT NULL,
-    time INT NOT NULL -- Time in seconds for the auction
+    starting_time DATETIME,
+    duration INT NOT NULL -- Time in seconds for the auction
 );
-
 
 -- Example data
 INSERT INTO auction_items (item_name, starting_price, time)
