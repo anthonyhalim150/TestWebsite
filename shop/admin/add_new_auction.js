@@ -10,13 +10,13 @@ async function addProduct(event) {
     const imageFile = document.getElementById('product-image').files[0]; // Get the selected file
     const category = document.getElementById('product-category').value;
     const duration = document.getElementById('product-duration').value;
-    const starting_time = document.getElementById('product-start').value;
+    const time = document.getElementById('product-start').value;
     // Validate form inputs
     if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !imageFile || !category|| !duration || duration <=0) {
         alert('All fields are required, and price/stock/duration must be positive numbers.');
         return;
     }
-
+    const starting_time = new Date(time).toISOString(); // Convert to UTC ISO form
     // Create FormData object to send data, including the image file
     const formData = new FormData();
     formData.append('name', name);

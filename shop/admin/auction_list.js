@@ -25,6 +25,7 @@ async function fetch_products(sorted_items = null) {
                     <td>$${product.starting_price}</td>
                     <td>${product.stock}</td>
                     <td>${product.description || 'N/A'}</td>
+                    <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
                     <td>${product.starting_time|| 'N/A'}</td>
                 </tr>`;
@@ -58,7 +59,7 @@ function searchItems() {
 
     const filteredItems = items
         .map(item => {
-            const nameMatch = (item.name.toLowerCase().includes(query) ? 1 : 0);
+            const nameMatch = (item.item_name.toLowerCase().includes(query) ? 1 : 0);
             if (item.description !== null) {
                 desc_match = (item.description.toLowerCase().includes(query) ? 1 : 0);
             }
@@ -74,7 +75,7 @@ function searchItems() {
             if (b.matchScore !== a.matchScore) {
                 return b.matchScore - a.matchScore;
             }
-            return a.name.localeCompare(b.name);
+            return a.item_name.localeCompare(b.item_name);
         });
 
     fetch_products(filteredItems);
@@ -159,7 +160,7 @@ function displayProductOverview(product) {
 
     // Populate the overview card with product details
     document.getElementById('product-image').src = product.image;
-    document.getElementById('product-name').value = product.name;
+    document.getElementById('product-name').value = product.item_name;
     document.getElementById('product-price').value = product.starting_price;
     document.getElementById('product-stock').value = product.stock;
     document.getElementById('product-description').value = product.description;
