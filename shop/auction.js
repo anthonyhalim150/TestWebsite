@@ -37,7 +37,6 @@ const renderAuctionItems = (items = filteredItems) => {
   items.forEach(item => {
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
-    itemElement.dataset.id = item.id;
 
     itemElement.innerHTML = `
       <img src="${item.image}" alt="${item.name}" class="item-image">
@@ -58,7 +57,7 @@ const renderAuctionItems = (items = filteredItems) => {
 // Start timer for a specific auction item
 const startItemTimer = (item) => {
   const timerElement = document.getElementById(`timer-${item.id}`);
-  const endTime = new Date(item.startingTime.getTime() + item.duration * 1000); // Add duration to starting time
+  const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);
 
   const interval = setInterval(() => {
     const currentTime = new Date();
@@ -82,7 +81,6 @@ const showProductOverview = (item) => {
   const overviewSection = document.getElementById("product-overview");
   overviewSection.style.display = "block";
 
-  // Fill in product details
   document.getElementById("product-name").value = item.name;
   document.getElementById("product-price").value = item.startingPrice;
   document.getElementById("product-stock").value = item.stock;
@@ -90,9 +88,8 @@ const showProductOverview = (item) => {
   document.getElementById("product-category").value = item.category;
 
   const productImage = document.getElementById("product-image");
-  productImage.src = item.image || "placeholder.jpg"; // Fallback if no image is provided
+  productImage.src = item.image || "placeholder.jpg";
 
-  // Add event listener to close button
   document.querySelector(".close-btn").addEventListener("click", () => {
     overviewSection.style.display = "none";
   });
@@ -103,13 +100,11 @@ const applySearchAndSort = () => {
   const searchInput = document.getElementById("search-input").value.toLowerCase();
   const sortCriteria = document.getElementById("sort-select").value;
 
-  // Filter items by search term
   filteredItems = auctionItems.filter(item =>
     item.name.toLowerCase().includes(searchInput) ||
     item.description.toLowerCase().includes(searchInput)
   );
 
-  // Sort filtered items
   switch (sortCriteria) {
     case "price-asc":
       filteredItems.sort((a, b) => a.startingPrice - b.startingPrice);
@@ -123,8 +118,6 @@ const applySearchAndSort = () => {
     case "name-desc":
       filteredItems.sort((a, b) => b.name.localeCompare(a.name));
       break;
-    default:
-      break;
   }
 
   renderAuctionItems();
@@ -132,11 +125,8 @@ const applySearchAndSort = () => {
 
 // Attach event listeners for search and sort
 const attachEventListeners = () => {
-  const searchInput = document.getElementById("search-input");
-  const sortSelect = document.getElementById("sort-select");
-
-  searchInput.addEventListener("input", applySearchAndSort);
-  sortSelect.addEventListener("change", applySearchAndSort);
+  document.getElementById("search-input").addEventListener("input", applySearchAndSort);
+  document.getElementById("sort-select").addEventListener("change", applySearchAndSort);
 };
 
 // Initialize auction

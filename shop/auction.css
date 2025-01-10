@@ -1,18 +1,28 @@
 /* General Styles */
-body {
-  font-family: Arial, sans-serif;
+html, body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(to bottom right, #ff8800, #ffcc66);
-  color: #fff;
+  width: 100%;
+  height: 100%; /* Ensures full height for background */
+  overflow-x: hidden; /* Prevents horizontal scrolling */
 }
 
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #4b79a1, #283e51); /* Updated teal gradient */
+  color: #ffda79; /* Gold text for better contrast */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Fixes possible overflow causing the line */
+}
+
+/* Header */
 header {
   text-align: center;
   padding: 20px;
-  background-color: rgba(0, 0, 0, 0.5);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  color: #fff;
+  background-color: rgba(20, 20, 20, 0.9); /* Semi-transparent black */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: #ffda79; /* Gold accent */
 }
 
 h1 {
@@ -21,35 +31,44 @@ h1 {
 }
 
 /* Auction Items Container */
-.auction-container {
+#auction-items {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 20px;
+  flex-wrap: wrap; /* Allow wrapping for dynamic items */
+  justify-content: center; /* Center items horizontally */
+  gap: 20px; /* Add spacing between items */
+  padding: 30px;
+  flex-grow: 1; /* Ensures it takes available space, pushing footer down */
 }
 
 .auction-item {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid #fff7e6;
-  border-radius: 10px;
-  padding: 15px;
-  margin: 15px;
-  width: 300px;
+  flex: 1 1 calc(33.33% - 40px); /* Responsive: 3 items per row with spacing */
+  max-width: 300px; /* Optional cap for larger screens */
+  box-sizing: border-box;
+  background: linear-gradient(145deg, #2a3c44, #1c2a32); /* Updated dark teal gradient */
+  border: 2px solid #ffda79; /* Gold border */
+  border-radius: 12px;
+  padding: 20px;
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
+  color: #ffda79; /* Gold text */
+}
+
+.auction-item img{
+  max-width:150px;
+  max-height:150px;
 }
 
 .auction-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
 }
 
+/* Timer styling */
 .timer {
-  margin-top: 10px;
+  margin-top: 15px;
   font-size: 1.2em;
-  color: #ffcc66;
+  color: #ffda79; /* Gold */
 }
 
 /* Product Overview */
@@ -58,54 +77,117 @@ h1 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fff7e6;
-  border: 2px solid #ff8800;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  background: linear-gradient(145deg, #2f3e46, #354f52); /* Updated gray-green gradient */
+  border: 2px solid #ffda79; /* Gold border */
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  padding: 25px;
   z-index: 1000;
   max-width: 500px;
-  width: 100%;
+  width: 90%;
+  height: 80vh; /* Set height to 80% of viewport height */
+  max-height: 80vh; /* Enforces maximum height */
   display: none;
+  color: #fff;
+  overflow-y: auto; /* Enables vertical scrolling */
+  overflow-x: hidden; /* Prevents horizontal scrolling */
+  box-sizing: border-box; /* Ensures padding is included in the total width and height */
+}
+
+/* Custom Scrollbar Styles */
+.product-overview::-webkit-scrollbar {
+  width: 10px; /* Adjust width of scrollbar */
+  border-radius: 5px; /* Rounded corners for the scrollbar */
+}
+
+.product-overview::-webkit-scrollbar-thumb {
+  background-color: #ffda79; /* Gold color for the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+  border: 3px solid #2f3e46; /* Adds a subtle border to the thumb for a better effect */
+  min-height: 40px; /* Set the minimum height of the thumb */
+  max-height: 60px; /* Set the maximum height of the thumb */
+}
+
+.product-overview::-webkit-scrollbar-thumb:hover {
+  background-color: #ffb84d; /* A lighter gold color on hover */
+}
+
+.product-overview::-webkit-scrollbar-track {
+  background-color: #3a4750; /* Darker track color to match the background */
+  border-radius: 5px; /* Rounded corners for the track */
 }
 
 .product-overview img {
   display: block;
-  margin: 0 auto 15px;
-  max-width: 100%;
-  border-radius: 8px;
+  margin: 0 auto 20px;
+  max-width: 100%; /* Ensures image doesn't overflow the container */
+  max-height: 60%; /* Limits the image height */
+  border-radius: 10px;
+  border: 2px solid #ffda79; /* Gold border */
+}
+
+.product-overview .details {
+  display: flex; /* Enables Flexbox */
+  flex-direction: column; /* Stacks items vertically */
+  justify-content: center; /* Centers items vertically */
+  align-items: center; /* Centers items horizontally */
+  height: 100%; /* Takes full height of the container */
 }
 
 .product-overview .details label {
   display: block;
   font-weight: bold;
-  color: #ff8800;
-  margin-top: 10px;
+  color: #ffda79; /* Gold */
+  margin-top: 15px;
+  text-align: center; /* Center the text horizontally */
+  display: flex; /* Make label a flex container */
+  justify-content: center; /* Center the text horizontally */
+  align-items: center; /* Center the text vertically */
 }
+
 
 .product-overview .details input,
 .product-overview .details textarea {
-  width: 100%;
-  padding: 5px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  width: 80%;
+  padding: 10px;
+  margin-top: 8px;
+  border: 1px solid #666; /* Subtle gray */
+  border-radius: 8px;
   resize: none;
-  text-align: center;
+  background-color: #3a4750; /* Dark background for inputs */
+  color: #fff; /* White text */
+  text-align: center; /* Center the text horizontally */
+  display: flex; /* Make label a flex container */
+  justify-content: center; /* Center the text horizontally */
+  align-items: center; /* Center the text vertically */
 }
 
 .product-overview .close-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #ff8800;
+  background: #ff6f61; /* Vibrant coral close button */
   color: white;
   border: none;
-  padding: 5px 10px;
+  padding: 6px 10px;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 1.2em;
 }
 
 .product-overview .close-btn:hover {
-  background-color: #ff6600;
+  background-color: #e0534e; /* Darker coral */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .auction-item {
+    flex: 1 1 calc(50% - 30px); /* Two items per row on tablets */
+  }
+}
+
+@media (max-width: 480px) {
+  .auction-item {
+    flex: 1 1 100%; /* One item per row on smaller screens */
+  }
 }
