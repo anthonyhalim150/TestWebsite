@@ -188,8 +188,8 @@ function displayProductOverview(product) {
     document.getElementById('product-duration').value = product.duration;
     const startingTime = new Date(product.starting_time);
 
-    // Use toLocaleString() to get the formatted local time
-    const formattedTime = startingTime.toLocaleString('en-CA', { hour12: true }).replace(',', '').slice(0, 16);
+    // Use toLocaleString() to get the formatted local time, hour12: is false, since datetime-local input ga support AM/PM, but it will automatically convert things like 13:00 to 1:00 PM
+    const formattedTime = startingTime.toLocaleString('en-CA', { hour12: false }).replace(',', '').slice(0, 16);
 
     // Set the formatted value to the datetime-local input
     document.getElementById('product-start').value = formattedTime;
