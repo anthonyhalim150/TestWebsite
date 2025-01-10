@@ -112,6 +112,7 @@ CREATE TABLE AUCTION_ITEMS(
     item_name VARCHAR(255) NOT NULL,
     stock INT NOT NULL,
     description TEXT,
+	category TEXT NOT NULL,
     image VARCHAR(255),
     starting_price DECIMAL(10, 2) NOT NULL,
     starting_time DATETIME,

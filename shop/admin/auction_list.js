@@ -21,7 +21,7 @@ async function fetch_products(sorted_items = null) {
                         <img src="${product.image}" alt="Not Found!" 
                         original-image="${product.image}" class="product-image">
                     </td>
-                    <td>${product.name}</td>
+                    <td>${product.item_name}</td>
                     <td>$${product.starting_price}</td>
                     <td>${product.stock}</td>
                     <td>${product.description || 'N/A'}</td>

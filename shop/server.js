@@ -1214,7 +1214,7 @@ app.get('/auctions', async (req, res) => {
     }
 });
 app.post("/add-new-auction", upload.single("product-image"), async (req, res) => {
-    const { name, price, description, stock, category, duration } = req.body;
+    const { name, price, starting_time, description, stock, category, duration } = req.body;
   
     // Validate inputs
     if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !req.file || !category || !duration || duration <= 0) {
@@ -1244,10 +1244,10 @@ app.post("/add-new-auction", upload.single("product-image"), async (req, res) =>
           const connection = await pool.getConnection();
           try {
             const query = `
-              INSERT INTO AUCTION_ITEMS (item_name, stock, description, image, starting_price, duration) 
-              VALUES (?, ?, ?, ?, ?,  ?)
+              INSERT INTO AUCTION_ITEMS (item_name, stock, description, category, image, starting_price, duration, starting_time) 
+              VALUES (?, ?, ?, ?, ?, ?,  ?)
             `;
-            const values = [name, stock, description, imageUrl, price, duration];
+            const values = [name, stock, description, category, imageUrl, price, duration, starting_time||null];
   
             const [result] = await connection.query(query, values);
             res.status(201).json({

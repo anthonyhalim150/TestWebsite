@@ -10,7 +10,7 @@ async function addProduct(event) {
     const imageFile = document.getElementById('product-image').files[0]; // Get the selected file
     const category = document.getElementById('product-category').value;
     const duration = document.getElementById('product-duration').value;
-
+    const starting_time = document.getElementById('product-start').value;
     // Validate form inputs
     if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !imageFile || !category|| !duration || duration <=0) {
         alert('All fields are required, and price/stock/duration must be positive numbers.');
@@ -26,6 +26,7 @@ async function addProduct(event) {
     formData.append('product-image', imageFile); // Key must match the backend's expected key
     formData.append('category', category);
     formData.append('duration', duration);
+    formData.append('starting_time', starting_time);
 
 
     try {
