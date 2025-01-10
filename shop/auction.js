@@ -1,103 +1,102 @@
 document.addEventListener("DOMContentLoaded", () => {
-  let items = []; // Array to store auction items
-  let currentIndex = 0;
-  let timeLeft = 0; // Timer for the current item
+  let auctionItems = []; // Array to store auction items
+  let timerIntervals = []; // Store timers for auction items
 
-  // DOM Elements
-  const timerElement = document.getElementById("timer");
-  const hammerElement = document.getElementById("hammer");
-  const countdownElement = document.getElementById("countdown");
-  const itemElement = document.getElementById("item");
-  // Fetch all auction items from the server
+  // Fetch auction items from the server
   const fetchAuctionItems = async () => {
     try {
       const response = await fetch("http://localhost:3000/auction");
       const data = await response.json();
-      items = data.map(item => ({
-        id: item.itemID,
+
+      auctionItems = data.map(item => ({
+        id: item.id,
         name: item.item_name,
+        stock: item.stock,
+        description: item.description,
+        category: item.category,
+        image: item.image,
         startingPrice: item.starting_price,
-        timeLeft: item.duration
+        duration: item.duration,
+        startingTime: new Date(item.starting_time), // Convert to Date object
       }));
-      initializeAuction();
+
+      renderAuctionItems();
     } catch (error) {
-      console.error("Error fetching auction data:", error);
+      console.error("Error fetching auction items:", error);
     }
   };
 
-  // Initialize auction based on fetched items
-  const initializeAuction = () => {
-    if (items.length === 0) {
-      itemElement.textContent = "No Items Available";
-      timerElement.style.display = "none";
-      countdownElement.style.display = "none";
-    } else {
-      loadItem(items[currentIndex]);
-      startTimer();
-    }
+  // Render auction items to the page
+  const renderAuctionItems = () => {
+    const auctionContainer = document.getElementById("auction-items");
+    auctionContainer.innerHTML = ""; // Clear existing items
+
+    auctionItems.forEach(item => {
+      const itemElement = document.createElement("div");
+      itemElement.classList.add("auction-item");
+      itemElement.dataset.id = item.id;
+
+      itemElement.innerHTML = `
+        <img src="${item.image}" alt="${item.name}" class="item-image">
+        <h3>${item.name}</h3>
+        <p>Starting Price: $${item.startingPrice}</p>
+        <p class="timer" id="timer-${item.id}"></p>
+      `;
+
+      auctionContainer.appendChild(itemElement);
+
+      startItemTimer(item); // Start countdown for each item
+
+      // Add click event to display product overview
+      itemElement.addEventListener("click", () => showProductOverview(item));
+    });
   };
 
-  // Load an item into the auction display
-  const loadItem = (item) => {
-    itemElement.textContent = `Item: ${item.name} | Starting Price: $${item.startingPrice}`;
-    timeLeft = item.timeLeft;
-    updateTimer();
-  };
+  // Start timer for a specific auction item
+  const startItemTimer = (item) => {
+    const timerElement = document.getElementById(`timer-${item.id}`);
+    const endTime = new Date(item.startingTime.getTime() + item.duration * 1000); // Add duration to starting time
 
-  // Update the timer display
-  const updateTimer = () => {
-    const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-    const seconds = (timeLeft % 60).toString().padStart(2, "0");
-    timerElement.textContent = `${minutes}:${seconds}`;
-  };
-
-  // Start the countdown with hammer strikes
-  const startCountdown = () => {
-    let strikeCount = 0;
-
-    const strikeHammer = () => {
-      hammerElement.classList.add("hit");
-      setTimeout(() => {
-        hammerElement.classList.remove("hit");
-        strikeCount++;
-
-        if (strikeCount < 3) {
-          setTimeout(strikeHammer, 500); // Delay between strikes
-        } else {
-          moveToNextItem(); // Proceed to the next item after strikes
-        }
-      }, 500); // Duration of each strike
-    };
-
-    strikeHammer();
-  };
-
-  // Move to the next item in the auction
-  const moveToNextItem = () => {
-    currentIndex++;
-    if (currentIndex < items.length) {
-      loadItem(items[currentIndex]);
-      startTimer();
-    } else {
-      console.log("Auction ended.");
-      itemElement.textContent = "No Items Available";
-      timerElement.style.display = "none";
-    }
-  };
-
-  // Start the timer for the current item
-  const startTimer = () => {
-    const timerInterval = setInterval(() => {
-      timeLeft--;
-      updateTimer();
+    const interval = setInterval(() => {
+      const currentTime = new Date();
+      const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
 
       if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        startCountdown();
+        clearInterval(interval);
+        timerElement.textContent = "Auction ended";
+      } else {
+        const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+        const seconds = (timeLeft % 60).toString().padStart(2, "0");
+        timerElement.textContent = `${minutes}:${seconds}`;
       }
     }, 1000);
+
+    timerIntervals.push(interval);
   };
 
-  // Initialize the auction process
+  // Show product overview in a popup
+  const showProductOverview = (item) => {
+    const overviewSection = document.getElementById("product-overview");
+    overviewSection.style.display = "block";
+
+    // Fill in product details
+    document.getElementById("product-name").value = item.name;
+    document.getElementById("product-price").value = item.startingPrice;
+    document.getElementById("product-stock").value = item.stock;
+    document.getElementById("product-description").value = item.description;
+    document.getElementById("product-category").value = item.category;
+
+    // Format starting time to local time for displa
+
+    const productImage = document.getElementById("product-image");
+    productImage.src = item.image || "placeholder.jpg"; // Fallback if no image is provided
+
+    // Add event listener to close button
+    document.querySelector(".close-btn").addEventListener("click", () => {
+      overviewSection.style.display = "none";
+    });
+  };
+
+  // Initialize auction
   fetchAuctionItems();
 });

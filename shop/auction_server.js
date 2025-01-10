@@ -42,59 +42,6 @@ app.get("/auction", (req, res) => {
   });
 });
 
-// Add a new auction item
-app.post("/auction", (req, res) => {
-  const { item_name, starting_price, time } = req.body;
-
-  if (!item_name || !starting_price || !time) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
-  const query = "INSERT INTO auction_items (item_name, starting_price, duration) VALUES (?, ?, ?)";
-  db.query(query, [item_name, starting_price, time], (err, result) => {
-    if (err) {
-      console.error("Error adding auction item:", err);
-      res.status(500).json({ error: "Database query failed" });
-    } else {
-      res.status(201).json({ message: "Item added successfully", itemID: result.insertId });
-    }
-  });
-});
-
-app.post("/start-auction", (req, res) => {
-  const { item_name, starting_price, time } = req.body;
-
-  if (!item_name || !starting_price || !time) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
-  const query = "INSERT INTO auction_items (starting_time) VALUES (?)";
-  db.query(query, [start_time], (err, result) => {
-    if (err) {
-      console.error("Error adding auction item:", err);
-      res.status(500).json({ error: "Database query failed" });
-    } else {
-      res.status(201).json({ message: "Auction Started Successfully!", itemID: result.insertId });
-    }
-  });
-});
-
-// Delete an auction item
-app.delete("/auction/:id", (req, res) => {
-  const { id } = req.params;
-
-  const query = "DELETE FROM auction_items WHERE itemID = ?";
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error("Error deleting auction item:", err);
-      res.status(500).json({ error: "Database query failed" });
-    } else if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Item not found" });
-    } else {
-      res.json({ message: "Item deleted successfully" });
-    }
-  });
-});
 
 // Start the server
 app.listen(PORT, () => {
