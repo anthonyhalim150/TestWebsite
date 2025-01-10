@@ -170,8 +170,13 @@ function displayProductOverview(product) {
     document.getElementById('product-description').value = product.description;
     document.getElementById('product-category').value = product.category;
     document.getElementById('product-duration').value = product.duration;
-    document.getElementById('product-start').value = product.starting_time;
+    const startingTime = new Date(product.starting_time);
 
+// Format the date to match the input's expected format (YYYY-MM-DDTHH:MM)
+    const formattedTime = startingTime.toISOString().slice(0, 16);
+
+    // Set the formatted value to the datetime-local input
+    document.getElementById('product-start').value = formattedTime;
     // Add a save button listener
     document.getElementById('save-button').onclick = () => saveProductChanges(product.id);
     document.getElementById('delete-button').onclick = () => delete_product(product.id);
