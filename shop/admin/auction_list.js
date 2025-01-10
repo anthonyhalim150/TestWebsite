@@ -90,7 +90,11 @@ async function saveProductChanges(productId) {
     formData.append('description', document.getElementById('product-description').value);
     formData.append('category', document.getElementById('product-category').value);
     formData.append('duration', document.getElementById('product-duration').value);
-    formData.append('starting_time', document.getElementById('product-start').value);
+    let time = document.getElementById('product-start').value;
+    if (time){
+        time = new Date(time).toISOString(); // Convert to UTC ISO form
+    }
+    formData.append('time', time);
 
     const imageFile = document.getElementById('image-form').files[0];
     if (imageFile) {

@@ -16,7 +16,10 @@ async function addProduct(event) {
         alert('All fields are required, and price/stock/duration must be positive numbers.');
         return;
     }
-    const starting_time = new Date(time).toISOString(); // Convert to UTC ISO form
+    let starting_time;
+    if (time){
+        starting_time = new Date(time).toISOString(); // Convert to UTC ISO form
+    }
     // Create FormData object to send data, including the image file
     const formData = new FormData();
     formData.append('name', name);
