@@ -105,7 +105,7 @@ CREATE TABLE FEEDBACK (
     FOREIGN KEY (comments_id) REFERENCES COMMENTS(comments_id)
 );
 
-
+use ecommerce;
 drop table AUCTION_ITEMS;
 CREATE TABLE AUCTION_ITEMS(
 	id INT AUTO_INCREMENT PRIMARY KEY,
@@ -118,6 +118,26 @@ CREATE TABLE AUCTION_ITEMS(
     starting_time DATETIME,
     duration INT NOT NULL -- Time in seconds for the auction
 );
+
+CREATE TABLE BIDS(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    auction_item_id INT NOT NULL,
+    user_id INT NOT NULL,
+    bid_amount DECIMAL(10, 2) NOT NULL,
+    bid_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_highest BOOLEAN DEFAULT FALSE, -- Marks if this is the highest bid
+    FOREIGN KEY (auction_item_id) REFERENCES AUCTION_ITEMS(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE
+);
+
+INSERT INTO AUCTION_ITEMS (item_name, stock, description, category, image, starting_price, starting_time, duration)
+VALUES
+('Vintage Clock', 5, 'A beautifully preserved vintage clock.', 'Antiques', 'Products/coal.png', 120.50, '2025-01-10 15:00:00', 3600),
+('Vintage Clock', 5, 'A beautifully preserved vintage clock.', 'Antiques', 'clock.jpg', 120.50, '2025-01-10 15:00:00', 3600),
+('Gaming Laptop', 3, 'High-performance gaming laptop with RTX 3060.', 'Electronics', 'laptop.jpg', 1500.00, '2025-01-10 16:00:00', 5400),
+('Diamond Necklace', 1, 'Exquisite diamond necklace with 24k gold chain.', 'Jewelry', 'necklace.jpg', 7500.00, '2025-01-10 17:00:00', 7200),
+('Oil Painting', 2, 'Original hand-painted oil painting.', 'Art', 'painting.jpg', 450.00, '2025-01-10 18:00:00', 3600);
+
 
 -- Example data
 INSERT INTO auction_items (item_name, starting_price, time)

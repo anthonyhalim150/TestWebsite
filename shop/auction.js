@@ -29,29 +29,100 @@ const fetchAuctionItems = async () => {
   }
 };
 
+// Fetch current highest bid for a specific item
+const fetchHighestBid = async (itemId) => {
+  try {
+    const response = await fetch(`http://localhost:3000/highest-bid?auction_item_id=${itemId}`);
+    const data = await response.json();
+    return data.highestBid || 0;
+  } catch (error) {
+    console.error("Error fetching highest bid:", error);
+    return 0;
+  }
+};
+
+// Place a bid
+const placeBid = async (itemId, bidAmount) => {
+  const userId = localStorage.getItem("userID");
+  try {
+    const response = await fetch("http://localhost:3000/bids", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ auction_item_id: itemId, user_id: userId, bid_amount: bidAmount }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      alert("Bid placed successfully!");
+      renderAuctionItems(); // Re-fetch and re-render auction items
+    } else {
+      alert(data.message || "Failed to place bid.");
+    }
+  } catch (error) {
+    console.error("Error placing bid:", error);
+  }
+};
+
+// Cancel a bid
+const cancelBid = async (itemId) => {
+  const userId = localStorage.getItem("userID");
+  try {
+    const response = await fetch(`http://localhost:3000/bids?auction_item_id=${itemId}&user_id=${userId}`, {
+      method: "DELETE",
+    });
+    if (response.ok) {
+      alert("Bid canceled successfully!");
+      renderAuctionItems(); // Re-fetch and re-render auction items
+    } else {
+      alert("Failed to cancel bid.");
+    }
+  } catch (error) {
+    console.error("Error canceling bid:", error);
+  }
+};
+
 // Render auction items to the page
-const renderAuctionItems = (items = filteredItems) => {
+const renderAuctionItems = async (items = filteredItems) => {
   const auctionContainer = document.getElementById("auction-items");
   auctionContainer.innerHTML = ""; // Clear existing items
 
-  items.forEach(item => {
+  for (const item of items) {
+    const highestBid = await fetchHighestBid(item.id);
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
-
+    const highestBidText = highestBid > 0 ? `$${highestBid}` : "No bids yet";
     itemElement.innerHTML = `
       <img src="${item.image}" alt="${item.name}" class="item-image">
       <h3>${item.name}</h3>
       <p>Starting Price: $${item.startingPrice}</p>
+      <p>Current Highest Bid: ${highestBidText}</p>
       <p class="timer" id="timer-${item.id}"></p>
+      <button class="bid-btn" id="bid-btn-${item.id}">Place Bid</button>
+      <button class="cancel-bid-btn" id="cancel-bid-btn-${item.id}">Cancel Bid</button>
     `;
 
     auctionContainer.appendChild(itemElement);
 
     startItemTimer(item); // Start countdown for each item
 
+    // Add click events to bid and cancel bid buttons
+    document.getElementById(`bid-btn-${item.id}`).addEventListener("click", () => {
+      const bidAmount = prompt("Enter your bid amount:");
+      if (bidAmount && parseFloat(bidAmount) > parseFloat(highestBid)) {
+        placeBid(item.id, parseFloat(bidAmount));
+      } else {
+        alert("Bid amount must be higher than the current highest bid.");
+      }
+    });
+
+    document.getElementById(`cancel-bid-btn-${item.id}`).addEventListener("click", () => {
+      if (confirm("Are you sure you want to cancel your bid?")) {
+        cancelBid(item.id);
+      }
+    });
+
     // Add click event to display product overview
-    itemElement.addEventListener("click", () => showProductOverview(item));
-  });
+    itemElement.addEventListener("click", () => showProductOverview(item, highestBid));
+  }
 };
 
 // Start timer for a specific auction item
@@ -77,7 +148,7 @@ const startItemTimer = (item) => {
 };
 
 // Show product overview in a popup
-const showProductOverview = (item) => {
+const showProductOverview = (item, highestBid) => {
   const overviewSection = document.getElementById("product-overview");
   overviewSection.style.display = "block";
 
@@ -90,8 +161,17 @@ const showProductOverview = (item) => {
   const productImage = document.getElementById("product-image");
   productImage.src = item.image || "placeholder.jpg";
 
+  const highestBidElement = document.createElement("p");
+  const highestBidText = highestBid > 0 ? `$${highestBid}` : "No bids yet";
+  highestBidElement.textContent = `Current Highest Bid: ${highestBidText}`;
+  highestBidElement.style.marginTop = "10px";
+
+  const detailsSection = document.querySelector(".details");
+  detailsSection.appendChild(highestBidElement);
+
   document.querySelector(".close-btn").addEventListener("click", () => {
     overviewSection.style.display = "none";
+    highestBidElement.remove(); // Clean up the appended element
   });
 };
 
