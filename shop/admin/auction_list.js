@@ -188,14 +188,12 @@ function displayProductOverview(product) {
     document.getElementById('product-duration').value = product.duration;
     const startingTime = new Date(product.starting_time);
 
-    // Adjust to local time
-    const localTime = new Date(startingTime.toLocaleString());
+    // Use toLocaleString() to get the formatted local time
+    const formattedTime = startingTime.toLocaleString('en-CA', { hour12: false }).replace(',', '').slice(0, 16);
 
-    // Format the local time to match the input's expected format (YYYY-MM-DDTHH:MM)
-    const formattedTime = localTime.toISOString().slice(0, 16);
-
-    // Set the formatted value to the datetime-local input, so that when product-overview is opened, it is not blank.
+    // Set the formatted value to the datetime-local input
     document.getElementById('product-start').value = formattedTime;
+
 
     // Add a save button listener
     document.getElementById('save-button').onclick = () => saveProductChanges(product.id);
