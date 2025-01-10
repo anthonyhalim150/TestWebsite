@@ -3,8 +3,8 @@ async function addProduct(event) {
     event.preventDefault(); // Prevent form reload
 
     // Get form data
-    const item_name = document.getElementById('product-name').value;
-    const starting_price = parseFloat(document.getElementById('product-price').value);
+    const name = document.getElementById('product-name').value;
+    const price = parseFloat(document.getElementById('product-price').value);
     const description = document.getElementById('product-description').value;
     const stock = parseInt(document.getElementById('product-stock').value);
     const imageFile = document.getElementById('product-image').files[0]; // Get the selected file
@@ -19,11 +19,11 @@ async function addProduct(event) {
     const starting_time = new Date(time).toISOString(); // Convert to UTC ISO form
     // Create FormData object to send data, including the image file
     const formData = new FormData();
-    formData.append('name', item_name);
-    formData.append('price', starting_price);
+    formData.append('name', name);
+    formData.append('price', price);
     formData.append('starting_time', starting_time);
-    formData.append('stock', stock);
     formData.append('description', description);
+    formData.append('stock', stock);
     formData.append('product-image', imageFile); // Key must match the backend's expected key
     formData.append('category', category);
     formData.append('duration', duration);
