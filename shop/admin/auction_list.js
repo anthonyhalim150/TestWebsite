@@ -189,7 +189,7 @@ function displayProductOverview(product) {
     const startingTime = new Date(product.starting_time);
 
     // Use toLocaleString() to get the formatted local time
-    const formattedTime = startingTime.toLocaleString('en-CA', { hour12: false }).replace(',', '').slice(0, 16);
+    const formattedTime = startingTime.toLocaleString('en-CA', { hour12: true }).replace(',', '').slice(0, 16);
 
     // Set the formatted value to the datetime-local input
     document.getElementById('product-start').value = formattedTime;
