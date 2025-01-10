@@ -222,6 +222,8 @@ td .product-image {
     display: none; /* Hidden by default */
     max-width: 500px;
     width: 100%; /* Responsive width */
+    max-height: 80vh; /* Limit the height of the modal */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .product-overview img {
