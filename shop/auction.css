@@ -126,13 +126,14 @@ h1 {
   border: 2px solid #ffda79; /* Gold border */
 }
 
-.product-overview .details {
-  display: flex; /* Enables Flexbox */
-  flex-direction: column; /* Stacks items vertically */
-  justify-content: center; /* Centers items vertically */
-  align-items: center; /* Centers items horizontally */
-  height: 100%; /* Takes full height of the container */
+.details {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center horizontally */
+  gap: 15px; /* Space between elements */
+  width: 100%; /* Ensure children fit within the container */
 }
+
 
 .product-overview .details label {
   display: block;
@@ -160,21 +161,23 @@ h1 {
   justify-content: center; /* Center the text horizontally */
   align-items: center; /* Center the text vertically */
 }
-#product-description{
-  width: 80%;
-  height: 300px; 
+#product-description {
+  width: 85%;
+  height: 150px; /* Set the height explicitly */
   padding: 10px;
-  margin-top: 8px;
-  border: 1px solid #666; /* Subtle gray */
+  border: 1px solid #666;
   border-radius: 8px;
   resize: none;
-  background-color: #3a4750; /* Dark background for inputs */
-  color: #fff; /* White text */
+  background-color: #3a4750;
+  color: #fff;
+  font-size: 1em;
+  line-height: 1.5;
+  overflow-y: auto; /* Enable scrolling if content overflows */
+  box-sizing: border-box; /* Includes padding and borders in dimensions */
   text-align: center; /* Center the text horizontally */
-  display: flex; /* Make label a flex container */
-  justify-content: center; /* Center the text horizontally */
-  align-items: center; /* Center the text vertically */
+  align-items: center; /* Ensures it takes full width available */
 }
+
 
 .product-overview .close-btn {
   position: absolute;
