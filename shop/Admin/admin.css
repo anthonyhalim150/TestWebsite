@@ -240,7 +240,7 @@ td .product-image {
 }
 .product-overview .details {
     max-height: 500px;          /* Limit the height of the details container */
-    max-width: 400px;          /* Limit the height of the details container */
+    max-width: 480px;          /* Limit the height of the details container */
     overflow-y: auto;           /* Scroll only the details section if content overflows */
 }
 
