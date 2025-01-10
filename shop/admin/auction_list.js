@@ -134,7 +134,7 @@ async function delete_product(productId) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ productId: parseInt(productId) }),
+            body: JSON.stringify({ itemID: parseInt(productId) }),
         });
 
         const result = await response.json();
