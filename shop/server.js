@@ -839,7 +839,7 @@ app.post("/add-new-auction", upload.single("product-image"), async (req, res) =>
   });
 
   // Delete an auction item
-app.delete("/auction", async (req, res) => {
+app.delete("/remove-auction", async (req, res) => {
   const { itemID } = req.body;
 
   if (!itemID) {
@@ -849,7 +849,7 @@ app.delete("/auction", async (req, res) => {
   try {
     const connection = await pool.getConnection();
     try {
-      const [rows] = await connection.query("SELECT image_url FROM auction_items WHERE id = ?", [itemID]);
+      const [rows] = await connection.query("SELECT image_url FROM AUCTION_ITEMS WHERE id = ?", [itemID]);
 
       if (rows.length === 0) {
         return res.status(404).json({ success: false, error: "Item not found." });
@@ -858,7 +858,7 @@ app.delete("/auction", async (req, res) => {
       const imageUrl = rows[0].image_url;
       const imageName = imageUrl.split("/").slice(-2).join("/");
 
-      const deleteQuery = "DELETE FROM auction_items WHERE id = ?";
+      const deleteQuery = "DELETE FROM AUCTION_ITEMS WHERE id = ?";
       const [result] = await connection.query(deleteQuery, [itemID]);
 
       if (result.affectedRows === 0) {
@@ -876,44 +876,7 @@ app.delete("/auction", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to remove item." });
   }
 });
-// Delete an auction item
-app.delete("/auction", async (req, res) => {
-    const { itemID } = req.body;
-  
-    if (!itemID) {
-      return res.status(400).json({ success: false, error: "Item ID is required." });
-    }
-  
-    try {
-      const connection = await pool.getConnection();
-      try {
-        const [rows] = await connection.query("SELECT image FROM AUCTION_ITEMS WHERE id = ?", [itemID]);
-  
-        if (rows.length === 0) {
-          return res.status(404).json({ success: false, error: "Item not found." });
-        }
-  
-        const imageUrl = rows[0].image_url;
-        const imageName = imageUrl.split("/").slice(-2).join("/");
-  
-        const deleteQuery = "DELETE FROM AUCTION_ITEMS WHERE id = ?";
-        const [result] = await connection.query(deleteQuery, [itemID]);
-  
-        if (result.affectedRows === 0) {
-          return res.status(404).json({ success: false, error: "Item not found." });
-        }
-  
-        await bucket.file(imageName).delete();
-  
-        res.status(200).json({ success: true, message: "Item deleted successfully!" });
-      } finally {
-        connection.release();
-      }
-    } catch (error) {
-      console.error("Error removing auction item:", error.message);
-      res.status(500).json({ success: false, error: "Failed to remove item." });
-    }
-  });
+
 
 app.post('/add-new-user', async (req, res) => {
     const { username, password, role, email} = req.body;

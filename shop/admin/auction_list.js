@@ -88,6 +88,8 @@ async function saveProductChanges(productId) {
     formData.append('stock', parseInt(document.getElementById('product-stock').value, 10));
     formData.append('description', document.getElementById('product-description').value);
     formData.append('category', document.getElementById('product-category').value);
+    formData.append('duration', document.getElementById('product-duration').value);
+    formData.append('starting_time', document.getElementById('product-start').value);
 
     const imageFile = document.getElementById('image-form').files[0];
     if (imageFile) {
@@ -126,7 +128,7 @@ async function delete_product(productId) {
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`${API_URL}/remove-product`, {
+        const response = await fetch(`${API_URL}/remove-auction`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -158,10 +160,12 @@ function displayProductOverview(product) {
     // Populate the overview card with product details
     document.getElementById('product-image').src = product.image;
     document.getElementById('product-name').value = product.name;
-    document.getElementById('product-price').value = product.price;
+    document.getElementById('product-price').value = product.starting_price;
     document.getElementById('product-stock').value = product.stock;
     document.getElementById('product-description').value = product.description;
     document.getElementById('product-category').value = product.category;
+    document.getElementById('product-duration').value = product.duration;
+    document.getElementById('product-start').value = product.starting_time;
 
     // Add a save button listener
     document.getElementById('save-button').onclick = () => saveProductChanges(product.id);
