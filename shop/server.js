@@ -9,6 +9,8 @@ const multer = require('multer'); // For file uploads
 const path = require('path');
 const { Storage } = require('@google-cloud/storage');
 const { NONAME } = require('dns');
+const axios = require('axios');
+
 
 // Secret key for JWT
 const JWT_SECRET = process.env.JWT_SECRET || 'blabla729wwdee302!2-';
@@ -84,8 +86,26 @@ app.post('/signup', async (req, res) => {
             connection.release();
         }
     } catch (error) {
-        console.error('Error signing up:', error);
-        res.json({ success: false, error: 'Internal server error.' });
+        if (error.code === 'ER_DUP_ENTRY') {
+            if (error.message.includes('username')) {
+                // Handle duplicate username error
+                console.error('Duplicate username error:', error);
+                res.status(400).json({ success: false, error: 'Username already exists.' });
+            } else if (error.message.includes('email')) {
+                // Handle duplicate email error
+                console.error('Duplicate email error:', error);
+                res.status(400).json({ success: false, error: 'Email already exists.' });
+            } else {
+                // General duplicate entry error
+                console.error('Duplicate entry error:', error);
+                res.status(400).json({ success: false, error: 'Duplicate entry detected.' });
+            }
+        }
+        else {
+            // Handle other errors
+            console.error('Error signing up:', error);
+            res.status(500).json({ success: false, error: 'Internal server error.' });
+        }
     }
 });
 
@@ -692,190 +712,6 @@ app.delete('/remove-product', async (req, res) => {
     }
 });
 
-app.put('/auction-items/:id', upload.single('auction-image'), async (req, res) => {
-    const auctionItemId = req.params.id;
-    const { item_name, starting_price, stock, description, duration, starting_time } = req.body;
-    try {
-        const connection = await pool.getConnection();
-
-        try {
-            // Fetch the existing image URL
-            const [rows] = await connection.query('SELECT image FROM AUCTION_ITEMS WHERE itemID = ?', [auctionItemId]);
-
-            if (rows.length === 0) {
-                return res.status(404).json({ success: false, error: 'Auction item not found.' });
-            }
-
-            const oldImageUrl = rows[0].image;
-            const oldImageName = oldImageUrl ? oldImageUrl.split('/').slice(-2).join('/') : null; // Extract the file name from the URL
-
-            // Handle new image upload
-            let newImagePath = oldImageUrl;
-            if (req.file) {
-                const uniqueName = `AuctionItems/${Date.now()}${path.extname(req.file.originalname)}`;
-                const blob = bucket.file(uniqueName);
-                const blobStream = blob.createWriteStream({
-                    metadata: { contentType: req.file.mimetype },
-                });
-
-                await new Promise((resolve, reject) => {
-                    blobStream.on('error', reject);
-                    blobStream.on('finish', resolve);
-                    blobStream.end(req.file.buffer);
-                });
-
-                newImagePath = `https://storage.googleapis.com/${bucketName}/${uniqueName}`;
-
-                // Remove the old image from Google Cloud Storage
-                if (oldImageName) {
-                    await bucket.file(oldImageName).delete().catch((err) => {
-                        console.error('Error deleting old image:', err.message);
-                    });
-                }
-            }
-
-            // Update auction item details in the database
-            const updateQuery = `
-                UPDATE AUCTION_ITEMS
-                SET item_name = ?, starting_price = ?, stock = ?, description = ?, duration = ?, image = ?, starting_time = ?
-                WHERE itemID = ?
-            `;
-            const [result] = await connection.query(updateQuery, [
-                item_name,
-                starting_price,
-                stock,
-                description,
-                duration,
-                newImagePath,
-                starting_time || null,
-                auctionItemId,
-            ]);
-
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ success: false, error: 'Auction item not found.' });
-            }
-
-            res.status(200).json({ success: true, message: 'Auction item updated successfully!' });
-        } finally {
-            connection.release();
-        }
-    } catch (error) {
-        console.error('Error updating auction item:', error.message);
-        res.status(500).json({ success: false, error: 'Failed to update auction item.', details: error.message });
-    }
-});
-
-
-app.get("/auction", async (req, res) => {
-    try {
-      const connection = await pool.getConnection();
-      try {
-        const [rows] = await connection.query("SELECT * FROM AUCTION_ITEMS");
-        res.json(rows);
-      } finally {
-        connection.release();
-      }
-    } catch (error) {
-      console.error("Error fetching auction items:", error.message);
-      res.status(500).json({ success: false, error: "Database query failed." });
-    }
-  });
-app.post("/add-new-auction", upload.single("product-image"), async (req, res) => {
-    const { name, price, description, stock, category, duration } = req.body;
-  
-    // Validate inputs
-    if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !req.file || !category || !duration || duration <= 0) {
-      return res.status(400).json({ success: false, error: "All fields are required, and price/stock/duration must be positive numbers." });
-    }
-  
-    try {
-      // Generate a unique name for the uploaded image
-      const uniqueName = `AuctionItems/${Date.now()}${path.extname(req.file.originalname)}`;
-      const blob = bucket.file(uniqueName);
-  
-      const blobStream = blob.createWriteStream({
-        metadata: {
-          contentType: req.file.mimetype,
-        },
-      });
-  
-      blobStream.on("error", (error) => {
-        console.error("Upload failed:", error.message);
-        res.status(500).json({ success: false, error: "Image upload failed." });
-      });
-  
-      blobStream.on("finish", async () => {
-        const imageUrl = `https://storage.googleapis.com/${bucketName}/${uniqueName}`;
-  
-        try {
-          const connection = await pool.getConnection();
-          try {
-            const query = `
-              INSERT INTO AUCTION_ITEMS (item_name, stock, description, image, starting_price, duration) 
-              VALUES (?, ?, ?, ?, ?,  ?)
-            `;
-            const values = [name, stock, description, imageUrl, price, duration];
-  
-            const [result] = await connection.query(query, values);
-            res.status(201).json({
-              success: true,
-              message: "Auction item added successfully!",
-              itemID: result.insertId,
-            });
-          } finally {
-            connection.release();
-          }
-        } catch (error) {
-          console.error("Database error:", error.message);
-          res.status(500).json({ success: false, error: "Failed to add auction item." });
-        }
-      });
-  
-      blobStream.end(req.file.buffer);
-    } catch (error) {
-      console.error("Error handling request:", error.message);
-      res.status(500).json({ success: false, error: "Internal server error." });
-    }
-  });
-
-  // Delete an auction item
-app.delete("/remove-auction", async (req, res) => {
-  const { itemID } = req.body;
-
-  if (!itemID) {
-    return res.status(400).json({ success: false, error: "Item ID is required." });
-  }
-
-  try {
-    const connection = await pool.getConnection();
-    try {
-      const [rows] = await connection.query("SELECT image_url FROM AUCTION_ITEMS WHERE id = ?", [itemID]);
-
-      if (rows.length === 0) {
-        return res.status(404).json({ success: false, error: "Item not found." });
-      }
-
-      const imageUrl = rows[0].image_url;
-      const imageName = imageUrl.split("/").slice(-2).join("/");
-
-      const deleteQuery = "DELETE FROM AUCTION_ITEMS WHERE id = ?";
-      const [result] = await connection.query(deleteQuery, [itemID]);
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ success: false, error: "Item not found." });
-      }
-
-      await bucket.file(imageName).delete();
-
-      res.status(200).json({ success: true, message: "Item deleted successfully!" });
-    } finally {
-      connection.release();
-    }
-  } catch (error) {
-    console.error("Error removing auction item:", error.message);
-    res.status(500).json({ success: false, error: "Failed to remove item." });
-  }
-});
 
 
 app.post('/add-new-user', async (req, res) => {
@@ -1243,12 +1079,13 @@ app.post('/save-user-settings', async (req, res) => {
 });
 
 
+
 app.post('/analyze-comments', async (req, res) => {
     try {
         const comments = req.body.comments || []; // Ensure comments are passed, klo empty error
         console.log('Sending comments to Flask for analysis:', comments);
 
-        const flaskResponse = await axios.post('http://127.0.0.1:5000/analyze', req.body);//Gabisa pake localhost
+        const flaskResponse = await axios.post('https://ai-723848267249.us-central1.run.app/analyze', req.body);//Gabisa pake localhost
 
         console.log('Response from Flask:', flaskResponse.data);  // Log the response data
 
@@ -1270,7 +1107,7 @@ app.post('/train-AI', async (req, res) => {
         const comments = req.body.comments || []; // Ensure comments are passed
         console.log('Sending comments to Flask for analysis:', comments);
 
-        const flaskResponse = await axios.post('http://127.0.0.1:5000/train-enhanced', req.body);//Gabisa pake localhost
+        const flaskResponse = await axios.post('https://ai-723848267249.us-central1.run.app/train-enhanced', req.body);//Gabisa pake localhost
 
         console.log('Response from Flask:', flaskResponse.data);  // Log the response data
 
@@ -1287,7 +1124,191 @@ app.post('/train-AI', async (req, res) => {
 });
 
 
+app.put('/auction-items/:id', upload.single('auction-image'), async (req, res) => {
+    const auctionItemId = req.params.id;
+    const { item_name, starting_price, stock, description, duration, starting_time } = req.body;
+    try {
+        const connection = await pool.getConnection();
 
+        try {
+            // Fetch the existing image URL
+            const [rows] = await connection.query('SELECT image FROM AUCTION_ITEMS WHERE itemID = ?', [auctionItemId]);
+
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Auction item not found.' });
+            }
+
+            const oldImageUrl = rows[0].image;
+            const oldImageName = oldImageUrl ? oldImageUrl.split('/').slice(-2).join('/') : null; // Extract the file name from the URL
+
+            // Handle new image upload
+            let newImagePath = oldImageUrl;
+            if (req.file) {
+                const uniqueName = `AuctionItems/${Date.now()}${path.extname(req.file.originalname)}`;
+                const blob = bucket.file(uniqueName);
+                const blobStream = blob.createWriteStream({
+                    metadata: { contentType: req.file.mimetype },
+                });
+
+                await new Promise((resolve, reject) => {
+                    blobStream.on('error', reject);
+                    blobStream.on('finish', resolve);
+                    blobStream.end(req.file.buffer);
+                });
+
+                newImagePath = `https://storage.googleapis.com/${bucketName}/${uniqueName}`;
+
+                // Remove the old image from Google Cloud Storage
+                if (oldImageName) {
+                    await bucket.file(oldImageName).delete().catch((err) => {
+                        console.error('Error deleting old image:', err.message);
+                    });
+                }
+            }
+
+            // Update auction item details in the database
+            const updateQuery = `
+                UPDATE AUCTION_ITEMS
+                SET item_name = ?, starting_price = ?, stock = ?, description = ?, duration = ?, image = ?, starting_time = ?
+                WHERE itemID = ?
+            `;
+            const [result] = await connection.query(updateQuery, [
+                item_name,
+                starting_price,
+                stock,
+                description,
+                duration,
+                newImagePath,
+                starting_time || null,
+                auctionItemId,
+            ]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, error: 'Auction item not found.' });
+            }
+
+            res.status(200).json({ success: true, message: 'Auction item updated successfully!' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error updating auction item:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to update auction item.', details: error.message });
+    }
+});
+
+
+app.get('/auctions', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `SELECT * FROM AUCTION_ITEMS`;
+            const [results] = await connection.query(query);
+            res.json({ success: true, items: results });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        res.json({ success: false, error: 'Error fetching items.' });
+    }
+});
+app.post("/add-new-auction", upload.single("product-image"), async (req, res) => {
+    const { name, price, description, stock, category, duration } = req.body;
+  
+    // Validate inputs
+    if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !req.file || !category || !duration || duration <= 0) {
+      return res.status(400).json({ success: false, error: "All fields are required, and price/stock/duration must be positive numbers." });
+    }
+  
+    try {
+      // Generate a unique name for the uploaded image
+      const uniqueName = `AuctionItems/${Date.now()}${path.extname(req.file.originalname)}`;
+      const blob = bucket.file(uniqueName);
+  
+      const blobStream = blob.createWriteStream({
+        metadata: {
+          contentType: req.file.mimetype,
+        },
+      });
+  
+      blobStream.on("error", (error) => {
+        console.error("Upload failed:", error.message);
+        res.status(500).json({ success: false, error: "Image upload failed." });
+      });
+  
+      blobStream.on("finish", async () => {
+        const imageUrl = `https://storage.googleapis.com/${bucketName}/${uniqueName}`;
+  
+        try {
+          const connection = await pool.getConnection();
+          try {
+            const query = `
+              INSERT INTO AUCTION_ITEMS (item_name, stock, description, image, starting_price, duration) 
+              VALUES (?, ?, ?, ?, ?,  ?)
+            `;
+            const values = [name, stock, description, imageUrl, price, duration];
+  
+            const [result] = await connection.query(query, values);
+            res.status(201).json({
+              success: true,
+              message: "Auction item added successfully!",
+              itemID: result.insertId,
+            });
+          } finally {
+            connection.release();
+          }
+        } catch (error) {
+          console.error("Database error:", error.message);
+          res.status(500).json({ success: false, error: "Failed to add auction item." });
+        }
+      });
+  
+      blobStream.end(req.file.buffer);
+    } catch (error) {
+      console.error("Error handling request:", error.message);
+      res.status(500).json({ success: false, error: "Internal server error." });
+    }
+  });
+
+  // Delete an auction item
+app.delete("/remove-auction", async (req, res) => {
+  const { itemID } = req.body;
+
+  if (!itemID) {
+    return res.status(400).json({ success: false, error: "Item ID is required." });
+  }
+
+  try {
+    const connection = await pool.getConnection();
+    try {
+      const [rows] = await connection.query("SELECT image_url FROM AUCTION_ITEMS WHERE id = ?", [itemID]);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ success: false, error: "Item not found." });
+      }
+
+      const imageUrl = rows[0].image_url;
+      const imageName = imageUrl.split("/").slice(-2).join("/");
+
+      const deleteQuery = "DELETE FROM AUCTION_ITEMS WHERE id = ?";
+      const [result] = await connection.query(deleteQuery, [itemID]);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, error: "Item not found." });
+      }
+
+      await bucket.file(imageName).delete();
+
+      res.status(200).json({ success: true, message: "Item deleted successfully!" });
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error("Error removing auction item:", error.message);
+    res.status(500).json({ success: false, error: "Failed to remove item." });
+  }
+});
 
 
 

@@ -35,7 +35,7 @@ async function addProduct(event) {
         });
         const result = await response.json();
         if (result.success) {
-            alert('Product added successfully!');
+            alert('Auction Product added successfully!');
         } else {
             alert('Failed to add product. Please try again.');
         }
