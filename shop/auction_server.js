@@ -41,6 +41,28 @@ app.get("/auction", (req, res) => {
     }
   });
 });
+app.post('/update-auction-status', (req, res) => {
+  const { id } = req.body;
+
+  if (!id) {
+      return res.status(400).json({ success: false, message: "AuctionID is required" });
+  }
+
+  const query = 'UPDATE AUCTION_ITEMS SET is_expired = TRUE WHERE id = ?';
+
+  db.query(query, [id], (err, results) => {
+      if (err) {
+          console.error('Failed to update auction status:', err);
+          return res.status(500).json({ success: false, message: "Database error" });
+      }
+
+      if (results.affectedRows > 0) {
+          res.json({ success: true, message: "Auction marked as expired" });
+      } else {
+          res.status(404).json({ success: false, message: "Item not found" });
+      }
+  });
+});
 
 app.post("/bids", (req, res) => {
   let { auction_item_id, user_id, bid_amount } = req.body;//change this to const later

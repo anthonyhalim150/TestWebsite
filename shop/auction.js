@@ -137,8 +137,25 @@ const startItemTimer = (item) => {
     if (timeLeft <= 0) {
       clearInterval(interval);
       timerElement.textContent = "Auction ended";
-      
-    } else {
+      fetch('http://localhost:3000/update-auction-status', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: item.id }), // Replace `auctionItemId` with the actual item's ID
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Auction marked as expired successfully");
+            } else {
+                console.error("Failed to update auction status");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+
+    } 
+    else {
       const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
       const seconds = (timeLeft % 60).toString().padStart(2, "0");
       timerElement.textContent = `${minutes}:${seconds}`;
