@@ -84,8 +84,8 @@ function searchItems() {
 
 async function saveProductChanges(productId) {
     const formData = new FormData();
-    if (parseFloat(document.getElementById('product-price').value) > 499,999,999,999.99){
-        alert('Starting price too high, please enter a number below 500 billion.');
+    if (parseFloat(document.getElementById('product-price').value) > 499999999999.99){
+        alert('Starting price too high, please enter a number below 500 billion!');
         return;
     }
     if ('stock', parseInt(document.getElementById('product-stock').value, 10) > 99999999.99 ||  document.getElementById('product-duration').value >  99999999.99){
