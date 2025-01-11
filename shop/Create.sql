@@ -116,6 +116,7 @@ CREATE TABLE AUCTION_ITEMS(
     image VARCHAR(255),
     starting_price DECIMAL(10, 2) NOT NULL,
     starting_time DATETIME,
+	is_expired BOOLEAN DEFAULT FALSE,
     duration INT NOT NULL -- Time in seconds for the auction
 );
 
@@ -125,10 +126,11 @@ CREATE TABLE BIDS(
     user_id INT NOT NULL,
     bid_amount DECIMAL(10, 2) NOT NULL,
     bid_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_highest BOOLEAN DEFAULT FALSE, -- Marks if this is the highest bid
     FOREIGN KEY (auction_item_id) REFERENCES AUCTION_ITEMS(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE
 );
+drop table BIDS;
+USE ECOMMERCE;
 
 INSERT INTO AUCTION_ITEMS (item_name, stock, description, category, image, starting_price, starting_time, duration)
 VALUES

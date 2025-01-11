@@ -31,7 +31,7 @@ db.connect((err) => {
 
 // Fetch all auction items
 app.get("/auction", (req, res) => {
-  const query = "SELECT * FROM auction_items";
+  const query = "SELECT * FROM auction_items WHERE is_expired = FALSE";
   db.query(query, (err, results) => {
     if (err) {
       console.error("Error fetching auction items:", err);

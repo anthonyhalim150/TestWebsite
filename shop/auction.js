@@ -137,6 +137,7 @@ const startItemTimer = (item) => {
     if (timeLeft <= 0) {
       clearInterval(interval);
       timerElement.textContent = "Auction ended";
+      
     } else {
       const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
       const seconds = (timeLeft % 60).toString().padStart(2, "0");
@@ -171,7 +172,7 @@ const showProductOverview = (item, highestBid) => {
 
   document.querySelector(".close-btn").addEventListener("click", () => {
     overviewSection.style.display = "none";
-    highestBidElement.remove(); // Clean up the appended element
+    highestBidElement.remove(); // Clean up the appended element??
   });
 };
 
