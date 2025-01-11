@@ -81,6 +81,10 @@ function searchItems() {
 
 async function saveProductChanges(productId) {
     const formData = new FormData();
+    if (parseFloat(document.getElementById('product-price').value)> 99999999.99 || parseInt(document.getElementById('product-stock').value, 10) > 99999999 ){
+        alert('Price/stock too high, please enter a number below 99.99 million.');
+        return;
+    }
     formData.append('id', productId);
     formData.append('name', document.getElementById('product-name').value);
     formData.append('price', parseFloat(document.getElementById('product-price').value));

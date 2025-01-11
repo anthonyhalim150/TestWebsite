@@ -60,7 +60,7 @@ CREATE TABLE CARTITEMS (
     cart_id INT NOT NULL,
     item_id INT NOT NULL,
     quantity INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
+    price DECIMAL(15, 2) NOT NULL,
     FOREIGN KEY (cart_id) REFERENCES CART(cart_id),
     FOREIGN KEY (item_id) REFERENCES ITEMS(id)  ON DELETE CASCADE
 );
@@ -69,7 +69,7 @@ CREATE TABLE CARTITEMS (
 CREATE TABLE  TRANSACTIONS(
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    total_amount DECIMAL(10, 2) NOT NULL,   -- Total price of the transaction
+    total_amount DECIMAL(15, 2) NOT NULL,   -- Total price of the transaction
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES USERS(id)
 );
@@ -81,7 +81,7 @@ CREATE TABLE SALE_ITEMS (
     transaction_id INT NOT NULL,
     item_id INT NOT NULL,
     quantity INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,  -- The price at the time of sale
+    price DECIMAL(15, 2) NOT NULL,  -- The price at the time of sale
     FOREIGN KEY (transaction_id) REFERENCES TRANSACTIONS(transaction_id)
 );
 
@@ -114,17 +114,19 @@ CREATE TABLE AUCTION_ITEMS(
     description TEXT,
 	category TEXT NOT NULL,
     image VARCHAR(255),
-    starting_price DECIMAL(10, 2) NOT NULL,
+    starting_price DECIMAL(15, 2) NOT NULL,
     starting_time DATETIME,
 	is_expired BOOLEAN DEFAULT FALSE,
     duration INT NOT NULL -- Time in seconds for the auction
 );
 
+
+
 CREATE TABLE BIDS(
     id INT AUTO_INCREMENT PRIMARY KEY,
     auction_item_id INT NOT NULL,
     user_id INT NOT NULL,
-    bid_amount DECIMAL(10, 2) NOT NULL,
+    bid_amount DECIMAL(15, 2) NOT NULL,
     bid_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (auction_item_id) REFERENCES AUCTION_ITEMS(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE

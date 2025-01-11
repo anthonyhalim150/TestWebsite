@@ -111,9 +111,14 @@ const renderAuctionItems = async (items = filteredItems) => {
       bid_button.addEventListener("click", (event) => {
         event.stopPropagation(); 
         const bidAmount = prompt("Enter your bid amount:");
+        if (bidAmount > 499,999,999,999.99){
+          alert("Bid amount too high! Please enter a number below 500b!");
+          return;
+        }
         if (bidAmount && parseFloat(bidAmount) > parseFloat(highestBid)) {
           placeBid(item.id, parseFloat(bidAmount));
-        } else {
+        } 
+        else {
           alert("Bid amount must be higher than the current highest bid.");
         }
       });

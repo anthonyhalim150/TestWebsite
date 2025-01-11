@@ -16,6 +16,14 @@ async function addProduct(event) {
         alert('All fields are required, and price/stock/duration must be positive numbers.');
         return;
     }
+    if (price > 499,999,999,999.99){
+        alert('Starting price too high, please enter a number below 500 billion.');
+        return;
+    }
+    if (stock > 99999999.99 || duration >  99999999.99){
+        alert('Stock/duration too high, please enter a number below 99.99 million.');
+        return;
+    }
     let starting_time;
     if (time){
         starting_time = new Date(time).toISOString(); // Convert to UTC ISO form

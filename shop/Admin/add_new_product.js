@@ -15,6 +15,10 @@ async function addProduct(event) {
         alert('All fields are required, and price/stock must be positive numbers.');
         return;
     }
+    if (price > 99999999.99 || stock > 99999999 ){
+        alert('Price/stock too high, please enter a number below 99.99 million.');
+        return;
+    }
 
     // Create FormData object to send data, including the image file
     const formData = new FormData();

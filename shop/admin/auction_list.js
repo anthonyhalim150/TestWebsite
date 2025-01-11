@@ -84,6 +84,14 @@ function searchItems() {
 
 async function saveProductChanges(productId) {
     const formData = new FormData();
+    if (parseFloat(document.getElementById('product-price').value) > 499,999,999,999.99){
+        alert('Starting price too high, please enter a number below 500 billion.');
+        return;
+    }
+    if ('stock', parseInt(document.getElementById('product-stock').value, 10) > 99999999.99 ||  document.getElementById('product-duration').value >  99999999.99){
+        alert('Stock/duration too high, please enter a number below 99.99 million.');
+        return;
+    }
     formData.append('id', productId);
     formData.append('name', document.getElementById('product-name').value);
     formData.append('price', parseFloat(document.getElementById('product-price').value));
