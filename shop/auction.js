@@ -1,11 +1,12 @@
 let auctionItems = []; // Array to store auction items
 let filteredItems = []; // Array to store filtered items
 let timerIntervals = []; // Store timers for auction items
+const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 
 // Fetch auction items from the server
 const fetchAuctionItems = async () => {
   try {
-    const response = await fetch("http://localhost:3000/auction");
+    const response = await fetch(`${API_URL}/auction`);
     const data = await response.json();
 
     auctionItems = data.map(item => ({
@@ -32,7 +33,7 @@ const fetchAuctionItems = async () => {
 // Fetch current highest bid for a specific item
 const fetchHighestBid = async (itemId) => {
   try {
-    const response = await fetch(`http://localhost:3000/highest-bid?auction_item_id=${itemId}`);
+    const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${itemId}`);
     const data = await response.json();
     return data.highestBid || 0;
   } catch (error) {
@@ -45,7 +46,7 @@ const fetchHighestBid = async (itemId) => {
 const placeBid = async (itemId, bidAmount) => {
   const userId = localStorage.getItem("userID");
   try {
-    const response = await fetch("http://localhost:3000/bids", {
+    const response = await fetch(`${API_URL}/bids`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ auction_item_id: itemId, user_id: userId, bid_amount: bidAmount }),
@@ -66,7 +67,7 @@ const placeBid = async (itemId, bidAmount) => {
 const cancelBid = async (itemId) => {
   const userId = localStorage.getItem("userID");
   try {
-    const response = await fetch(`http://localhost:3000/bids?auction_item_id=${itemId}&user_id=${userId}`, {
+    const response = await fetch(`${API_URL}/bids?auction_item_id=${itemId}&user_id=${userId}`, {
       method: "DELETE",
     });
     if (response.ok) {
@@ -137,7 +138,7 @@ const startItemTimer = (item) => {
     if (timeLeft <= 0) {
       clearInterval(interval);
       timerElement.textContent = "Auction ended";
-      fetch('http://localhost:3000/update-auction-status', {
+      fetch(`${API_URL}/update-auction-status`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
