@@ -106,20 +106,27 @@ const renderAuctionItems = async (items = filteredItems) => {
     startItemTimer(item); // Start countdown for each item
 
     // Add click events to bid and cancel bid buttons
-    document.getElementById(`bid-btn-${item.id}`).addEventListener("click", () => {
-      const bidAmount = prompt("Enter your bid amount:");
-      if (bidAmount && parseFloat(bidAmount) > parseFloat(highestBid)) {
-        placeBid(item.id, parseFloat(bidAmount));
-      } else {
-        alert("Bid amount must be higher than the current highest bid.");
-      }
-    });
-
-    document.getElementById(`cancel-bid-btn-${item.id}`).addEventListener("click", () => {
-      if (confirm("Are you sure you want to cancel your bid?")) {
-        cancelBid(item.id);
-      }
-    });
+    const bid_button =  document.getElementById(`bid-btn-${item.id}`);
+    if (bid_button){
+      bid_button.addEventListener("click", (event) => {
+        event.stopPropagation(); 
+        const bidAmount = prompt("Enter your bid amount:");
+        if (bidAmount && parseFloat(bidAmount) > parseFloat(highestBid)) {
+          placeBid(item.id, parseFloat(bidAmount));
+        } else {
+          alert("Bid amount must be higher than the current highest bid.");
+        }
+      });
+    }
+    const cancel_bid_button = document.getElementById(`cancel-bid-btn-${item.id}`);
+    if (cancel_bid_button){
+      document.getElementById(`cancel-bid-btn-${item.id}`).addEventListener("click", (event) => {
+        event.stopPropagation(); 
+        if (confirm("Are you sure you want to cancel your bid?")) {
+          cancelBid(item.id);
+        }
+      });
+    }
 
     // Add click event to display product overview
     itemElement.addEventListener("click", () => showProductOverview(item, highestBid));
@@ -129,7 +136,7 @@ const renderAuctionItems = async (items = filteredItems) => {
 // Start timer for a specific auction item
 const startItemTimer = (item) => {
   const timerElement = document.getElementById(`timer-${item.id}`);
-  const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);
+  const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);//Get time converts it to miliseconds(Since UNIX epoch 1 JAN 1970)
 
   const interval = setInterval(() => {
     const currentTime = new Date();
