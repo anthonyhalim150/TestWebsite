@@ -91,10 +91,12 @@ const renderAuctionItems = async (items = filteredItems) => {
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
     const highestBidText = highestBid > 0 ? `$${highestBid}` : "No bids yet";
+    const startingPrice = item.startingPrice || 0; 
+    const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');
     itemElement.innerHTML = `
       <img src="${item.image}" alt="${item.name}" class="item-image">
       <h3>${item.name}</h3>
-      <p>Starting Price: $${item.startingPrice}</p>
+      <p>Starting Price: $${formattedPrice}</p>
       <p>Current Highest Bid: ${highestBidText}</p>
       <p class="timer" id="timer-${item.id}"></p>
       <button class="bid-btn" id="bid-btn-${item.id}">Place Bid</button>
@@ -184,7 +186,9 @@ const showProductOverview = (item, highestBid) => {
   overviewSection.style.display = "block";
 
   document.getElementById("product-name").value = item.name;
-  document.getElementById("product-price").value = item.startingPrice;
+  const startingPrice = item.startingPrice || 0; 
+  const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');//Turn from 7000 to 7,000
+  document.getElementById("product-price").value = formattedPrice;
   document.getElementById("product-stock").value = item.stock;
   document.getElementById("product-description").value = item.description;
   document.getElementById("product-category").value = item.category;
