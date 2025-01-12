@@ -212,25 +212,30 @@ function displayProductOverview(product) {
 const productPriceInput = document.getElementById("product-price");
 if (productPriceInput){
     productPriceInput.addEventListener("input", (event) => {
-        let value = event.target.value.replace(/,/g, ''); // Remove commas for the purpose of processing
-        // Check if it's a valid number, allowing for decimals
-        if (!isNaN(value) && value !== "") {
-            event.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Add commas as thousands separator
-        }
-    });
-
-    productPriceInput.addEventListener("blur", (event) => {
-        let value = event.target.value.replace(/,/g, ''); // Remove commas to handle the raw number
-        if (value === "" || isNaN(value)) {
-            event.target.value = ""; // Clear invalid input
+        let rawValue = event.target.value.replace(/,/g, ''); // Remove commas
+        if (!isNaN(rawValue) && rawValue !== "") {
+            const [whole, decimal] = rawValue.split('.'); // Split into whole and decimal parts
+            // Format whole part with commas and append decimal part if exists
+            event.target.value = decimal !== undefined 
+                ? parseFloat(whole).toLocaleString('en-US') + '.' + decimal 
+                : parseFloat(whole).toLocaleString('en-US');
         } else {
-            // Ensure two decimal places on blur and format with commas
-            event.target.value = parseFloat(value).toLocaleString('en-US', { 
-                minimumFractionDigits: 2, 
-                maximumFractionDigits: 2
-            });
+            event.target.value = ""; // Clear invalid input
         }
     });
+    
+    productPriceInput.addEventListener("blur", (event) => {
+        let rawValue = event.target.value.replace(/,/g, ''); // Remove commas for raw value
+        if (!isNaN(rawValue) && rawValue !== "") {
+            event.target.value = parseFloat(rawValue).toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            }); // Format with two decimal places
+        } else {
+            event.target.value = ""; // Clear invalid input
+        }
+    });
+    
 }
 // Hide product overview when clicking outside
 document.addEventListener('click', (event) => {
