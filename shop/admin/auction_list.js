@@ -95,7 +95,7 @@ async function saveProductChanges(productId) {
     }
     formData.append('id', productId);
     formData.append('name', document.getElementById('product-name').value);
-    formData.append('price', parseFloat(document.getElementById('product-price').value));
+    formData.append('price', parseFloat(document.getElementById('product-price').value.replace(/,/g, '')));
     formData.append('stock', parseInt(document.getElementById('product-stock').value, 10));
     formData.append('description', document.getElementById('product-description').value);
     formData.append('category', document.getElementById('product-category').value);
@@ -190,7 +190,7 @@ function displayProductOverview(product) {
     // Populate the overview card with product details
     document.getElementById('product-image').src = product.image;
     document.getElementById('product-name').value = product.item_name;
-    document.getElementById('product-price').value = product.starting_price;
+    document.getElementById('product-price').value = parseFloat(product.starting_price).toLocaleString('en-US');;
     document.getElementById('product-stock').value = product.stock;
     document.getElementById('product-description').value = product.description;
     document.getElementById('product-category').value = product.category;
