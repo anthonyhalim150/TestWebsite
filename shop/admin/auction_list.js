@@ -16,6 +16,7 @@ async function fetch_products(sorted_items = null) {
             const productContainer = document.getElementById('product-container-tbody');
             productContainer.innerHTML = items.map(product => {
                 const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
+                const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
                 return `
               <tr data-id="${product.id}">
                     <td>
@@ -23,7 +24,7 @@ async function fetch_products(sorted_items = null) {
                         original-image="${product.image}" class="product-image">
                     </td>
                     <td>${product.item_name}</td>
-                    <td>$${product.starting_price}</td>
+                    <td>$${formattedPrice}</td>
                     <td>${product.stock}</td>
                     <td>${product.description || 'N/A'}</td>
                     <td>${product.category || 'N/A'}</td>

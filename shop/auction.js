@@ -90,7 +90,8 @@ const renderAuctionItems = async (items = filteredItems) => {
     const highestBid = await fetchHighestBid(item.id);
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
-    const highestBidText = highestBid > 0 ? `$${highestBid}` : "No bids yet";
+    const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
+    const highestBidText = formattedBid > 0 ? `$${formattedBid}` : "No bids yet";
     const startingPrice = item.startingPrice || 0; 
     const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');
     itemElement.innerHTML = `
@@ -197,7 +198,9 @@ const showProductOverview = (item, highestBid) => {
   productImage.src = item.image || "placeholder.jpg";
 
   const highestBidElement = document.createElement("p");
-  const highestBidText = highestBid > 0 ? `$${highestBid}` : "No bids yet";
+  const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
+  const highestBidText = formattedBid > 0 ? `$${formattedBid}` : "No bids yet";
+  
   highestBidElement.textContent = `Current Highest Bid: ${highestBidText}`;
   highestBidElement.style.marginTop = "10px";
 

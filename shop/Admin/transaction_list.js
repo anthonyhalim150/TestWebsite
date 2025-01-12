@@ -10,15 +10,21 @@ async function fetch_products(sorted_items = null) {
             items = sorted_items || data; // Use sorted items if provided, otherwise use fetched data
 
             const productContainer = document.getElementById('product-container tbody');
-            productContainer.innerHTML = items.map(transaction => `
-                <tr>
-                    <td>${transaction.transaction_id}</td>
-                    <td>${transaction.username}</td>
-                    <td class = "total-amount">$${transaction.total_amount}</td>
-                    <td><pre>${transaction.description}</pre></td>
-                    <td class = "created-at">${new Date(transaction.created_at).toLocaleString()}</td>
-                </tr>
-            `).join('');
+            productContainer.innerHTML = items
+            .map(transaction => {
+                const formattedAmount = parseFloat(transaction.total_amount).toLocaleString('en-US'); // Turn 7000 to 7,000
+                return `
+                    <tr>
+                        <td>${transaction.transaction_id}</td>
+                        <td>${transaction.username}</td>
+                        <td class="total-amount">$${formattedAmount}</td>
+                        <td><pre>${transaction.description}</pre></td>
+                        <td class="created-at">${new Date(transaction.created_at).toLocaleString()}</td>
+                    </tr>
+                `;
+            })
+    .join('');
+
         } else {
             console.error('Failed to fetch transactions: Invalid response format');
         }
