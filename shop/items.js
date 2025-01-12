@@ -273,7 +273,7 @@ async function renderItems(filteredItems = null) {
 
         // Check if the item is liked (use `likedItems` to track liked items)
         const isLiked = likedItems.some(liked => liked.id === item.id); // `likedItems` is a Set of liked item IDs
-
+        const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
         return `
             <div class="col-md-4 mb-4">
                 <div class="card" onclick="showItemOverview(${item.id})">
@@ -283,7 +283,7 @@ async function renderItems(filteredItems = null) {
                     <img src="${item.image}" class="card-img-top" alt="${item.name} ">
                     <div class="card-body text-center">
                         <h5 class="card-title">${item.name}</h5>
-                        <p class="card-text">$${item.price}</p>
+                        <p class="card-text">$${formattedPrice}</p>
                         <p class="card-text">Stock: ${availableStock}</p>
                         <div class="quantity-control">
                             <button class="btn btn-secondary" onclick="event.stopPropagation(); changeQuantity(${item.id}, -1)">-</button>
@@ -338,11 +338,12 @@ function showItemOverview(itemId) {
     if (!item) return;
 
     const overviewContainer = document.getElementById('item-overview');
+    const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
     overviewContainer.innerHTML = `
         <h3>${item.name}</h3>
         <img src="${item.image}" alt="${item.name}" style="width: 180px; height: 180px; margin-bottom: 15px;">
         <p class="item-description"><strong>Description:</strong> ${item.description}</p>
-        <p class="item-description"><strong>Price:</strong> $${item.price}</p>
+        <p class="item-description"><strong>Price:</strong> $${formattedPrice}</p>
         <p class="item-description"><strong>Stock:</strong> ${item.stock}</p>
         <p class="item-description"><strong>Category:</strong> ${item.category || 'N/A'}</p>
         <button class="close-btn" onclick="closeItemOverview()">Close</button>

@@ -22,14 +22,16 @@ async function renderCart() {
         //You can use the functions from another js file as long as your html has it.
         cartContent.innerHTML = `
             <ul class="list-group">
-                ${cartItems.map(item => `
+                ${cartItems.map(item => { 
+                    const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
+                    `
                     <div class="card" onclick="showItemOverview(${item.id})">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                                 <img src="${item.image}" alt="${item.name}" class="img-thumbnail me-3" style="width: 50px; height: 50px;">
                                 <div>
                                     <p class="mb-0"><strong>${item.name}</strong></p>
-                                    <small>Price: $${item.price}</small>
+                                    <small>Price: $${formattedPrice}</small>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center">
@@ -50,10 +52,13 @@ async function renderCart() {
 
 
                     </li>
-                `).join('')}
+                `}).join('')}
             </ul>
             <div class="mt-3 text-end">
-                <h4>Total: $${cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</h4>
+                <h4>Total: $${cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+                .toFixed(2) // Fix to two decimal places (returns a string)
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} // Add commas to the result
+                </h4>
                 <button class="btn btn-warning me-3" onclick="clearCart()">Clear Cart</button>
                 <button class="btn btn-success" onclick="checkout()">Checkout</button>
             </div>
