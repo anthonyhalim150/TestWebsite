@@ -22,9 +22,9 @@ async function renderCart() {
         //You can use the functions from another js file as long as your html has it.
         cartContent.innerHTML = `
             <ul class="list-group">
-                ${cartItems.map(item => { 
+                ${cartItems.map(item => {
                     const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
-                    `
+                    return `
                     <div class="card" onclick="showItemOverview(${item.id})">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
@@ -37,32 +37,33 @@ async function renderCart() {
                             <div class="d-flex align-items-center">
                                 <div class="quantity-container me-3">
                                     <div class="quantity-control">
-                                        <button class="btn btn-secondary" onclick="handleClick(event,'${item.id}', -1, ${item.stock})">-</button>
-                                        <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="0" max="${item.stock}" class="quantity-input" onclick="event.stopPropagation();" onchange="updateQuantity('${item.id}', ${item.stock})">
+                                        <button class="btn btn-secondary" onclick="handleClick(event, '${item.id}', -1, ${item.stock})">-</button>
+                                        <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="0" max="${item.stock}" 
+                                            class="quantity-input" onclick="event.stopPropagation();" 
+                                            onchange="updateQuantity('${item.id}', ${item.stock})">
                                         <button class="btn btn-secondary" onclick="handleClick(event, '${item.id}', 1, ${item.stock})">+</button>
                                     </div>
                                 </div>
                                 <div class="price-container me-3">
-                                    <span class="price-text" onclick="event.stopPropagation();">$${(item.price * item.quantity).toFixed(2)}</span>
+                                    <span class="price-text" onclick="event.stopPropagation();">
+                                        $${(item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
                                 </div>
                                 <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); removeItem('${item.id}')">Remove All</button>
                             </div>
-                        </div>
-                        
-
-
-                    </li>
-                `}).join('')}
+                        </li>
+                    </div>
+                    `;
+                }).join('')}
             </ul>
             <div class="mt-3 text-end">
-                <h4>Total: $${(() => {
-                const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-                return total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                })()}</h4>
+                <h4>Total: $${cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+                    .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h4>
                 <button class="btn btn-warning me-3" onclick="clearCart()">Clear Cart</button>
                 <button class="btn btn-success" onclick="checkout()">Checkout</button>
             </div>
         `;
+
     } catch (error) {
         console.error('Error fetching cart:', error);
         cartContent.innerHTML = `<p class="text-danger">Failed to load cart. Please try again later.</p>`;
