@@ -45,6 +45,23 @@ async function addProduct(event) {
         alert('Failed to add product. Please try again.');//Have to be changed later
     }
 }
+const productPriceInput = document.getElementById("product-price");
+
+productPriceInput.addEventListener("input", (event) => {
+    const value = event.target.value.replace(/,/g, ''); // Remove existing commas
+    if (!isNaN(value) && value !== "") {
+        event.target.value = parseFloat(value).toLocaleString('en-US');
+    }
+});
+
+productPriceInput.addEventListener("blur", (event) => {
+    const value = event.target.value.replace(/,/g, ''); // Remove commas to handle actual numeric value
+    if (value === "" || isNaN(value)) {
+        event.target.value = ""; // Clear invalid input
+    } else {
+        event.target.value = parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2 });
+    }
+});
 
 
 document.addEventListener('DOMContentLoaded', () => {
