@@ -88,7 +88,7 @@ async function saveProductChanges(productId) {
     }
     formData.append('id', productId);
     formData.append('name', document.getElementById('product-name').value);
-    formData.append('price', parseFloat(document.getElementById('product-price').value));
+    formData.append('price', parseFloat(document.getElementById('product-price').value.replace(/,/g, '')));
     formData.append('stock', parseInt(document.getElementById('product-stock').value, 10));
     formData.append('description', document.getElementById('product-description').value);
     formData.append('category', document.getElementById('product-category').value);
@@ -162,7 +162,7 @@ function displayProductOverview(product) {
     // Populate the overview card with product details
     document.getElementById('product-image').src = product.image;
     document.getElementById('product-name').value = product.name;
-    document.getElementById('product-price').value = product.price;
+    document.getElementById('product-price').value = parseFloat(product.starting_price).toLocaleString('en-US');
     document.getElementById('product-stock').value = product.stock;
     document.getElementById('product-description').value = product.description;
     document.getElementById('product-category').value = product.category;
@@ -207,4 +207,31 @@ if (searchBar) {
     });
 }
 
-
+const productPriceInput = document.getElementById("product-price");
+if (productPriceInput){
+    productPriceInput.addEventListener("input", (event) => {
+        let rawValue = event.target.value.replace(/,/g, ''); // Remove commas
+        if (!isNaN(rawValue) && rawValue !== "") {
+            const [whole, decimal] = rawValue.split('.'); // Split into whole and decimal parts
+            // Format whole part with commas and append decimal part if exists
+            event.target.value = decimal !== undefined 
+                ? parseFloat(whole).toLocaleString('en-US') + '.' + decimal 
+                : parseFloat(whole).toLocaleString('en-US');
+        } else {
+            event.target.value = ""; // Clear invalid input
+        }
+    });
+    
+    productPriceInput.addEventListener("blur", (event) => {
+        let rawValue = event.target.value.replace(/,/g, ''); // Remove commas for raw value
+        if (!isNaN(rawValue) && rawValue !== "") {
+            event.target.value = parseFloat(rawValue).toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            }); // Format with two decimal places
+        } else {
+            event.target.value = ""; // Clear invalid input
+        }
+    });
+    
+}
