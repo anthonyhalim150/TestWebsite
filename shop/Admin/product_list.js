@@ -162,7 +162,7 @@ function displayProductOverview(product) {
     // Populate the overview card with product details
     document.getElementById('product-image').src = product.image;
     document.getElementById('product-name').value = product.name;
-    document.getElementById('product-price').value = parseFloat(product.starting_price).toLocaleString('en-US');
+    document.getElementById('product-price').value = parseFloat(product.price).toLocaleString('en-US');
     document.getElementById('product-stock').value = product.stock;
     document.getElementById('product-description').value = product.description;
     document.getElementById('product-category').value = product.category;
