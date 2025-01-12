@@ -228,7 +228,7 @@ document.querySelectorAll('#product-container tbody tr').forEach(row => {
         document.querySelectorAll('#product-container tbody tr').forEach(r => r.classList.remove('highlight-row'));
         row.classList.add('highlight-row');
 
-        displayProductOverview(product, row);
+        displayProductOverview(product);
     });
 });
 
@@ -245,3 +245,26 @@ if (searchBar) {
 }
 
 
+const productPriceInput = document.getElementById("product-price");
+if (productPriceInput){
+    productPriceInput.addEventListener("input", (event) => {
+        let value = event.target.value.replace(/,/g, ''); // Remove commas for the purpose of processing
+        // Check if it's a valid number, allowing for decimals
+        if (!isNaN(value) && value !== "") {
+            event.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Add commas as thousands separator
+        }
+    });
+
+    productPriceInput.addEventListener("blur", (event) => {
+        let value = event.target.value.replace(/,/g, ''); // Remove commas to handle the raw number
+        if (value === "" || isNaN(value)) {
+            event.target.value = ""; // Clear invalid input
+        } else {
+            // Ensure two decimal places on blur and format with commas
+            event.target.value = parseFloat(value).toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2
+            });
+        }
+    });
+}

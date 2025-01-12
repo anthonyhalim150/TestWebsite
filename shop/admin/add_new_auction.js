@@ -4,7 +4,7 @@ async function addProduct(event) {
 
     // Get form data
     const name = document.getElementById('product-name').value;
-    const price = parseFloat(document.getElementById('product-price').value);
+    const price = parseFloat(document.getElementById('product-price').value.replace(/,/g, ''));
     const description = document.getElementById('product-description').value;
     const stock = parseInt(document.getElementById('product-stock').value);
     const imageFile = document.getElementById('product-image').files[0]; // Get the selected file
@@ -56,7 +56,29 @@ async function addProduct(event) {
     }
 }
 
+const productPriceInput = document.getElementById("product-price");
+if (productPriceInput){
+    productPriceInput.addEventListener("input", (event) => {
+        let value = event.target.value.replace(/,/g, ''); // Remove commas for the purpose of processing
+        // Check if it's a valid number, allowing for decimals
+        if (!isNaN(value) && value !== "") {
+            event.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Add commas as thousands separator
+        }
+    });
 
+    productPriceInput.addEventListener("blur", (event) => {
+        let value = event.target.value.replace(/,/g, ''); // Remove commas to handle the raw number
+        if (value === "" || isNaN(value)) {
+            event.target.value = ""; // Clear invalid input
+        } else {
+            // Ensure two decimal places on blur and format with commas
+            event.target.value = parseFloat(value).toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2
+            });
+        }
+    });
+}
 document.addEventListener('DOMContentLoaded', () => {
     const product_form = document.getElementById('product-form');
     if (product_form) {
