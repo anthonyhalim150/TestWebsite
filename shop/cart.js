@@ -55,10 +55,10 @@ async function renderCart() {
                 `}).join('')}
             </ul>
             <div class="mt-3 text-end">
-                <h4>Total: $${cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-                .toFixed(2) // Fix to two decimal places (returns a string)
-                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")} // Add commas to the result
-                </h4>
+                <h4>Total: $${(() => {
+                const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                return total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                })()}</h4>
                 <button class="btn btn-warning me-3" onclick="clearCart()">Clear Cart</button>
                 <button class="btn btn-success" onclick="checkout()">Checkout</button>
             </div>
