@@ -190,7 +190,7 @@ function displayProductOverview(product) {
     // Populate the overview card with product details
     document.getElementById('product-image').src = product.image;
     document.getElementById('product-name').value = product.item_name;
-    document.getElementById('product-price').value = parseFloat(product.starting_price).toLocaleString('en-US');;
+    document.getElementById('product-price').value = parseFloat(product.starting_price).toLocaleString('en-US');
     document.getElementById('product-stock').value = product.stock;
     document.getElementById('product-description').value = product.description;
     document.getElementById('product-category').value = product.category;
@@ -209,6 +209,29 @@ function displayProductOverview(product) {
     document.getElementById('delete-button').onclick = () => delete_product(product.id);
 }
 
+const productPriceInput = document.getElementById("product-price");
+if (productPriceInput){
+    productPriceInput.addEventListener("input", (event) => {
+        let value = event.target.value.replace(/,/g, ''); // Remove commas for the purpose of processing
+        // Check if it's a valid number, allowing for decimals
+        if (!isNaN(value) && value !== "") {
+            event.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Add commas as thousands separator
+        }
+    });
+
+    productPriceInput.addEventListener("blur", (event) => {
+        let value = event.target.value.replace(/,/g, ''); // Remove commas to handle the raw number
+        if (value === "" || isNaN(value)) {
+            event.target.value = ""; // Clear invalid input
+        } else {
+            // Ensure two decimal places on blur and format with commas
+            event.target.value = parseFloat(value).toLocaleString('en-US', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2
+            });
+        }
+    });
+}
 // Hide product overview when clicking outside
 document.addEventListener('click', (event) => {
     const overviewSection = document.getElementById('product-overview');
@@ -241,30 +264,5 @@ const searchBar = document.getElementById('search-bar');
 if (searchBar) {
     searchBar.addEventListener('input', () => {
         searchItems();
-    });
-}
-
-
-const productPriceInput = document.getElementById("product-price");
-if (productPriceInput){
-    productPriceInput.addEventListener("input", (event) => {
-        let value = event.target.value.replace(/,/g, ''); // Remove commas for the purpose of processing
-        // Check if it's a valid number, allowing for decimals
-        if (!isNaN(value) && value !== "") {
-            event.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Add commas as thousands separator
-        }
-    });
-
-    productPriceInput.addEventListener("blur", (event) => {
-        let value = event.target.value.replace(/,/g, ''); // Remove commas to handle the raw number
-        if (value === "" || isNaN(value)) {
-            event.target.value = ""; // Clear invalid input
-        } else {
-            // Ensure two decimal places on blur and format with commas
-            event.target.value = parseFloat(value).toLocaleString('en-US', { 
-                minimumFractionDigits: 2, 
-                maximumFractionDigits: 2
-            });
-        }
     });
 }
