@@ -4,7 +4,7 @@ async function addProduct(event) {
 
     // Get form data
     const name = document.getElementById('product-name').value;
-    const price = parseFloat(document.getElementById('product-price').value);
+    const price = parseFloat(document.getElementById('product-price').value.replace(/,/g, ''));
     const description = document.getElementById('product-description').value;
     const stock = parseInt(document.getElementById('product-stock').value);
     const imageFile = document.getElementById('product-image').files[0]; // Get the selected file
