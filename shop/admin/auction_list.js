@@ -30,17 +30,45 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
                     <td>${formattedStartingTime|| 'N/A'}</td>
+                    <td>${product.is_expired === undefined ? 'N/A' : (product.is_expired ? 'EXPIRED' : 'ONGOING')}</td>
+                    <td>
+                        <a href="bid_history.html?product_id=${product.id}" class="picture-link">
+                            <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
+                        </a>
+                    </td>
                 </tr>`;
             }).join('');
 
             // Add click event listeners to rows
             document.querySelectorAll('#product-container tbody tr').forEach(row => {
-                row.addEventListener('click', () => {
-                    const productId = row.getAttribute('data-id');
-                    const product = items.find(item => item.id == productId);
-                    displayProductOverview(product);
+                row.addEventListener('click', async () => { // Make the function asynchronous
+                    const productId = row.getAttribute('data-id'); // Get the product ID from the row
+                    
+                    try {
+                        // Fetch auction data from the server
+                        const fetch_query = await fetch(`${API_URL}/auction`);
+                        
+                        // Ensure the response is successful
+                        if (!fetch_query.ok) {
+                            throw new Error("Failed to fetch data from the server");
+                        }
+                        
+                        const fetch_data = await fetch_query.json(); 
+            
+                        // Find the product by ID in the fetched data
+                        const product = fetch_data.find(item => item.id == productId);
+                        
+                        if (product) {
+                            displayProductOverview(product);
+                        } else {
+                            alert("Cannot alter the data of an ongoing or expired auction!");
+                        }
+                    } catch (error) {
+                        console.error("Error fetching auction data:", error);
+                        alert("An error occurred while fetching auction data.");
+                    }
                 });
-            });
+            });            
         } else {
             console.error('Failed to fetch products:', data.error);
         }

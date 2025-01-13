@@ -542,3 +542,11 @@ button[type="submit"]:hover {
     font-size: 12px;
     vertical-align: middle;
 }
+
+.picture-link {
+    text-decoration: none;
+}
+.button-image {
+    width: 24px; /* Adjust size */
+    height: 24px; /* Adjust size, this is for auction list icon */
+}
