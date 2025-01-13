@@ -113,6 +113,13 @@ const renderAuctionItems = async (items = filteredItems) => {
     if (bid_button){
       bid_button.addEventListener("click", (event) => {
         event.stopPropagation(); 
+        const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);//Get time converts it to miliseconds(Since UNIX epoch 1 JAN 1970)
+        const currentTime = new Date();
+        const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
+        if (timeLeft < 1){
+          alert("Auction has already ended! Cannot add bid!");
+          return;
+        }
         const bidAmount = prompt("Enter your bid amount:");
         if (bidAmount > 499999999999.99){
           alert("Bid amount too high! Please enter a number below 500 billion!");
@@ -130,6 +137,13 @@ const renderAuctionItems = async (items = filteredItems) => {
     if (cancel_bid_button){
       document.getElementById(`cancel-bid-btn-${item.id}`).addEventListener("click", (event) => {
         event.stopPropagation(); 
+        const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);//Get time converts it to miliseconds(Since UNIX epoch 1 JAN 1970)
+        const currentTime = new Date();
+        const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
+        if (timeLeft < 1){
+          alert("Auction has already ended! Cannot cancel bid!");
+          return;
+        }
         if (confirm("Are you sure you want to cancel your bid?")) {
           cancelBid(item.id);
         }
@@ -253,4 +267,4 @@ const initializeAuction = () => {
   attachEventListeners();
 };
 
-document.addEventListener("DOMContentLoaded", initializeAuction);
+initializeAuction();
