@@ -6,6 +6,14 @@ async function fetch_products(sorted_items = null) {
     try {
         const response = await fetch(`${API_URL}/auctions`);
         const data = await response.json();
+        const fetch_query = await fetch(`${API_URL}/auction`);
+                        
+        // Ensure the response is successful
+        if (!fetch_query.ok) {
+            throw new Error("Failed to fetch data from the server");
+        }
+        
+        const fetch_data = await fetch_query.json(); 
 
         if (data.success && data.items) {
             items = data.items;
@@ -15,6 +23,7 @@ async function fetch_products(sorted_items = null) {
 
             const productContainer = document.getElementById('product-container-tbody');
             productContainer.innerHTML = items.map(product => {
+                const is_not_expired = fetch_data.find(item => item.id == product.id);
                 const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
                 const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
                 return `
@@ -30,7 +39,7 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
                     <td>${formattedStartingTime|| 'N/A'}</td>
-                    <td>${product.is_expired === undefined ? 'N/A' : (product.is_expired ? 'EXPIRED' : 'ONGOING')}</td>
+                    <td>${is_not_expired === undefined ? 'N/A' : (is_not_expired ? 'ONGOING' : 'EXPIRED')}</td>
                     <td>
                         <a href="bid_history.html?product_id=${product.id}" class="picture-link">
                             <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
@@ -45,20 +54,8 @@ async function fetch_products(sorted_items = null) {
                     const productId = row.getAttribute('data-id'); // Get the product ID from the row
                     
                     try {
-                        // Fetch auction data from the server
-                        const fetch_query = await fetch(`${API_URL}/auction`);
-                        
-                        // Ensure the response is successful
-                        if (!fetch_query.ok) {
-                            throw new Error("Failed to fetch data from the server");
-                        }
-                        
-                        const fetch_data = await fetch_query.json(); 
-            
-                        // Find the product by ID in the fetched data
-                        const product = fetch_data.find(item => item.id == productId);
-                        
-                        if (product) {
+                        const is_not_expired = fetch_data.find(item => item.id == productId);
+                        if (is_not_expired) {
                             displayProductOverview(product);
                         } else {
                             alert("Cannot alter the data of an ongoing or expired auction!");
