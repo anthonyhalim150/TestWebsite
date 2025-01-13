@@ -35,7 +35,6 @@ const fetchHighestBid = async (itemId) => {
   try {
     const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${itemId}`);
     const data = await response.json();
-    console.log(data.highestBid);
     return data.highestBid || 0;
   } catch (error) {
     console.error("Error fetching highest bid:", error);
@@ -92,6 +91,7 @@ const renderAuctionItems = async (items = filteredItems) => {
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
     const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
+    console.log(formattedBid);
     const highestBidText = formattedBid > 0 ? `$${formattedBid}` : "No bids yet";
     const startingPrice = item.startingPrice || 0; 
     const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');
