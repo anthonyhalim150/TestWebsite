@@ -9,7 +9,7 @@ const fetchAuctionItems = async () => {
     const response = await fetch(`${API_URL}/auction`);
     const data = await response.json();
 
-    auctionItems = data.map(item => ({
+    auctionItems = data.items.map(item => ({
       id: item.id,
       name: item.item_name,
       stock: item.stock,

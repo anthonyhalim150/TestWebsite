@@ -4,30 +4,19 @@ let items = [];
 
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(`${API_URL}/auctions`);
+        const response = await fetch(`${API_URL}/auction`);
         const data = await response.json();
-        const fetch_query = await fetch(`${API_URL}/auction`);
-                        
-        // Ensure the response is successful
-        if (!fetch_query.ok) {
-            throw new Error("Failed to fetch data from the server");
-        }
-        
-        const fetch_data = await fetch_query.json(); 
-
         if (data.success && data.items) {
             items = data.items;
             if (sorted_items !== null) {
                 items = sorted_items;
             }
-
             const productContainer = document.getElementById('product-container-tbody');
             productContainer.innerHTML = items.map(product => {
-                const is_not_expired = fetch_data.find(item => item.id == product.id);
                 const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
                 const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
                 return `
-              <tr data-id="${product.id}">
+                <tr data-id="${product.id}">
                     <td>
                         <img src="${product.image}" alt="Not Found!" 
                         original-image="${product.image}" class="product-image">
@@ -39,7 +28,7 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
                     <td>${formattedStartingTime|| 'N/A'}</td>
-                    <td>${is_not_expired === undefined ? 'N/A' : (is_not_expired ? 'ONGOING' : 'EXPIRED')}</td>
+                    <td>Ongoing</td>
                     <td>
                         <a href="bid_history.html?product_id=${product.id}" class="picture-link">
                             <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
@@ -50,29 +39,19 @@ async function fetch_products(sorted_items = null) {
 
             // Add click event listeners to rows
             document.querySelectorAll('#product-container tbody tr').forEach(row => {
-                row.addEventListener('click', async () => { // Make the function asynchronous
-                    const productId = row.getAttribute('data-id'); // Get the product ID from the row
-                    
-                    try {
-                        const is_not_expired = fetch_data.find(item => item.id == productId);
-                        if (is_not_expired) {
-                            displayProductOverview(product);
-                        } else {
-                            alert("Cannot alter the data of an ongoing or expired auction!");
-                        }
-                    } catch (error) {
-                        console.error("Error fetching auction data:", error);
-                        alert("An error occurred while fetching auction data.");
-                    }
-                });
-            });            
-        } else {
-            console.error('Failed to fetch products:', data.error);
+                row.addEventListener('click', () => {
+                    const productId = row.getAttribute('data-id');
+                    const product = items.find(item => item.id == productId);
+                    displayProductOverview(product);
+                }); 
+            })
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error fetching products:', error);
     }
-}
+}  
+            
 
 function searchItems() {
     const query = document.getElementById('search-bar').value.trim().toLowerCase();
