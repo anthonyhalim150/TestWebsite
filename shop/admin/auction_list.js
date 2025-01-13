@@ -6,7 +6,7 @@ async function fetch_products(sorted_items = null) {
     try {
         const response = await fetch(`${API_URL}/auctions`);
         const data = await response.json();
-        const fetch_query = await fetch(`${API_URL}/fixed-auction`);
+        const fetch_query = await fetch(`${API_URL}/auction`);
                         
         // Ensure the response is successful
         if (!fetch_query.ok) {
@@ -39,7 +39,7 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
                     <td>${formattedStartingTime|| 'N/A'}</td>
-                    <td>${is_not_expired ? 'ONGOING' : 'EXPIRED'}</td>
+                    <td>${is_not_expired === undefined ? 'N/A' : (is_not_expired ? 'ONGOING' : 'EXPIRED')}</td>
                     <td>
                         <a href="bid_history.html?product_id=${product.id}" class="picture-link">
                             <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
@@ -56,7 +56,7 @@ async function fetch_products(sorted_items = null) {
                     try {
                         const is_not_expired = fetch_data.find(item => item.id == productId);
                         if (is_not_expired) {
-                            displayProductOverview(productId);
+                            displayProductOverview(product);
                         } else {
                             alert("Cannot alter the data of an ongoing or expired auction!");
                         }
