@@ -56,7 +56,7 @@ async function fetch_products(sorted_items = null) {
                     try {
                         const is_not_expired = fetch_data.find(item => item.id == productId);
                         if (is_not_expired) {
-                            displayProductOverview(is_not_expired.id);
+                            displayProductOverview(productId);
                         } else {
                             alert("Cannot alter the data of an ongoing or expired auction!");
                         }
