@@ -101,7 +101,6 @@
 
 /* Product List Table */
 .product-list table {
-    cursor: default;
     width: 100%;
     border-collapse: collapse; /* Ensures no space between table cells */
     margin-top: 30px;
@@ -127,7 +126,7 @@
 
 .product-list tbody tr:hover {
     background-color: #f1f1f1; /* Highlight row on hover */
-    cursor: pointer; /* Optional: Changes cursor to pointer */
+    cursor: default; /* Optional: Changes cursor to pointer */
 }
 
 .form-section {
@@ -211,6 +210,7 @@ td .product-image {
     position: fixed;
     text-align: center;
     align-items: center;
+    cursor: pointer;
     top: 50%; /* Center vertically */
     left: 50%; /* Center horizontally */
     transform: translate(-50%, -50%); /* Adjust for width/height */
