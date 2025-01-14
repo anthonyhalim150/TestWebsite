@@ -21,12 +21,12 @@ async function update_login() {
         <ul class="navbar-icons">
             <li class="nav-item">
                 <a class="cart-btn" href="cart.html" id="cart_nav">
-                    <img src="Icons/cart.png" alt="Transparent Cart Icon">
+                    <img src="Icons/cart.png"  title="Cart" alt="Transparent Cart Icon">
                 </a>
             </li>
             <li class="nav-item dropdown">
                 <a class="dropdown-toggle" href="#" id="profileDropdown" role="button">
-                    <img src="Icons/profile.png" alt="Profile Icon" class="profile-btn">
+                    <img src="Icons/profile.png"  title="Profile" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
                     <li><a class="dropdown-item" id="settings_nav" href="auction.html">Auctions</a></li>
@@ -37,7 +37,7 @@ async function update_login() {
             </li>
             <li class="nav-item">
                 <button id="customer-support" class="support-btn">
-                    <img src="Icons/customer-support.png" alt="Feedback">
+                    <img src="Icons/customer-support.png"  title="Customer Support" alt="Feedback">
                 </button>
             </li>
         </ul>
@@ -57,21 +57,21 @@ async function update_login() {
         <ul class="navbar-icons">
             <li class="nav-item">
                 <a class="cart-btn" href="#" id="cart_nav">
-                    <img src="Icons/cart.png" alt="Transparent Cart Icon">
+                    <img src="Icons/cart.png" title="Cart" alt="Transparent Cart Icon">
                 </a>
             </li>
             <li class="nav-item dropdown">
                 <a class="dropdown-toggle" href="#" id="profileDropdown" role="button">
-                    <img src="Icons/profile.png" alt="Profile Icon" class="profile-btn">
+                    <img src="Icons/profile.png" title="Profile" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" href="login.html">Login</a></li>
                     <li><a class="dropdown-item" href="signup.html">Sign Up</a></li>
+                    <li><a class="dropdown-item" href="login.html">Login</a></li>
                 </ul>
             </li>
             <li class="nav-item">
                 <button id="customer-support" class="support-btn">
-                    <img src="Icons/customer-support.png" alt="Feedback">
+                    <img src="Icons/customer-support.png" title="Customer Support" alt="Feedback">
                 </button>
             </li>
         </ul>

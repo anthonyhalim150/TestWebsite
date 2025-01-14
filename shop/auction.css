@@ -70,8 +70,8 @@ header {
 }
 
 .header-icons img {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   transition: transform 0.2s;
 }
