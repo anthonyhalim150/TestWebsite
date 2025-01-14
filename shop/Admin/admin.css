@@ -101,6 +101,7 @@
 
 /* Product List Table */
 .product-list table {
+    cursor: default;
     width: 100%;
     border-collapse: collapse; /* Ensures no space between table cells */
     margin-top: 30px;
