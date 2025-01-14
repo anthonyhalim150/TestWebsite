@@ -198,6 +198,7 @@ document.querySelectorAll('#product-container tbody tr').forEach(row => {
 // Existing event listeners remain unchanged
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products();
+    productContainer.classList.add('pointer-hover');
 });
 
 const searchBar = document.getElementById('search-bar');

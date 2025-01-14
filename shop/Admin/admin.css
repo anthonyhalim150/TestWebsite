@@ -270,10 +270,6 @@ td .product-image {
     background-color: #ff6600;
 }
 
-.product-overview :hover {/*If there is product-overview, change the cursor to pointer*/
-    cursor: pointer !important;
-}
-
 .product-overview #delete-button {
     background-color: pink;
     color: white;
@@ -285,6 +281,10 @@ td .product-image {
     width: 100%;
     transition: background-color 0.3s ease;
 }
+#product-container.pointer-hover:hover {
+    cursor: pointer;
+}
+
 
 .product-overview #delete-button:hover {
     background-color: red;
