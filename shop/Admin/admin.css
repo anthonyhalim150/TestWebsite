@@ -281,9 +281,10 @@ td .product-image {
     width: 100%;
     transition: background-color 0.3s ease;
 }
-#product-container.pointer-hover:hover {
-    cursor: pointer !important;
+#product-container-tbody.pointer-hover:hover {
+    cursor: pointer;
 }
+
 
 
 .product-overview #delete-button:hover {

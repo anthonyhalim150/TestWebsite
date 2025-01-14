@@ -194,11 +194,11 @@ document.querySelectorAll('#product-container tbody tr').forEach(row => {
         displayProductOverview(product, row);
     });
 });
-const productContainer = document.getElementById('product-container');
+const productContainerTbody = document.getElementById('product-container-tbody');
 // Existing event listeners remain unchanged
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products();
-    productContainer.classList.add('pointer-hover');
+    productContainerTbody.classList.add('pointer-hover'); 
 });
 
 const searchBar = document.getElementById('search-bar');
