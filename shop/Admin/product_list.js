@@ -194,7 +194,7 @@ document.querySelectorAll('#product-container tbody tr').forEach(row => {
         displayProductOverview(product, row);
     });
 });
-
+const productContainer = document.getElementById('product-container');
 // Existing event listeners remain unchanged
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products();
