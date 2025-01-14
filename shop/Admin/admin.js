@@ -52,7 +52,7 @@ function createSidebar() {
                         <li><a href="auction_list.html" class="nav-item">Auction List</a></li>
                         <li class="dropdown nested-dropdown">
                             <a href="#" class="nav-item dropdown-toggle">
-                                Auction Status <span class="arrow">▶</span>
+                                Auction Status <span class="arrow">▼</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a href="expired_auction_list.html" class="nav-item">Expired Auctions</a></li>
@@ -87,16 +87,6 @@ function createSidebar() {
     open_drop_down();
 }
 
-function clear_login() {
-    const login = document.getElementById('logout_nav');
-    login.addEventListener('click', () => {
-        // Clear user info and refresh the page
-        localStorage.clear();
-        alert('You have logged out.');
-        window.location.href = '../login.html';
-    });
-}
-
 function open_drop_down() {
     // Select all dropdown toggles
     const drop_down_toggles = document.querySelectorAll('.dropdown-toggle');
@@ -108,28 +98,27 @@ function open_drop_down() {
             // Toggle the 'open' class for the parent dropdown
             const dropdown = toggle.parentElement;
 
-            // Check if it is a nested dropdown
-            const isNested = dropdown.classList.contains('nested-dropdown');
+            // Check if this dropdown is already open
+            const isOpen = dropdown.classList.contains('open');
 
-            // Toggle only the clicked dropdown
-            dropdown.classList.toggle('open');
+            // Close all dropdowns at the same level
+            const siblingDropdowns = dropdown.parentElement.querySelectorAll(':scope > .dropdown');
+            siblingDropdowns.forEach(sibling => sibling.classList.remove('open'));
 
-            // Close other dropdowns at the same level
-            const siblingDropdowns = isNested
-                ? dropdown.parentElement.querySelectorAll('.nested-dropdown')
-                : dropdown.parentElement.querySelectorAll('.dropdown');
+            // Close nested dropdowns inside this dropdown (if applicable)
+            dropdown.querySelectorAll('.dropdown').forEach(child => child.classList.remove('open'));
 
-            siblingDropdowns.forEach(sibling => {
-                if (sibling !== dropdown) {
-                    sibling.classList.remove('open');
-                }
-            });
+            // Open or close the clicked dropdown based on its current state
+            if (!isOpen) {
+                dropdown.classList.add('open');
+            }
         });
     });
 
-    // Close the dropdown when clicking outside
+    // Close dropdowns when clicking outside
     document.addEventListener('click', (event) => {
-        document.querySelectorAll('.dropdown').forEach(dropdown => {
+        const allDropdowns = document.querySelectorAll('.dropdown');
+        allDropdowns.forEach(dropdown => {
             if (!dropdown.contains(event.target)) {
                 dropdown.classList.remove('open');
             }
@@ -137,6 +126,15 @@ function open_drop_down() {
     });
 }
 
+function clear_login() {
+    const login = document.getElementById('logout_nav');
+    login.addEventListener('click', () => {
+        // Clear user info and refresh the page
+        localStorage.clear();
+        alert('You have logged out.');
+        window.location.href = '../login.html';
+    });
+}
 
 
 

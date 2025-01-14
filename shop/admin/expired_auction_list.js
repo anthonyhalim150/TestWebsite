@@ -4,7 +4,7 @@ let items = [];
 
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(`${API_URL}/expire-auction`);
+        const response = await fetch(`${API_URL}/expired-auction`);
         const data = await response.json();
         if (data.success && data.items) {
             items = data.items;
