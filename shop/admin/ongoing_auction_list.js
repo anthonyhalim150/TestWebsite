@@ -36,14 +36,6 @@ async function fetch_products(sorted_items = null) {
                 </tr>`;
             }).join('');
 
-            // Add click event listeners to rows
-            document.querySelectorAll('#product-container tbody tr').forEach(row => {
-                row.addEventListener('click', () => {
-                    const productId = row.getAttribute('data-id');
-                    const product = items.find(item => item.id == productId);
-                    displayProductOverview(product);
-                }); 
-            })
         }
     }
     catch (error) {

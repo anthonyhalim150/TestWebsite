@@ -18,6 +18,8 @@ async function fetch_products(sorted_items = null) {
                 const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
                 const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
                 const highestBidText = highestBid > 0 ? `$${formattedBid}` : "No Bids";
+                console.log(highestBid);
+                console.log(highestBidText);
                 return `
                 <tr data-id="${product.id}">
                     <td>
@@ -39,15 +41,6 @@ async function fetch_products(sorted_items = null) {
                     </td>
                 </tr>`;
             }).join('');
-
-            // Add click event listeners to rows
-            document.querySelectorAll('#product-container tbody tr').forEach(row => {
-                row.addEventListener('click', () => {
-                    const productId = row.getAttribute('data-id');
-                    const product = items.find(item => item.id == productId);
-                    displayProductOverview(product);
-                }); 
-            })
         }
     }
     catch (error) {
