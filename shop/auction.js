@@ -80,7 +80,7 @@ const cancelBid = async (itemId) => {
     });
     if (response.ok) {
       alert("Bid canceled successfully!");
-      renderAuctionItems(); // Re-fetch and re-render auction items
+      fetchAuctionItems(); // Re-fetch and re-render auction items
     } else {
       alert("Failed to cancel bid.");
     }
