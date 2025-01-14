@@ -282,7 +282,7 @@ td .product-image {
     transition: background-color 0.3s ease;
 }
 #product-container.pointer-hover:hover {
-    cursor: pointer;
+    cursor: pointer !important;
 }
 
 
