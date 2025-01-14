@@ -50,13 +50,13 @@ function createSidebar() {
                     <ul class="dropdown-menu">
                         <li><a href="add_new_auction.html" class="nav-item">Add Auction</a></li>
                         <li><a href="auction_list.html" class="nav-item">Auction List</a></li>
-                        <li class="dropdown">
+                        <li class="dropdown nested-dropdown">
                             <a href="#" class="nav-item dropdown-toggle">
-                                Auction Status <span class="arrow">▼</span>
+                                Auction Status <span class="arrow">▶</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a href="expired_auction_list.html" class="nav-item">Expired Auctions</a></li>
-                                <li><a href="auction_list.html" class="nav-item">Ongoing Auctions</a></li>
+                                <li><a href="ongoing_auction_list.html" class="nav-item">Ongoing Auctions</a></li>
                                 <li><a href="upcoming_auction_list.html" class="nav-item">Upcoming Auctions</a></li>
                             </ul>
                         </li>
@@ -105,14 +105,23 @@ function open_drop_down() {
         toggle.addEventListener('click', (event) => {
             event.preventDefault();
 
-            // Find the parent dropdown and toggle the 'open' class
+            // Toggle the 'open' class for the parent dropdown
             const dropdown = toggle.parentElement;
+
+            // Check if it is a nested dropdown
+            const isNested = dropdown.classList.contains('nested-dropdown');
+
+            // Toggle only the clicked dropdown
             dropdown.classList.toggle('open');
 
-            // Close other open dropdowns
-            document.querySelectorAll('.dropdown').forEach(otherDropdown => {
-                if (otherDropdown !== dropdown) {
-                    otherDropdown.classList.remove('open');
+            // Close other dropdowns at the same level
+            const siblingDropdowns = isNested
+                ? dropdown.parentElement.querySelectorAll('.nested-dropdown')
+                : dropdown.parentElement.querySelectorAll('.dropdown');
+
+            siblingDropdowns.forEach(sibling => {
+                if (sibling !== dropdown) {
+                    sibling.classList.remove('open');
                 }
             });
         });
@@ -127,6 +136,7 @@ function open_drop_down() {
         });
     });
 }
+
 
 
 
