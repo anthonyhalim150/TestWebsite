@@ -6,26 +6,28 @@ async function fetch_products(sorted_items = null) {
     try {
         const response = await fetch(`${API_URL}/expired-auction`);
         const data = await response.json();
+
         if (data.success && data.items) {
             items = data.items;
             if (sorted_items !== null) {
                 items = sorted_items;
             }
+
             const productContainer = document.getElementById('product-container-tbody');
-            productContainer.innerHTML = items.map(product => {
-                const highestBid = fetchHighestBid(product.id);
-                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
+            productContainer.innerHTML = '';
+
+            // Loop through each product and await the highest bid for each
+            for (const product of items) {
+                const highestBid = await fetchHighestBid(product.id);  // Wait for the highest bid
+                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';
                 const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
-                const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
+                const formattedBid = parseFloat(highestBid).toLocaleString('en-US');
                 const highestBidText = highestBid > 0 ? `$${formattedBid}` : "No Bids";
-                console.log(highestBid);
-                console.log(formattedBid);
-                console.log(highestBidText);
-                return `
+
+                productContainer.innerHTML += `
                 <tr data-id="${product.id}">
                     <td>
-                        <img src="${product.image}" alt="Not Found!" 
-                        original-image="${product.image}" class="product-image">
+                        <img src="${product.image}" alt="Not Found!" original-image="${product.image}" class="product-image">
                     </td>
                     <td>${product.item_name}</td>
                     <td>$${formattedPrice}</td>
@@ -33,7 +35,7 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.description || 'N/A'}</td>
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
-                    <td>${formattedStartingTime|| 'N/A'}</td>
+                    <td>${formattedStartingTime || 'N/A'}</td>
                     <td>${highestBidText}</td>
                     <td>
                         <a href="bid_history.html?product_id=${product.id}" class="picture-link">
@@ -41,13 +43,12 @@ async function fetch_products(sorted_items = null) {
                         </a>
                     </td>
                 </tr>`;
-            }).join('');
+            }
         }
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching products:', error);
     }
-}  
+}
      
 const fetchHighestBid = async (itemId) => {
     try {
