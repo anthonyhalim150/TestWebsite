@@ -4,7 +4,7 @@ let items = [];
 
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(`${API_URL}/auction`);
+        const response = await fetch(`${API_URL}/expired-auction`);
         const data = await response.json();
         if (data.success && data.items) {
             items = data.items;
@@ -28,7 +28,6 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
                     <td>${formattedStartingTime|| 'N/A'}</td>
-                    <td>Ongoing</td>
                     <td>
                         <a href="bid_history.html?product_id=${product.id}" class="picture-link">
                             <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
