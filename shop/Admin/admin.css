@@ -210,7 +210,6 @@ td .product-image {
     position: fixed;
     text-align: center;
     align-items: center;
-    cursor: pointer;
     top: 50%; /* Center vertically */
     left: 50%; /* Center horizontally */
     transform: translate(-50%, -50%); /* Adjust for width/height */
@@ -227,6 +226,7 @@ td .product-image {
     overflow-x: hidden; /* Enable vertical scrolling */
     overflow-y: auto; /* Enable vertical scrolling */
 }
+
 
 .product-overview img {
     display: block;
@@ -270,6 +270,9 @@ td .product-image {
     background-color: #ff6600;
 }
 
+.product-overview :hover {
+    cursor: pointer;
+}
 
 .product-overview #delete-button {
     background-color: pink;
