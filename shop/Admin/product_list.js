@@ -17,7 +17,7 @@ async function fetch_products(sorted_items = null) {
             productContainer.innerHTML = items.map(product => {//Used to access product ID
                 const formattedPrice= parseFloat(product.price).toLocaleString('en-US');
                 return `
-              <tr data-id="${product.id}">
+              <tr data-id="${product.id}" class="pointer-row">
                     <td>
                         <img src="${product.image}" alt="Not Found!" 
                         original-image="${product.image}" class="product-image">
@@ -194,11 +194,9 @@ document.querySelectorAll('#product-container tbody tr').forEach(row => {
         displayProductOverview(product, row);
     });
 });
-const productContainerTbody = document.getElementById('product-container-tbody');
 // Existing event listeners remain unchanged
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products();
-    productContainerTbody.classList.add('pointer-hover'); 
 });
 
 const searchBar = document.getElementById('search-bar');

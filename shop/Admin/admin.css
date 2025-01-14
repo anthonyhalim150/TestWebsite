@@ -281,7 +281,7 @@ td .product-image {
     width: 100%;
     transition: background-color 0.3s ease;
 }
-#product-container-tbody.pointer-hover:hover {
+.pointer-row {
     cursor: pointer !important;
 }
 
