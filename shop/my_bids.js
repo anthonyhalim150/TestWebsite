@@ -6,7 +6,13 @@ const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 // Fetch auction items from the server
 const fetchAuctionItems = async () => {
   try {
-    const response = await fetch(`${API_URL}/auction`);
+    const userID = localStorage.getItem("userID");
+    if (!userID){
+        alert("You must be logged in to see your bids!");
+        window.location.href = "auction.html"
+        return;
+    }
+    const response = await fetch(`${API_URL}/get-bid-by-user?userID=${userID}`);
     const data = await response.json();
 
     auctionItems = data.items.map(item => ({
