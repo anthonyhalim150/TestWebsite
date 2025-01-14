@@ -49,17 +49,9 @@ function createSidebar() {
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="add_new_auction.html" class="nav-item">Add Auction</a></li>
-                        <li><a href="auction_list.html" class="nav-item">Auction List</a></li>
-                        <li class="dropdown nested-dropdown">
-                            <a href="#" class="nav-item dropdown-toggle">
-                                Auction Status <span class="arrow">▼</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a href="expired_auction_list.html" class="nav-item">Expired Auctions</a></li>
-                                <li><a href="ongoing_auction_list.html" class="nav-item">Ongoing Auctions</a></li>
-                                <li><a href="upcoming_auction_list.html" class="nav-item">Upcoming Auctions</a></li>
-                            </ul>
-                        </li>
+                        <li><a href="expired_auction_list.html" class="nav-item">Expired Auction List</a></li>
+                        <li><a href="ongoing_auction_list.html" class="nav-item">Ongoing Auction List</a></li>
+                        <li><a href="upcoming_auction_list.html" class="nav-item">Upcoming Auction List</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
@@ -87,6 +79,16 @@ function createSidebar() {
     open_drop_down();
 }
 
+function clear_login() {
+    const login = document.getElementById('logout_nav');
+    login.addEventListener('click', () => {
+        // Clear user info and refresh the page
+        localStorage.clear();
+        alert('You have logged out.');
+        window.location.href = '../login.html';
+    });
+}
+
 function open_drop_down() {
     // Select all dropdown toggles
     const drop_down_toggles = document.querySelectorAll('.dropdown-toggle');
@@ -95,44 +97,26 @@ function open_drop_down() {
         toggle.addEventListener('click', (event) => {
             event.preventDefault();
 
-            // Toggle the 'open' class for the parent dropdown
+            // Find the parent dropdown and toggle the 'open' class
             const dropdown = toggle.parentElement;
+            dropdown.classList.toggle('open');
 
-            // Check if this dropdown is already open
-            const isOpen = dropdown.classList.contains('open');
-
-            // Close all dropdowns at the same level
-            const siblingDropdowns = dropdown.parentElement.querySelectorAll(':scope > .dropdown');
-            siblingDropdowns.forEach(sibling => sibling.classList.remove('open'));
-
-            // Close nested dropdowns inside this dropdown (if applicable)
-            dropdown.querySelectorAll('.dropdown').forEach(child => child.classList.remove('open'));
-
-            // Open or close the clicked dropdown based on its current state
-            if (!isOpen) {
-                dropdown.classList.add('open');
-            }
+            // Close other open dropdowns
+            document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                if (otherDropdown !== dropdown) {
+                    otherDropdown.classList.remove('open');
+                }
+            });
         });
     });
 
-    // Close dropdowns when clicking outside
+    // Close the dropdown when clicking outside
     document.addEventListener('click', (event) => {
-        const allDropdowns = document.querySelectorAll('.dropdown');
-        allDropdowns.forEach(dropdown => {
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
             if (!dropdown.contains(event.target)) {
                 dropdown.classList.remove('open');
             }
         });
-    });
-}
-
-function clear_login() {
-    const login = document.getElementById('logout_nav');
-    login.addEventListener('click', () => {
-        // Clear user info and refresh the page
-        localStorage.clear();
-        alert('You have logged out.');
-        window.location.href = '../login.html';
     });
 }
 
