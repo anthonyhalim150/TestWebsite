@@ -50,6 +50,16 @@ function createSidebar() {
                     <ul class="dropdown-menu">
                         <li><a href="add_new_auction.html" class="nav-item">Add Auction</a></li>
                         <li><a href="auction_list.html" class="nav-item">Auction List</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-item dropdown-toggle">
+                                Auction Status <span class="arrow">▼</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="expired_auction_list.html" class="nav-item">Expired Auctions</a></li>
+                                <li><a href="auction_list.html" class="nav-item">Ongoing Auctions</a></li>
+                                <li><a href="upcoming_auction_list.html" class="nav-item">Upcoming Auctions</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
                 <li class="dropdown">
