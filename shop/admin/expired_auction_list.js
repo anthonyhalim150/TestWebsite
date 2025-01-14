@@ -13,8 +13,11 @@ async function fetch_products(sorted_items = null) {
             }
             const productContainer = document.getElementById('product-container-tbody');
             productContainer.innerHTML = items.map(product => {
+                const highestBid = fetchHighestBid(product.id);
                 const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
                 const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
+                const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
+                const highestBidText = highestBid > 0 ? `$${formattedBid}` : "No Bids";
                 return `
                 <tr data-id="${product.id}">
                     <td>
@@ -28,6 +31,7 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
                     <td>${formattedStartingTime|| 'N/A'}</td>
+                    <td>${highestBidText}</td>
                     <td>
                         <a href="bid_history.html?product_id=${product.id}" class="picture-link">
                             <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
@@ -50,7 +54,17 @@ async function fetch_products(sorted_items = null) {
         console.error('Error fetching products:', error);
     }
 }  
-            
+     
+const fetchHighestBid = async (itemId) => {
+    try {
+      const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${itemId}`);
+      const data = await response.json();
+      return data.highestBid || 0;
+    } catch (error) {
+      console.error("Error fetching highest bid:", error);
+      return 0;
+    }
+  };
 
 function searchItems() {
     const query = document.getElementById('search-bar').value.trim().toLowerCase();
