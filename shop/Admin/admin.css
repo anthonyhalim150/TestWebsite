@@ -199,10 +199,17 @@
 .hidden {
     display: none;
 }
-td .product-image {
-    text-align: center; /* Centers the content horizontally */
-    vertical-align: middle; /* Centers the content vertically */
-    margin-left: 5px;
+#product-container td {
+    vertical-align: middle; /* Vertically aligns content in the middle */
+    text-align: center; /* Horizontally centers the content (optional) */
+}
+
+/* Style for the images */
+#product-container .product-image {
+    max-height: 50px; /* Set a maximum height for the images */
+    object-fit: contain; /* Ensures the image maintains its aspect ratio */
+    display: block; /* Ensures proper alignment */
+    margin: 0 auto; /* Centers the image horizontally in its cell */
 }
 
 /* Product Overview Styles */

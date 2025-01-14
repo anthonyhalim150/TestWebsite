@@ -16,7 +16,7 @@ async function fetch_products(sorted_items = null) {
                 const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
                 const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
                 return `
-                <tr data-id="${product.id}">
+                <tr data-id="${product.id}" class="pointer-row">
                     <td>
                         <img src="${product.image}" alt="Not Found!" 
                         original-image="${product.image}" class="product-image">
@@ -28,12 +28,6 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.category || 'N/A'}</td>
                     <td>${product.duration || 'N/A'}</td>
                     <td>${formattedStartingTime|| 'N/A'}</td>
-                    <td>Ongoing</td>
-                    <td>
-                        <a href="bid_history.html?product_id=${product.id}" class="picture-link">
-                            <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
-                        </a>
-                    </td>
                 </tr>`;
             }).join('');
 
