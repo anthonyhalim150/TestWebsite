@@ -19,6 +19,7 @@ async function fetch_products(sorted_items = null) {
                 const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
                 const highestBidText = highestBid > 0 ? `$${formattedBid}` : "No Bids";
                 console.log(highestBid);
+                console.log(formattedBid);
                 console.log(highestBidText);
                 return `
                 <tr data-id="${product.id}">
