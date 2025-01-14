@@ -15,20 +15,71 @@ body {
   flex-direction: column;
   min-height: 100vh; /* Fixes possible overflow causing the line */
 }
-
 /* Header */
 header {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 20px;
   background-color: rgba(20, 20, 20, 0.9); /* Semi-transparent black */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   color: #ffda79; /* Gold accent */
 }
 
-h1 {
-  margin: 0;
-  font-size: 2.5em;
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
+
+.navbar h1 {
+  margin: 0;
+  font-size: 2em;
+  flex: 1; /* Pushes other content to adjust properly */
+  text-align: left; /* Align text to the left */
+}
+
+.controls {
+  display: flex;
+  flex: 1;
+  justify-content: center; /* Center align search and sort */
+  gap: 10px;
+}
+
+#search-input {
+  padding: 8px;
+  font-size: 1em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 250px;
+}
+
+#sort-select {
+  padding: 8px;
+  font-size: 1em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.header-icons {
+  display: flex;
+  gap: 15px;
+  flex: 1;
+  justify-content: flex-end; /* Align icons to the right */
+}
+
+.header-icons img {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.header-icons img:hover {
+  transform: scale(1.1);
+}
+
 
 /* Auction Items Container */
 #auction-items {
@@ -243,4 +294,3 @@ h1 {
 .cancel-bid-btn:hover {
   background-color: #c82333;
 }
-

@@ -28,29 +28,58 @@ body.loading::before {
     font-size: 20px;
 }
 
-
-
-.nav-item a {
-    font-size: 1rem;
-    color: white;
-    margin: 0 10px;
-    transition: color 0.3s;
-}
-
 h2, h3 {
     text-align: center;
     color: var(--primary-color);
 }
-/* The space below navbar */
+
 .navbar {
     background-color: var(--primary-color);
     border-bottom: 3px solid var(--secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
 }
 
+.container-fluid {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+/* Shopmate logo */
 .navbar-brand {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+    margin-right: 10px; /* Adds some space from the top and left edges */
     font-weight: bold;
     color: white;
+    flex: 0 0 auto; /* Ensures it does not shrink or grow */
+}
+
+.search-container {
+    flex: 1; /* Takes the remaining space in the middle */
+    display: flex;
+    justify-content: center;
+}
+
+#search-bar {
+    width: 90%;  /* Adjust the width as per your requirement */
+    max-width: 400px; /* Limits the maximum width */
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+.navbar-collapse {
+    flex: 0 0 auto; /* Ensures it does not shrink or grow */
+    display: flex;
+    justify-content: flex-end;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
 }
 
 .nav-item a {
@@ -62,17 +91,6 @@ h2, h3 {
 
 .nav-item a:hover {
     color: var(--highlight-color);
-}
-
-h2 {
-    text-align: center;
-    margin: 20px 0;
-    color: var(--primary-color);
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
 }
 
 
@@ -222,15 +240,7 @@ input[type="number"] {
     border-radius: 10%;
 }
 
-#search-bar {
-    width: 200%;  /* Adjust the width as per your requirement */
-    max-width: 400px; /* Limits the maximum width */
-    padding: 5px;
-    font-size: 16px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    margin-left: 140px;
-}
+
 
 .comment-section {
     background-color: var(--highlight-color); /* Light highlight background */
