@@ -71,8 +71,8 @@ h2, h3 {
 }
 
 #search-bar {
-    width: 90%;  /* Adjust the width as per your requirement */
-    max-width: 400px; /* Limits the maximum width */
+    width: 20%;  /* Adjust the width as per your requirement */
+    max-width: 200px; /* Limits the maximum width */
     padding: 5px;
     font-size: 16px;
     border-radius: 20px;
