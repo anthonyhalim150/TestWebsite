@@ -32,7 +32,6 @@ h2, h3 {
     text-align: center;
     color: var(--primary-color);
 }
-
 .navbar {
     background-color: var(--primary-color);
     border-bottom: 3px solid var(--secondary-color);
@@ -77,6 +76,29 @@ h2, h3 {
     border: 1px solid #ccc;
 }
 
+/* Navbar collapse section */
+.navbar-collapse {
+    flex: 0 0 auto; /* Ensures it does not shrink or grow */
+    display: flex;
+    justify-content: flex-end;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+}
+
+.nav-item a {
+    font-size: 1rem;
+    color: white;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+.nav-item a:hover {
+    color: var(--highlight-color);
+}
+
 /* Responsive styles for small screens */
 @media (max-width: 576px) {
     .container-fluid {
@@ -100,33 +122,6 @@ h2, h3 {
     }
 }
 
-/* Shopmate logo */
-.navbar-brand {
-    font-size: 1.8rem;
-    margin-right: 10px; /* Adds some space from the top and left edges */
-    font-weight: bold;
-    color: white;
-    flex: 0 0 auto; /* Ensures it does not shrink or grow */
-}
-
-
-.navbar-collapse {
-    flex: 0 0 auto; /* Ensures it does not shrink or grow */
-    display: flex;
-    justify-content: flex-end;
-}
-
-.navbar-nav {
-    display: flex;
-    align-items: center;
-}
-
-.nav-item a {
-    font-size: 1rem;
-    color: white;
-    margin: 0 10px;
-    transition: color 0.3s;
-}
 
 .nav-item a:hover {
     color: var(--highlight-color);
