@@ -88,7 +88,7 @@ h2, h3 {
 }
 
 /* Responsive adjustments for small screens */
-@media (max-width: 300px) {
+@media (max-width: 100px) {
     .container-fluid {
         flex-direction: column; /* Stack the navbar content vertically */
         align-items: center; /* Center the content */
