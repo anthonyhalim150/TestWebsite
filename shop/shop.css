@@ -32,6 +32,9 @@ h2, h3 {
     text-align: center;
     color: var(--primary-color);
 }
+
+/* Existing CSS remains intact */
+
 .navbar {
     background-color: var(--primary-color);
     border-bottom: 3px solid var(--secondary-color);
@@ -76,7 +79,7 @@ h2, h3 {
     border: 1px solid #ccc;
 }
 
-/* Navbar collapse section */
+/* Navbar collapse and navigation */
 .navbar-collapse {
     flex: 0 0 auto; /* Ensures it does not shrink or grow */
     display: flex;
@@ -95,11 +98,7 @@ h2, h3 {
     transition: color 0.3s;
 }
 
-.nav-item a:hover {
-    color: var(--highlight-color);
-}
-
-/* Responsive styles for small screens */
+/* Fix for small screens */
 @media (max-width: 576px) {
     .container-fluid {
         flex-direction: column; /* Stack the navbar content vertically */
@@ -117,11 +116,28 @@ h2, h3 {
         margin-top: 10px; /* Add spacing */
     }
 
+    .nav-item {
+        margin: 5px 0; /* Add spacing between navbar items */
+    }
+
     .nav-item a {
         font-size: 0.9rem; /* Adjust font size for smaller screens */
     }
-}
 
+    .navbar-icons {
+        display: flex;
+        flex-wrap: wrap; /* Allow icons to wrap if needed */
+        justify-content: center; /* Center the icons */
+        width: 100%; /* Full width for icons */
+        margin-top: 10px; /* Add spacing above icons */
+    }
+
+    .navbar-icons img {
+        width: 24px;
+        height: 24px;
+        margin: 5px; /* Add spacing around icons */
+    }
+}
 
 .nav-item a:hover {
     color: var(--highlight-color);
