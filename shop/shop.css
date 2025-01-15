@@ -49,6 +49,7 @@ h2, h3 {
     display: none; /* For WebKit browsers */
 }
 
+
 .container-fluid {
     display: flex;
     width: 100%;
@@ -76,6 +77,25 @@ h2, h3 {
     font-size: 16px;
     border-radius: 20px;
     border: 1px solid #ccc;
+}
+
+@media (max-width: 100px) {
+    .navbar {
+        padding: 5px; /* Adjust padding for smaller screens */
+    }
+
+    .navbar-icons img {
+        width: 24px;
+        height: 24px;
+    }
+    #search-bar {
+        width: 10%;  /* Adjust the width as per your requirement */
+        max-width: 30px; /* Limits the maximum width */
+        padding: 5px;
+        font-size: 16px;
+        border-radius: 20px;
+        border: 1px solid #ccc;
+    }
 }
 
 .navbar-collapse {
