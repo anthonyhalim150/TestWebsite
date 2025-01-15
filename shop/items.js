@@ -7,41 +7,57 @@ let likedItems = [];
 async function update_login() {
     const navbarLinks = document.getElementById('navbar-links');
     const userID = localStorage.getItem('userID');
-    const role = localStorage.getItem('role');
-
-    if (get_user_role() !== role) {
-        alert("Token changed, alert developer of the error!");
+    const role = localStorage.getItem('role'); 
+    if (get_user_role() !== role){
+        alert("Token changed, alert developer of the error!"); //Jangan sampe masuk sini
         window.location.href = './index.html';
     }
-
-    const iconsHTML = userID ? `
+    if (userID) {
+        if (role === 'admin') {
+            window.location.href = './admin/index.html';
+        }
+        // User is logged in
+        navbarLinks.innerHTML = `
         <ul class="navbar-icons">
             <li class="nav-item">
                 <a class="cart-btn" href="cart.html" id="cart_nav">
-                    <img src="Icons/cart.png" title="Cart" alt="Cart Icon">
+                    <img src="Icons/cart.png"  title="Cart" alt="Transparent Cart Icon">
                 </a>
             </li>
             <li class="nav-item dropdown">
                 <a class="dropdown-toggle" href="#" id="profileDropdown" role="button">
-                    <img src="Icons/profile.png" title="Profile" alt="Profile Icon" class="profile-btn">
+                    <img src="Icons/profile.png"  title="Profile" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" href="auction.html">Auctions</a></li>
-                    <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                    <li><a class="dropdown-item" id="settings_nav" href="auction.html">Auctions</a></li>
+                    <li><a class="dropdown-item" id="settings_nav" href="settings.html">Settings</a></li>
                     <li><a class="dropdown-item" id="likes_nav" href="#">Likes</a></li>
-                    <li><a class="dropdown-item" href="#" id="logout_nav">Logout</a></li>
+                    <li><a class="dropdown-item" id="logout_nav" href="#">Logout</a></li>
                 </ul>
             </li>
             <li class="nav-item">
                 <button id="customer-support" class="support-btn">
-                    <img src="Icons/customer-support.png" title="Customer Support" alt="Support">
+                    <img src="Icons/customer-support.png"  title="Customer Support" alt="Feedback">
                 </button>
             </li>
-        </ul>` : `
+        </ul>
+        `;
+        const likesNav = document.getElementById('likes_nav');
+        if (likesNav) {
+            likesNav.addEventListener('click', (event) => {
+                event.preventDefault(); 
+                show_likes(userID);
+                window.location.href = 'like.html';
+            })
+        }
+        clear_login();
+    } else {
+        // User is logged out
+        navbarLinks.innerHTML = `
         <ul class="navbar-icons">
             <li class="nav-item">
                 <a class="cart-btn" href="#" id="cart_nav">
-                    <img src="Icons/cart.png" title="Cart" alt="Cart Icon">
+                    <img src="Icons/cart.png" title="Cart" alt="Transparent Cart Icon">
                 </a>
             </li>
             <li class="nav-item dropdown">
@@ -55,27 +71,16 @@ async function update_login() {
             </li>
             <li class="nav-item">
                 <button id="customer-support" class="support-btn">
-                    <img src="Icons/customer-support.png" title="Customer Support" alt="Support">
+                    <img src="Icons/customer-support.png" title="Customer Support" alt="Feedback">
                 </button>
             </li>
-        </ul>`;
-
-    navbarLinks.innerHTML = iconsHTML;
-
-    // Add event listeners after rendering
-    const likesNav = document.getElementById('likes_nav');
-    if (likesNav) {
-        likesNav.addEventListener('click', (event) => {
-            event.preventDefault();
-            show_likes(userID);
-            window.location.href = 'like.html';
-        });
+        </ul>
+        `;
+        prevent_cart(userID);
+   
     }
-
-    if (!userID) prevent_cart(userID);
-    setup_icon();
+    setup_icon(); 
 }
-
 function show_likes(userID){
     if (!userID) {//Jangan sampe masuk sini
         window.location.href = 'signup.html';

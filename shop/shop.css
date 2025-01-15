@@ -33,29 +33,36 @@ h2, h3 {
     color: var(--primary-color);
 }
 
-/* Existing CSS remains intact */
-
-/* Navbar container */
 .navbar {
     background-color: var(--primary-color);
     border-bottom: 3px solid var(--secondary-color);
+    overflow-x: auto; /* Allow horizontal scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling for touch devices */
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping for small screens */
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
 }
 
-/* ShopMate logo */
-.navbar-brand {
-    font-size: 1.8rem;
-    margin-right: 10px;
-    font-weight: bold;
-    color: white;
-    flex: 0 0 auto; /* Prevents shrinking or growing */
+/* Optional: Hide scrollbars for a cleaner look */
+.navbar::-webkit-scrollbar {
+    display: none; /* For WebKit browsers */
 }
 
-/* Search container */
+.container-fluid {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+/* Shopmate logo */
+.navbar-brand {
+    font-size: 1.8rem;
+    margin-right: 10px; /* Adds some space from the top and left edges */
+    font-weight: bold;
+    color: white;
+    flex: 0 0 auto; /* Ensures it does not shrink or grow */
+}
+
 .search-container {
     flex: 1; /* Takes the remaining space in the middle */
     display: flex;
@@ -63,54 +70,30 @@ h2, h3 {
 }
 
 #search-bar {
-    width: 90%;
-    max-width: 300px;
-    min-width: 150px;
+    width: 90%;  /* Adjust the width as per your requirement */
+    max-width: 400px; /* Limits the maximum width */
     padding: 5px;
     font-size: 16px;
     border-radius: 20px;
     border: 1px solid #ccc;
 }
 
-/* Navbar icons container */
-.navbar-icons {
+.navbar-collapse {
+    flex: 0 0 auto; /* Ensures it does not shrink or grow */
+    display: flex;
+    justify-content: flex-end;
+}
+
+.navbar-nav {
     display: flex;
     align-items: center;
-    justify-content: flex-end; /* Align to the right */
-    gap: 10px; /* Add spacing between icons */
 }
 
-/* Icons */
-.navbar-icons img {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-}
-
-/* Responsive adjustments for small screens */
-@media (max-width: 100px) {
-    .container-fluid {
-        flex-direction: column; /* Stack the navbar content vertically */
-        align-items: center; /* Center the content */
-    }
-
-    .search-container {
-        width: 100%; /* Full width on smaller screens */
-        margin: 10px 0; /* Add spacing above and below */
-    }
-
-    .navbar-icons {
-        flex-wrap: wrap; /* Allow icons to wrap if needed */
-        justify-content: center; /* Center the icons */
-        width: 100%; /* Full width for icons */
-        margin-top: 10px; /* Add spacing above icons */
-    }
-
-    .navbar-icons img {
-        width: 24px;
-        height: 24px;
-        margin: 5px; /* Add spacing around icons */
-    }
+.nav-item a {
+    font-size: 1rem;
+    color: white;
+    margin: 0 10px;
+    transition: color 0.3s;
 }
 
 .nav-item a:hover {
