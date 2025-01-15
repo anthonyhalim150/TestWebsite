@@ -37,26 +37,30 @@ h2, h3 {
     background-color: var(--primary-color);
     border-bottom: 3px solid var(--secondary-color);
     display: flex;
+    flex-wrap: wrap; /* Allow wrapping for small screens */
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    overflow-x:auto;
 }
 
 .container-fluid {
     display: flex;
+    flex-wrap: wrap; /* Allow wrapping of the contents inside container-fluid */
     width: 100%;
     align-items: center;
+    justify-content: space-between; /* Spread content evenly */
 }
+
 /* Shopmate logo */
 .navbar-brand {
     font-size: 1.8rem;
-    margin-right: 10px; /* Adds some space from the top and left edges */
+    margin-right: 10px;
     font-weight: bold;
     color: white;
-    flex: 0 0 auto; /* Ensures it does not shrink or grow */
+    flex: 0 0 auto; /* Prevents shrinking or growing */
 }
 
+/* Search container */
 .search-container {
     flex: 1; /* Takes the remaining space in the middle */
     display: flex;
@@ -65,19 +69,44 @@ h2, h3 {
 
 #search-bar {
     width: 90%;
-    max-width: 300px; /* Adjust to fit smaller devices */
-    min-width: 150px; /* Prevent it from shrinking too much */
+    max-width: 300px;
+    min-width: 150px;
     padding: 5px;
     font-size: 16px;
     border-radius: 20px;
     border: 1px solid #ccc;
 }
 
-@media (max-width: 480px) {
-    #search-bar {
-        width: 90%; /* Adjust to fit within small screens */
-        max-width: none; /* Allow full use of available width */
+/* Responsive styles for small screens */
+@media (max-width: 576px) {
+    .container-fluid {
+        flex-direction: column; /* Stack the navbar content vertically */
+        align-items: center; /* Center the content */
     }
+
+    .search-container {
+        width: 100%; /* Full width on smaller screens */
+        margin: 10px 0; /* Add spacing above and below */
+    }
+
+    .navbar-collapse {
+        width: 100%; /* Ensure it spans full width */
+        justify-content: center; /* Center navbar items */
+        margin-top: 10px; /* Add spacing */
+    }
+
+    .nav-item a {
+        font-size: 0.9rem; /* Adjust font size for smaller screens */
+    }
+}
+
+/* Shopmate logo */
+.navbar-brand {
+    font-size: 1.8rem;
+    margin-right: 10px; /* Adds some space from the top and left edges */
+    font-weight: bold;
+    color: white;
+    flex: 0 0 auto; /* Ensures it does not shrink or grow */
 }
 
 
