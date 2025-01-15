@@ -36,19 +36,11 @@ h2, h3 {
 .navbar {
     background-color: var(--primary-color);
     border-bottom: 3px solid var(--secondary-color);
-    overflow-x: auto; /* Allow horizontal scrolling */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling for touch devices */
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
 }
-
-/* Optional: Hide scrollbars for a cleaner look */
-.navbar::-webkit-scrollbar {
-    display: none; /* For WebKit browsers */
-}
-
 
 .container-fluid {
     display: flex;
@@ -71,31 +63,12 @@ h2, h3 {
 }
 
 #search-bar {
-    width: 20%;  /* Adjust the width as per your requirement */
-    max-width: 200px; /* Limits the maximum width */
+    width: 90%;  /* Adjust the width as per your requirement */
+    max-width: 400px; /* Limits the maximum width */
     padding: 5px;
     font-size: 16px;
     border-radius: 20px;
     border: 1px solid #ccc;
-}
-
-@media (max-width: 100px) {
-    .navbar {
-        padding: 5px; /* Adjust padding for smaller screens */
-    }
-
-    .navbar-icons img {
-        width: 24px;
-        height: 24px;
-    }
-    #search-bar {
-        width: 10%;  /* Adjust the width as per your requirement */
-        max-width: 30px; /* Limits the maximum width */
-        padding: 5px;
-        font-size: 16px;
-        border-radius: 20px;
-        border: 1px solid #ccc;
-    }
 }
 
 .navbar-collapse {
