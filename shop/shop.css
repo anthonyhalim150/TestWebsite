@@ -35,6 +35,7 @@ h2, h3 {
 
 /* Existing CSS remains intact */
 
+/* Navbar container */
 .navbar {
     background-color: var(--primary-color);
     border-bottom: 3px solid var(--secondary-color);
@@ -45,15 +46,7 @@ h2, h3 {
     padding: 0 20px;
 }
 
-.container-fluid {
-    display: flex;
-    flex-wrap: wrap; /* Allow wrapping of the contents inside container-fluid */
-    width: 100%;
-    align-items: center;
-    justify-content: space-between; /* Spread content evenly */
-}
-
-/* Shopmate logo */
+/* ShopMate logo */
 .navbar-brand {
     font-size: 1.8rem;
     margin-right: 10px;
@@ -79,27 +72,23 @@ h2, h3 {
     border: 1px solid #ccc;
 }
 
-/* Navbar collapse and navigation */
-.navbar-collapse {
-    flex: 0 0 auto; /* Ensures it does not shrink or grow */
-    display: flex;
-    justify-content: flex-end;
-}
-
-.navbar-nav {
+/* Navbar icons container */
+.navbar-icons {
     display: flex;
     align-items: center;
+    justify-content: flex-end; /* Align to the right */
+    gap: 10px; /* Add spacing between icons */
 }
 
-.nav-item a {
-    font-size: 1rem;
-    color: white;
-    margin: 0 10px;
-    transition: color 0.3s;
+/* Icons */
+.navbar-icons img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
 }
 
-/* Fix for small screens */
-@media (max-width: 576px) {
+/* Responsive adjustments for small screens */
+@media (max-width: 300px) {
     .container-fluid {
         flex-direction: column; /* Stack the navbar content vertically */
         align-items: center; /* Center the content */
@@ -110,22 +99,7 @@ h2, h3 {
         margin: 10px 0; /* Add spacing above and below */
     }
 
-    .navbar-collapse {
-        width: 100%; /* Ensure it spans full width */
-        justify-content: center; /* Center navbar items */
-        margin-top: 10px; /* Add spacing */
-    }
-
-    .nav-item {
-        margin: 5px 0; /* Add spacing between navbar items */
-    }
-
-    .nav-item a {
-        font-size: 0.9rem; /* Adjust font size for smaller screens */
-    }
-
     .navbar-icons {
-        display: flex;
         flex-wrap: wrap; /* Allow icons to wrap if needed */
         justify-content: center; /* Center the icons */
         width: 100%; /* Full width for icons */
