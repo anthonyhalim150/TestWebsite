@@ -63,13 +63,22 @@ h2, h3 {
 }
 
 #search-bar {
-    width: 90%;  /* Adjust the width as per your requirement */
-    max-width: 400px; /* Limits the maximum width */
+    width: 90%;
+    max-width: 300px; /* Adjust to fit smaller devices */
+    min-width: 150px; /* Prevent it from shrinking too much */
     padding: 5px;
     font-size: 16px;
     border-radius: 20px;
     border: 1px solid #ccc;
 }
+
+@media (max-width: 480px) {
+    #search-bar {
+        width: 90%; /* Adjust to fit within small screens */
+        max-width: none; /* Allow full use of available width */
+    }
+}
+
 
 .navbar-collapse {
     flex: 0 0 auto; /* Ensures it does not shrink or grow */
