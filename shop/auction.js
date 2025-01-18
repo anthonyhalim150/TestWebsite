@@ -96,19 +96,19 @@ const renderAuctionItems = async (items = filteredItems) => {
 
   for (const item of items) {
     const data = await fetchHighestBid(item.id);
-    const highestBid = data.bid_amount;
+    const highestBid = data.bid_amount || 0;
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
     const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
-    const highestBidText = highestBid > 0 ? `$${formattedBid}` : "No bids yet";
+    const user = data.username || 'None'; //Jangan sampe None
+    const highestBidText = highestBid > 0 ? `$${formattedBid} by ${user}` : "No bids yet";
     const startingPrice = item.startingPrice || 0; 
     const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');
-    const user = data.username;
     itemElement.innerHTML = `
       <img src="${item.image}" alt="${item.name}" class="item-image">
       <h3>${item.name}</h3>
       <p>Starting Price: $${formattedPrice}</p>
-      <p>Current Highest Bid: ${highestBidText} by ${user}</p>
+      <p>Current Highest Bid: ${highestBidText}</p>
       <p class="timer" id="timer-${item.id}"></p>
       <button class="bid-btn" id="bid-btn-${item.id}">Place Bid</button>
       <button class="cancel-bid-btn" id="cancel-bid-btn-${item.id}">Cancel Bid</button>
