@@ -35,7 +35,7 @@ const fetchHighestBid = async (itemId) => {
   try {
     const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${itemId}`);
     const data = await response.json();
-    return data.results;
+    return data.length > 0 ? data[0] : { bid_amount: 0, username: null }; // Return the first item or a default object
   } catch (error) {
     console.error("Error fetching highest bid:", error);
     return 0;
