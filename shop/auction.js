@@ -95,8 +95,7 @@ const renderAuctionItems = async (items = filteredItems) => {
   auctionContainer.innerHTML = ""; // Clear existing items
 
   for (const item of items) {
-    const response = await fetchHighestBid(item.id);
-    const data = await response.json();
+    const data = await fetchHighestBid(item.id);
     const highestBid = data.bid_amount || 0;
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
