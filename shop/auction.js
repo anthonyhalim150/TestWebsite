@@ -101,7 +101,7 @@ const renderAuctionItems = async (items = filteredItems) => {
     itemElement.classList.add("auction-item");
     const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
     const user = data.username || 'None'; //Jangan sampe None
-    const highestBidText = highestBid > 0 ? `$${formattedBid} by ${user}` : "No bids yet";
+    const highestBidText = highestBid > 0 ? `$${formattedBid}<br>Submitted by ${user}` : "No bids yet";
     const startingPrice = item.startingPrice || 0; 
     const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');
     itemElement.innerHTML = `
