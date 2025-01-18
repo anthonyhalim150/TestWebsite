@@ -35,7 +35,7 @@ const fetchHighestBid = async (itemId) => {
   try {
     const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${itemId}`);
     const data = await response.json();
-    return data.highestBid || 0;
+    return data|| 0;
   } catch (error) {
     console.error("Error fetching highest bid:", error);
     return 0;
@@ -95,18 +95,20 @@ const renderAuctionItems = async (items = filteredItems) => {
   auctionContainer.innerHTML = ""; // Clear existing items
 
   for (const item of items) {
-    const highestBid = await fetchHighestBid(item.id);
+    const data = await fetchHighestBid(item.id);
+    const highestBid = data.bid_amount;
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
     const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
     const highestBidText = highestBid > 0 ? `$${formattedBid}` : "No bids yet";
     const startingPrice = item.startingPrice || 0; 
     const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');
+    const user = data.username;
     itemElement.innerHTML = `
       <img src="${item.image}" alt="${item.name}" class="item-image">
       <h3>${item.name}</h3>
       <p>Starting Price: $${formattedPrice}</p>
-      <p>Current Highest Bid: ${highestBidText}</p>
+      <p>Current Highest Bid: ${highestBidText} by ${user}</p>
       <p class="timer" id="timer-${item.id}"></p>
       <button class="bid-btn" id="bid-btn-${item.id}">Place Bid</button>
       <button class="cancel-bid-btn" id="cancel-bid-btn-${item.id}">Cancel Bid</button>
@@ -159,7 +161,7 @@ const renderAuctionItems = async (items = filteredItems) => {
     }
 
     // Add click event to display product overview
-    itemElement.addEventListener("click", () => showProductOverview(item, highestBid));
+    itemElement.addEventListener("click", () => showProductOverview(item, highestBid, user));
   }
 };
 
@@ -188,7 +190,7 @@ const startItemTimer = (item) => {
 };
 
 // Show product overview in a popup
-const showProductOverview = (item, highestBid) => {
+const showProductOverview = (item, highestBid, user) => {
   const overviewSection = document.getElementById("product-overview");
   overviewSection.style.display = "block";
 
@@ -205,7 +207,7 @@ const showProductOverview = (item, highestBid) => {
 
   const highestBidElement = document.createElement("p");
   const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
-  const highestBidText = formattedBid > 0 ? `$${formattedBid}` : "No bids yet";
+  const highestBidText = formattedBid > 0 ? `$${formattedBid} by ${user}` : "No bids yet";
   
   highestBidElement.textContent = `Current Highest Bid: ${highestBidText}`;
   highestBidElement.style.marginTop = "10px";

@@ -36,6 +36,9 @@ const upload = multer({
 
 // Express app setup
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // CORS configuration
 app.use(cors({
@@ -859,7 +862,7 @@ app.get('/transactions', async (req, res) => {
                     u.username, 
                     t.total_amount, 
                     t.created_at,
-                    GROUP_CONCAT(CONCAT('Item: ', i.name, ', Quantity: ', s.quantity, ', Price: $', s.price) SEPARATOR '\n') AS description
+                    GROUP_CONCAT(CONCAT('Item: ', i.name, ', Quantity: ', s.quantity, ', Price: $', FORMAT(s.price, 2)) SEPARATOR '\n') AS description
                 FROM TRANSACTIONS t
                 JOIN USERS u ON t.user_id = u.id
                 JOIN SALE_ITEMS s ON t.transaction_id = s.transaction_id
@@ -1124,15 +1127,19 @@ app.post('/train-AI', async (req, res) => {
 });
 
 
-app.put('/auction-items/:id', upload.single('auction-image'), async (req, res) => {
+app.put('/auction-items/:id', upload.single('product-image'), async (req, res) => {
     const auctionItemId = req.params.id;
-    const { item_name, starting_price, stock, description, duration, starting_time } = req.body;
+    const { name, price, stock, description, category, duration, time } = req.body;
+    let starting_time;
+    if (time){
+        starting_time = new Date(time);
+    }
     try {
         const connection = await pool.getConnection();
 
         try {
             // Fetch the existing image URL
-            const [rows] = await connection.query('SELECT image FROM AUCTION_ITEMS WHERE itemID = ?', [auctionItemId]);
+            const [rows] = await connection.query('SELECT image FROM AUCTION_ITEMS WHERE id = ?', [auctionItemId]);
 
             if (rows.length === 0) {
                 return res.status(404).json({ success: false, error: 'Auction item not found.' });
@@ -1169,14 +1176,15 @@ app.put('/auction-items/:id', upload.single('auction-image'), async (req, res) =
             // Update auction item details in the database
             const updateQuery = `
                 UPDATE AUCTION_ITEMS
-                SET item_name = ?, starting_price = ?, stock = ?, description = ?, duration = ?, image = ?, starting_time = ?
-                WHERE itemID = ?
+                SET item_name = ?, starting_price = ?, stock = ?, description = ?, category = ?, duration = ?, image = ?, starting_time = ?
+                WHERE id = ?
             `;
             const [result] = await connection.query(updateQuery, [
-                item_name,
-                starting_price,
+                name,
+                price,
                 stock,
                 description,
+                category,
                 duration,
                 newImagePath,
                 starting_time || null,
@@ -1215,6 +1223,10 @@ app.get('/auctions', async (req, res) => {
 });
 app.post("/add-new-auction", upload.single("product-image"), async (req, res) => {
     const { name, price, starting_time, description, stock, category, duration } = req.body;
+    let time;
+    if (starting_time){
+        time = new Date(starting_time);
+    }
   
     // Validate inputs
     if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !req.file || !category || !duration || duration <= 0) {
@@ -1245,9 +1257,9 @@ app.post("/add-new-auction", upload.single("product-image"), async (req, res) =>
           try {
             const query = `
               INSERT INTO AUCTION_ITEMS (item_name, stock, description, category, image, starting_price, duration, starting_time) 
-              VALUES (?, ?, ?, ?, ?, ?,  ?)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `;
-            const values = [name, stock, description, category, imageUrl, price, duration, starting_time||null];
+            const values = [name, stock, description, category, imageUrl, price, duration, time||null];
   
             const [result] = await connection.query(query, values);
             res.status(201).json({
@@ -1282,13 +1294,13 @@ app.delete("/remove-auction", async (req, res) => {
   try {
     const connection = await pool.getConnection();
     try {
-      const [rows] = await connection.query("SELECT image_url FROM AUCTION_ITEMS WHERE id = ?", [itemID]);
+      const [rows] = await connection.query("SELECT image FROM AUCTION_ITEMS WHERE id = ?", [itemID]);
 
       if (rows.length === 0) {
         return res.status(404).json({ success: false, error: "Item not found." });
       }
 
-      const imageUrl = rows[0].image_url;
+      const imageUrl = rows[0].image;
       const imageName = imageUrl.split("/").slice(-2).join("/");
 
       const deleteQuery = "DELETE FROM AUCTION_ITEMS WHERE id = ?";
@@ -1310,7 +1322,212 @@ app.delete("/remove-auction", async (req, res) => {
   }
 });
 
+app.get("/expired-auction", async (req, res) => {
+    const query = `
+    SELECT * 
+    FROM AUCTION_ITEMS 
+    WHERE (starting_time + INTERVAL duration SECOND) < NOW()
+    `;//NOW() is guranteed to be the server date and cannot be manipulated
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        const [results] = await connection.query(query);
+        res.json({ success: true, items: results });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error("Error fetching auction items:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+});
+//TBA auctions
+app.get("/upcoming-auction", async (req, res) => {
+    const query = `
+    SELECT * 
+    FROM AUCTION_ITEMS 
+    WHERE starting_time > NOW() OR starting_time IS NULL
+    `;//NOW() is guranteed to be the server date and cannot be manipulated
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        const [results] = await connection.query(query);
+        res.json({ success: true, items: results });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error("Error fetching auction items:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+});
+//Ongoing auctions
+app.get("/auction", async (req, res) => {
+    const query = `
+    SELECT * 
+    FROM AUCTION_ITEMS 
+    WHERE (starting_time + INTERVAL duration SECOND) > NOW() AND starting_time < NOW()
+    `;//NOW() is guranteed to be the server date and cannot be manipulated
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        const [results] = await connection.query(query);
+        res.json({ success: true, items: results });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error("Error fetching auction items:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+});
 
+app.post("/update-auction-status", async (req, res) => {
+    const { id } = req.body;
+  
+    if (!id) {
+      return res.status(400).json({ success: false, message: "AuctionID is required" });
+    }
+  
+    const query = "UPDATE AUCTION_ITEMS SET is_expired = TRUE WHERE id = ?";
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        const [results] = await connection.query(query, [id]);
+  
+        if (results.affectedRows > 0) {
+          res.json({ success: true, message: "Auction marked as expired" });
+        } else {
+          res.status(404).json({ success: false, message: "Item not found" });
+        }
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error("Failed to update auction status:", err);
+      res.status(500).json({ success: false, message: "Database error" });
+    }
+  });
+app.get('/bid-list', async (req, res) => {
+    const { auction_item_id } = req.query;
+
+    if (!auction_item_id) {
+        return res.status(400).json({ success: false, message: 'Missing auction_item_id' });
+    }
+
+    const query = `
+        SELECT b.id, b.bid_amount, b.bid_time, u.username 
+        FROM BIDS b
+        INNER JOIN USERS u ON b.user_id = u.id
+        WHERE b.auction_item_id = ?
+        ORDER BY b.bid_time DESC
+    `;
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const [rows] = await connection.query(query, [auction_item_id]);
+            res.json({ success: true, bids: rows });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching bids:', error);
+        res.status(500).json({ success: false, message: 'Database query failed' });
+    }
+});
+app.post("/bids", async (req, res) => {
+    const { auction_item_id, user_id, bid_amount } = req.body;
+  
+    const sql = `
+      INSERT INTO BIDS (auction_item_id, user_id, bid_amount)
+      VALUES (?, ?, ?)
+      ON DUPLICATE KEY UPDATE bid_amount = VALUES(bid_amount);
+    `;
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        await connection.query(sql, [auction_item_id, user_id, bid_amount]);
+        res.json({ message: "Bid placed successfully." });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Error placing bid." });
+    }
+  });
+  
+app.delete("/bids", async (req, res) => {
+    const { auction_item_id, user_id } = req.query;
+  
+    const sql = "DELETE FROM BIDS WHERE auction_item_id = ? AND user_id = ?";
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        await connection.query(sql, [auction_item_id, user_id]);
+        res.json({ message: "Bid canceled successfully." });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Error canceling bid." });
+    }
+});
+
+app.get("/get-bid-by-user", async (req, res) => {
+    const { userID } = req.query;
+    if (!userID) {
+        return res.status(400).json({ message: "No user ID sent." });
+    }
+
+    const sql = "SELECT AI.* FROM AUCTION_ITEMS AI INNER JOIN BIDS B ON AI.id = B.auction_item_id WHERE B.user_id = ? AND (AI.starting_time + INTERVAL AI.duration SECOND) > NOW() AND AI.starting_time < NOW();";
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const [results] = await connection.query(sql, [userID]); // Pass userID as the query parameter
+            res.json(results);
+        } finally {
+            connection.release();
+        }
+    } catch (err) {
+        console.error("Error fetching bidded items:", err);
+        res.status(500).json({ error: "Database query failed" });
+    }
+});
+
+app.get("/highest-bid", async (req, res) => {
+    const { auction_item_id } = req.query;
+  
+    if (!auction_item_id) {
+      return res.status(400).json({ message: "Auction item ID is required." });
+    }
+  
+    const sql = "SELECT MAX(bid_amount) AS highestBid FROM BIDS WHERE auction_item_id = ?";
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        const [results] = await connection.query(sql, [auction_item_id]);
+        const highestBid = results[0]?.highestBid || 0;
+        res.json({ highestBid });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error("Error fetching the highest bid:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+});
+  
 
 
 
