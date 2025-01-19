@@ -2,6 +2,7 @@
 const qrCodeCanvas = document.getElementById("qr-code");
 const transactionStatus = document.getElementById("transaction-status");
 const backToHomeButton = document.getElementById("back-to-home");
+const API_URL = "https://anthonyhalim-150-723848267249.us-central1.run.app";
 
 const recipientAddress = "LOF7AOSWGGOXJQXKIP4TVLL2643C2H2EKWB2XZ6FWZZYPVWHXKS4WUUZVQ"; // Replace with your recipient address
 const transactionAmount = sessionStorage.getItem('transaction_amount');
@@ -17,7 +18,6 @@ function generateQRCode() {
     amount_in: amount,
     note: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
   };
-  console.log("Payment sent to client:" , paymentDetails.note);
   // Create a JSON string for the QR code
   const qrCodeData = `algorand://${paymentDetails.recipient}?amount=${amount}&asset=${paymentDetails.assetID}&note=${encodeURIComponent(paymentDetails.note)}`;
 
@@ -38,7 +38,7 @@ function generateQRCode() {
 
 async function monitorTransaction(txid) {
   try {
-    const response = await fetch("https://anthonyhalim-150-723848267249.us-central1.run.app/check-transaction", {
+    const response = await fetch(`${API_URL}/check-transaction`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -57,7 +57,6 @@ async function monitorTransaction(txid) {
         alert('You must be logged in to checkout.');
         return;
     }
-    console.log("Payment sent to server:" , `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`);
     const data = await response.json();
     if (data.completed) {
       try {
