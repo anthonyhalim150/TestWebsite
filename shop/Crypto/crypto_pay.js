@@ -17,7 +17,7 @@ function generateQRCode() {
     amount_in: amount,
     note: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
   };
-
+  console.log("Payment sent to client:" , paymentDetails.note);
   // Create a JSON string for the QR code
   const qrCodeData = `algorand://${paymentDetails.recipient}?amount=${amount}&asset=${paymentDetails.assetID}&note=${encodeURIComponent(paymentDetails.note)}`;
 
@@ -57,7 +57,7 @@ async function monitorTransaction(txid) {
         alert('You must be logged in to checkout.');
         return;
     }
-
+    console.log("Payment sent to server:" , `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`);
     const data = await response.json();
     if (data.completed) {
       try {

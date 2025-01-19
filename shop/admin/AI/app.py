@@ -29,10 +29,11 @@ sentiment_model = pipeline(
 def get_db_connection():
     """Create a connection to the database."""
     return mysql.connector.connect(
-        host="localhost",
+        host="34.67.118.54",
         user="root",
         password="Vvs319338",
-        database="ecommerce"
+        database="ecommerce",
+        port= "3306"
     )
 
 def fetch_comments_from_db():
@@ -236,9 +237,9 @@ def analyze_enhanced():
     baseline_weights = read_baseline_weights()
     model = EnhancedRatingModel()
     model.load_state_dict(torch.load("enhanced_model.pth"))
-
     results = evaluate_model(model, comments_data, baseline_weights)
     return jsonify({"status": "success", "ratings": results})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get("PORT", 8080))  # Default to 8080 if PORT is not set
+    app.run(host='0.0.0.0', port=port, debug=False)

@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // CORS configuration
-app.use(cors({
+/*app.use(cors({
     origin: (origin, callback) => {
         if (!origin || origin.startsWith('https://')) {
             callback(null, true);
@@ -52,6 +52,13 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 }));
+*/
+app.use(cors({
+    origin: '*',  // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+}));
+
 
 
 // Middleware
@@ -1510,15 +1517,27 @@ app.get("/highest-bid", async (req, res) => {
     if (!auction_item_id) {
       return res.status(400).json({ message: "Auction item ID is required." });
     }
-  
-    const sql = "SELECT MAX(bid_amount) AS highestBid FROM BIDS WHERE auction_item_id = ?";
+    //Faster than using max
+    const sql = `
+        SELECT 
+            b.bid_amount,
+            u.username
+        FROM 
+            BIDS b
+        JOIN 
+            USERS u ON b.user_id = u.id
+        WHERE 
+            b.auction_item_id = ?
+        ORDER BY 
+            b.bid_amount DESC
+        LIMIT 1;
+    `;
   
     try {
       const connection = await pool.getConnection();
       try {
         const [results] = await connection.query(sql, [auction_item_id]);
-        const highestBid = results[0]?.highestBid || 0;
-        res.json({ highestBid });
+        res.json(results);
       } finally {
         connection.release();
       }
@@ -1527,7 +1546,71 @@ app.get("/highest-bid", async (req, res) => {
       res.status(500).json({ error: "Database query failed" });
     }
 });
+
+app.post('/check-transaction', async (req, res) => {
+    const { txid, amount, assetId, recipientAddress, orderId } = req.body; // Receive details from the frontend
   
+    if (!txid || !amount || !assetId || !recipientAddress || !orderId) {
+      return res.status(400).json({ error: "Transaction ID, amount, asset ID, and recipient address are required." });
+    }
+  
+    try {
+      // Query the Nodely Indexer API for transaction information
+      const response = await fetch(`https://testnet-idx.4160.nodely.dev/v2/transactions/${txid}`);
+      const txnInfo = await response.json();
+  
+      if (!txnInfo || txnInfo.error) {
+        return res.status(500).json({ error: "Error fetching transaction info." });
+      }
+  
+      if (txnInfo.transaction && txnInfo.transaction['confirmed-round'] > 0) {
+        // Validate transaction details
+        const payment = txnInfo.transaction['asset-transfer-transaction']; // Asset transfer details
+        const transactionNote = Buffer.from(txnInfo.transaction.note, 'base64').toString();
+
+        console.log("Payment.receiver", payment.receiver);
+        console.log("Expected receiver address", recipientAddress);
+
+        console.log("Asset ID in payment", payment['asset-id']);
+        console.log("Expected Asset ID", assetId);
+
+        console.log("Payment amount", payment.amount);
+        console.log("Expected amount", amount);
+
+        console.log("Transaction note", transactionNote);
+
+        // Encode the expected transaction note to match the frontend encoding
+        const expectedNote = encodeURIComponent(`order_${orderId} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`);
+        console.log("Expected transaction note", expectedNote);
+
+        if (
+          payment.receiver === recipientAddress &&
+          payment['asset-id'] === assetId &&
+          payment.amount === amount &&
+          transactionNote === expectedNote // Compare with the encoded note
+        ) {
+          return res.json({
+            completed: true,
+            confirmedRound: txnInfo.transaction['confirmed-round'],
+            sender: txnInfo.transaction.sender,
+            amount: payment.amount,
+            assetId: payment['asset-id'],
+          });
+        } else {
+          return res.json({
+            completed: false,
+            error: "Transaction details do not match the expected values.",
+          });
+        }
+      } else {
+        return res.json({ completed: false });
+      }
+      
+    } catch (error) {
+      console.error("Error checking transaction:", error);
+      return res.status(500).json({ error: "Error verifying transaction. Please try again." });
+    }
+});
 
 
 
