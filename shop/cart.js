@@ -60,7 +60,7 @@ async function renderCart() {
                 <h4>Total: $${cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
                     .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h4>
                 <button class="btn btn-warning me-3" onclick="clearCart()">Clear Cart</button>
-                <button class="btn btn-success" onclick="checkout()">Checkout</button>
+                <button class="btn btn-success" onclick="checkout(cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0))">Checkout</button>
             </div>
         `;
 
@@ -207,62 +207,24 @@ async function clearCart() {
     }
 }
 
-async function checkout() {
+async function checkout(transactionAmount) {
     const userID = localStorage.getItem('userID');
 
     if (!userID) {
         alert('You must be logged in to checkout.');
         return;
     }
+    const serverSecret = "yourServerSecret"; // Replace with your server's secret
+    const currentTime = new Date().toISOString();
+    const note = btoa(`${userID}:${serverSecret}:${currentTime}`); // Simple Base64 encoding (replace with a secure hash if needed)
 
-    try {
-        const response = await fetch(`${API_URL}/checkout`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID })
-        });
-        const result = await response.json();
+    // Store transaction details in localStorage or sessionStorage
+    sessionStorage.setItem('transaction_amount', transactionAmount);
+    sessionStorage.setItem('note', note);
+    window.location.href('Crypto/crypto_pay.html');
 
-        if (result.success) {
-            alert('Thank you for your purchase!');
-            renderCart(); // Refresh cart
-        } else {
-            alert('Checkout failed: ' + result.error);
-        }
-    } catch (error) {
-        console.error('Error during checkout:', error);
-        alert('An error occurred during checkout. Please try again.');
-    }
 }
 
-async function create_checkout_page(){
-    const userID = localStorage.getItem('userID');
-    if (!userID) {
-        alert('You must be logged in to checkout.');
-        return;
-    }
-
-    try {
-        // Create a checkout session
-        const response = await fetch(`${API_URL}/create-checkout-session`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID }),
-        });
-
-        const result = await response.json();
-
-        if (!result.success) {
-            alert('Failed to start the checkout process: ' + result.error);
-            return;
-        }
-        const stripe = Stripe('your_publishable_key'); // Use your Stripe publishable key
-        await stripe.redirectToCheckout({ sessionId: result.sessionId });
-    } catch (error) {
-        console.error('Error during checkout:', error);
-        alert('An error occurred during checkout. Please try again.');
-    }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     renderCart();

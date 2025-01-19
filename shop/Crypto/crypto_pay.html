@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <link rel="stylesheet" href="crypto_pay.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Complete Your Payment</h1>
+        <p>Scan the QR code below to complete your transaction:</p>
+        <div id="qr-container">
+            <canvas id="qr-code"></canvas>
+        </div>
+        <p id="transaction-status"></p>
+        <button id="back-to-home">Go to Home</button>
+    </div>
+    <script src="crypto_pay.js"></script>
+</body>
+</html>
