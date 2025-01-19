@@ -5,10 +5,9 @@ const backToHomeButton = document.getElementById("back-to-home");
 const API_URL = "https://anthonyhalim-150-723848267249.us-central1.run.app";
 
 const recipientAddress = "LOF7AOSWGGOXJQXKIP4TVLL2643C2H2EKWB2XZ6FWZZYPVWHXKS4WUUZVQ"; // Replace with your recipient address
-const transactionAmount = sessionStorage.getItem('transaction_amount');
 const note = sessionStorage.getItem('note');
 const assetId = 732664447; // Your CSP asset ID
-const amount = 10; // Amount to transfer in micro-units (1 CSP = 100 micro-units)
+const amount = sessionStorage.getItem('transaction_amount'); // Amount to transfer in micro-units (1 CSP = 100 micro-units)
 
 // Generate QR code with payment details
 function generateQRCode() {
@@ -84,9 +83,8 @@ async function monitorTransaction(txid) {
         sessionStorage.clear();
         window.location.href = "../index.html";
       }, 3000);
-    } else if (data.error) {
-      transactionStatus.textContent = `Error: ${data.error}`;
-      transactionStatus.classList.add("error");
+    } else if (data.error ==  "Transaction details do not match the expected values.") {
+      transactionStatus.textContent = "Waiting for payment...";
     } else {
       transactionStatus.textContent = "Waiting for payment...";
     }
