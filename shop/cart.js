@@ -222,7 +222,7 @@ async function checkout(transactionAmount) {
     // Store transaction details in localStorage or sessionStorage
     sessionStorage.setItem('transaction_amount', transactionAmount);
     sessionStorage.setItem('note', note);
-    window.location.href('Crypto/crypto_pay.html');
+    window.location.href = 'Crypto/crypto_pay.html';
 
 }
 
