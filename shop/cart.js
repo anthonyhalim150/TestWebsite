@@ -20,6 +20,7 @@ async function renderCart() {
 
         const cartItems = result.cartItems;
         //You can use the functions from another js file as long as your html has it.
+        const total_amount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
         cartContent.innerHTML = `
             <ul class="list-group">
                 ${cartItems.map(item => {
@@ -57,10 +58,10 @@ async function renderCart() {
                 }).join('')}
             </ul>
             <div class="mt-3 text-end">
-                <h4>Total: $${cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-                    .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h4>
+                <h4>Total: $${
+                    total_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h4>
                 <button class="btn btn-warning me-3" onclick="clearCart()">Clear Cart</button>
-                <button class="btn btn-success" onclick="checkout(cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0))">Checkout</button>
+                <button class="btn btn-success" onclick="checkout(${total_amount})">Checkout</button>
             </div>
         `;
 
