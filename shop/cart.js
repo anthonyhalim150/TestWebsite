@@ -210,11 +210,11 @@ async function clearCart() {
 
 async function checkout(transactionAmount) {
     const userID = localStorage.getItem('userID');
-
     if (!userID) {
         alert('You must be logged in to checkout.');
         return;
     }
+    sessionStorage.clear();
     const serverSecret = "yourServerSecret"; // Replace with your server's secret
     const currentTime = new Date().toISOString();
     const note = btoa(`${userID}:${serverSecret}:${currentTime}`); // Simple Base64 encoding (replace with a secure hash if needed)

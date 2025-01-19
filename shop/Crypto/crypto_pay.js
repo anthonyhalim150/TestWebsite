@@ -81,6 +81,7 @@ async function monitorTransaction(txid) {
 
       // Redirect after confirmation
       setTimeout(() => {
+        sessionStorage.clear();
         window.location.href = "../index.html";
       }, 3000);
     } else if (data.error) {
