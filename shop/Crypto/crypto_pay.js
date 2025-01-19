@@ -135,7 +135,7 @@ async function startTransactionMonitoring() {
   }
 }
 
-setInterval(startTransactionMonitoring, 5000);
+setInterval(startTransactionMonitoring, 3000);
 
 // Redirect to home when button is clicked
 backToHomeButton.addEventListener("click", () => {
