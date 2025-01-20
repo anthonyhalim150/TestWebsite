@@ -106,5 +106,4 @@ function open_drop_down() {
 document.addEventListener('DOMContentLoaded', () => {
     createSidebar();
     crawler_check();
-    clear_login();
 });
