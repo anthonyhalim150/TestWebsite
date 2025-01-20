@@ -223,6 +223,7 @@ async function checkout(transactionAmount) {
     sessionStorage.setItem('address', owner_address)
     sessionStorage.setItem('transaction_amount', transactionAmount);
     sessionStorage.setItem('note', note);
+    sessionStorage.setItem('type', 'cart');
     window.location.href = 'Crypto/crypto_pay.html';
 
 }

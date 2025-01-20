@@ -80,8 +80,14 @@ async function monitorTransaction(txid) {
 
       // Redirect after confirmation
       setTimeout(() => {
-        sessionStorage.clear();
-        window.location.href = "../index.html";
+        const type = sessionStorage.getItem('type');
+        if (type == 'cart'){
+          sessionStorage.clear();
+          window.location.href = "../index.html";
+        }
+        else if (type == 'deposit'){
+          
+        }
       }, 1500);
     } else if (data.error ==  "Transaction details do not match the expected values.") {
       transactionStatus.textContent = "Waiting for payment...";

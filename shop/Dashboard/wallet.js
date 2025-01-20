@@ -46,8 +46,7 @@ if(deposit_form){
 
         const deposit_amount = document.getElementById('deposit-amount').value.trim();
         const userID = localStorage.getItem('userID'); // Assuming userID is stored in localStorage
-
-        // Validate the input
+      // Validate the input
         if (!deposit_amount) {
             alert('Please enter how much you want to deposit!');
             return;
@@ -57,9 +56,18 @@ if(deposit_form){
             alert('User ID is missing. Please log in again.');
             return;
         }
-
+        sessionStorage.clear();
+        const serverSecret = "OneTwoThreeOneTwoThrees"; // Replace with your server's secret
+        const currentTime = new Date().toISOString();
+        const note = btoa(`${userID}:${serverSecret}:${currentTime}`); // Simple Base64 encoding (replace with a secure hash if needed)
+        const owner_address = "LOF7AOSWGGOXJQXKIP4TVLL2643C2H2EKWB2XZ6FWZZYPVWHXKS4WUUZVQ"
+        // Store transaction details in localStorage or sessionStorage
+        sessionStorage.setItem('address', owner_address)
+        sessionStorage.setItem('transaction_amount', deposit_amount);
+        sessionStorage.setItem('note', note);
+        sessionStorage.setItem('type', 'desposit');
         try {
-            const response = await fetch('/update-wallet', {
+            const response = await fetch('/update-balance', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -70,12 +78,12 @@ if(deposit_form){
             const result = await response.json();
 
             if (result.success) {
-                alert('Wallet address updated successfully!');
+                alert('Deposit successful!');
             } else {
-                alert('Failed to update wallet address: ' + result.error);
+                alert('Failed to deposit: ' + result.error);
             }
         } catch (error) {
-            console.error('Error updating wallet address:', error);
+            console.error('Error depositing:', error);
             alert('An error occurred. Please try again.');
         }
     });
