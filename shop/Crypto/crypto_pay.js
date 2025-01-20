@@ -53,48 +53,47 @@ async function monitorTransaction(txid) {
     const userID = localStorage.getItem('userID');
 
     if (!userID) {
-        alert('You must be logged in to checkout.');
-        return;
+        alert('You must be logged in!');
+        window.location.href('../index.html');
     }
     const data = await response.json();
     if (data.completed) {
-      try {
-        const response = await fetch(`${API_URL}/checkout`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID })
-        });
-        const result = await response.json();
-
-        if (result.success) {
-          transactionStatus.textContent = `Transaction confirmed! Amount: ${data.amount} CSP. Redirecting...`;
-          transactionStatus.classList.add("success");
-        } else {
-            alert('Checkout failed: ' + result.error);
-        }
-      } 
-      catch (error) {
-          console.error('Error during checkout:', error);
-          alert('An error occurred during checkout. Please try again.');
-      }
-
       // Redirect after confirmation
       setTimeout(() => {
+        transactionStatus.textContent = `Transaction confirmed! Amount: ${data.amount} CSP. Redirecting...`;
+        transactionStatus.classList.add("success");
+        const homeButton = document.getElementById("back-to-home");
         const type = sessionStorage.getItem('type');
-        if (type == 'cart'){
+        if (type === 'cart'){
+          if (homeButton) {
+            homeButton.style.display = "none";
+          }
           sessionStorage.clear();
-          window.location.href = "../index.html";
+          sessionStorage.setItem("payment_status", "success");
+          window.location.href = "../cart.html";
         }
-        else if (type == 'deposit'){
-          
+        else if (type === 'deposit'){
+          if (homeButton) {
+            homeButton.style.display = "none";
+          }
+          sessionStorage.setItem("payment_status", "success");
+          sessionStorage.setItem("txid", txid);
+          window.location.href = "../Dashboard/wallet.html";
         }
       }, 1500);
-    } else if (data.error ==  "Transaction details do not match the expected values.") {
+
+    } 
+    else if (data.error ==  "Transaction details do not match the expected values.") {
+      sessionStorage.setItem("payment_status", "failed");
       transactionStatus.textContent = "Waiting for payment...";
-    } else {
+    } 
+    else {
+      sessionStorage.setItem("payment_status", "failed");
       transactionStatus.textContent = "Waiting for payment...";
     }
-  } catch (error) {
+  } 
+  catch (error) {
+    sessionStorage.setItem("payment_status", "failed");
     console.error("Error checking transaction status:", error);
     transactionStatus.textContent = "Error verifying transaction. Please try again.";
   }
@@ -132,7 +131,7 @@ async function getLatestTransactionId() {
 // Poll for transaction status every 5 seconds
 async function startTransactionMonitoring() {
   try {
-    const txid = await getLatestTransactionId(); // Replace with actual function to get the txid
+    const txid = await getLatestTransactionId(); 
     if (txid) {
       await monitorTransaction(txid);
     }
@@ -141,11 +140,22 @@ async function startTransactionMonitoring() {
   }
 }
 
-setInterval(startTransactionMonitoring, 3000);
+setInterval(startTransactionMonitoring, 2000);
 
 // Redirect to home when button is clicked
 backToHomeButton.addEventListener("click", () => {
-  window.location.href = "../index.html";
+  const type = sessionStorage.getItem('type');
+  confirm("Are you sure to cancel payment? If you have just paid, do not leave the page and wait to be redirected!");
+  if (type === 'cart'){
+    sessionStorage.clear();
+    sessionStorage.setItem("payment_status", "failed");
+    window.location.href = "../cart.html";
+  }
+  else if (type === 'deposit'){
+    sessionStorage.clear();
+    sessionStorage.setItem("payment_status", "failed");
+    window.location.href = "../Dashboard/wallet.html";
+  }
 });
 
 // Call the QR code generation function when the page loads

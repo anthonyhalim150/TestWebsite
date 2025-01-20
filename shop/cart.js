@@ -218,7 +218,7 @@ async function checkout(transactionAmount) {
     const serverSecret = "OneTwoThreeOneTwoThrees"; // Replace with your server's secret
     const currentTime = new Date().toISOString();
     const note = btoa(`${userID}:${serverSecret}:${currentTime}`); // Simple Base64 encoding (replace with a secure hash if needed)
-    const owner_address = "LOF7AOSWGGOXJQXKIP4TVLL2643C2H2EKWB2XZ6FWZZYPVWHXKS4WUUZVQ"
+    const owner_address = "AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU"
     // Store transaction details in localStorage or sessionStorage
     sessionStorage.setItem('address', owner_address)
     sessionStorage.setItem('transaction_amount', transactionAmount);
@@ -228,7 +228,49 @@ async function checkout(transactionAmount) {
 
 }
 
+// Monitor payment status when returning to the cart page
+function monitorPaymentStatus() {
+    const interval = setInterval(() => {
+      const paymentStatus = sessionStorage.getItem("payment_status");
+  
+      if (paymentStatus === "success") {
+        sessionStorage.clear(); 
+        clearInterval(interval);
+        confirm_checkout();
+      } else if (paymentStatus === "failed") {
+        alert("Payment failed. Please try again.");
+        sessionStorage.clear(); 
+        clearInterval(interval); 
+      }
+      renderCart();
+      clearInterval(interval); 
+    }, 500);
+}
+
+async function confirm_checkout(){
+    const userID = localStorage.getItem('userID');
+    try {
+        const response = await fetch(`${API_URL}/checkout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userID })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Checkout Successful!');
+            renderCart();
+        } else {
+            alert('Checkout failed: ' + result.error);
+        }
+      } 
+      catch (error) {
+          console.error('Error during checkout:', error);
+          alert('An error occurred during checkout. Please try again.');
+      }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderCart();
+    monitorPaymentStatus();
 });
