@@ -4,7 +4,7 @@ const transactionStatus = document.getElementById("transaction-status");
 const backToHomeButton = document.getElementById("back-to-home");
 const API_URL = "https://anthonyhalim-150-723848267249.us-central1.run.app";
 
-const recipientAddress = "LOF7AOSWGGOXJQXKIP4TVLL2643C2H2EKWB2XZ6FWZZYPVWHXKS4WUUZVQ"; // Replace with your recipient address
+const recipientAddress = sessionStorage.getItem('address'); // Replace with your recipient address
 const note = sessionStorage.getItem('note');
 const assetId = 732664447; // Your CSP asset ID
 const amount = sessionStorage.getItem('transaction_amount'); // Amount to transfer in micro-units (1 CSP = 100 micro-units)

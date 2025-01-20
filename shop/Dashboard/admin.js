@@ -34,6 +34,7 @@ function createSidebar() {
         </div>
         <nav class="sidebar-nav">
             <ul>
+                <li><a href="wallet.html" class="nav-item">Wallet</a></li>
                 <li class="dropdown">
                     <a href="#" class="nav-item dropdown-toggle">
                         Products <span class="arrow">▼</span>

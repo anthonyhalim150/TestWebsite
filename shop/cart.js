@@ -215,11 +215,12 @@ async function checkout(transactionAmount) {
         return;
     }
     sessionStorage.clear();
-    const serverSecret = "yourServerSecret"; // Replace with your server's secret
+    const serverSecret = "OneTwoThreeOneTwoThrees"; // Replace with your server's secret
     const currentTime = new Date().toISOString();
     const note = btoa(`${userID}:${serverSecret}:${currentTime}`); // Simple Base64 encoding (replace with a secure hash if needed)
-
+    const owner_address = "LOF7AOSWGGOXJQXKIP4TVLL2643C2H2EKWB2XZ6FWZZYPVWHXKS4WUUZVQ"
     // Store transaction details in localStorage or sessionStorage
+    sessionStorage.setItem('address', owner_address)
     sessionStorage.setItem('transaction_amount', transactionAmount);
     sessionStorage.setItem('note', note);
     window.location.href = 'Crypto/crypto_pay.html';
