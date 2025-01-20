@@ -56,7 +56,7 @@ function createSidebar() {
                 </li>
                 <li><a href="transaction_list.html" class="nav-item">Transaction List</a></li>
                 <li><a href="metrics.html" class="nav-item">Metrics</a></li>
-                <li><a id="logout_nav" class="nav-item">Logout</a></li>
+                <li><a href="../index.html" class="nav-item">Home</a></li>
             </ul>
         </nav>
     `;
@@ -68,15 +68,7 @@ function createSidebar() {
     open_drop_down();
 }
 
-function clear_login() {
-    const login = document.getElementById('logout_nav');
-    login.addEventListener('click', () => {
-        // Clear user info and refresh the page
-        localStorage.clear();
-        alert('You have logged out.');
-        window.location.href = '../login.html';
-    });
-}
+
 
 function open_drop_down() {
     // Select all dropdown toggles

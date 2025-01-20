@@ -82,7 +82,7 @@ async function monitorTransaction(txid) {
       setTimeout(() => {
         sessionStorage.clear();
         window.location.href = "../index.html";
-      }, 3000);
+      }, 1500);
     } else if (data.error ==  "Transaction details do not match the expected values.") {
       transactionStatus.textContent = "Waiting for payment...";
     } else {

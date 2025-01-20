@@ -5,7 +5,7 @@ async function fetch_products(sorted_items = null) {
     try {
         const userID = localStorage.getItem('userID');  // Retrieve userID from localStorage
         if (!userID) {
-            throw new Error('User ID not found. Please log in.');
+            alert('User ID not found. Please log in.');
             return;
         }
 
