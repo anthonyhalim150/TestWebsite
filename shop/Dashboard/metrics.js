@@ -2,7 +2,7 @@ const API_URL = 'https://users-723848267249.us-central1.run.app/shop-metrics';
 
 document.getElementById('filter-button').addEventListener('click', fetchFilteredMetrics);
 
-let salesChart, productMetricsChart, productComparisonChart, userRegistrationChart; // Chart instances
+let salesChart, productMetricsChart, productComparisonChart; // Chart instances
 
 async function fetchFilteredMetrics() {
     const startDate = document.getElementById('start-date').value;
