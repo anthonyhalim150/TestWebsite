@@ -1,5 +1,5 @@
-const API_URL = 'https://users-723848267249.us-central1.run.app';
-const API_URL2 = "https://anthonyhalim-150-723848267249.us-central1.run.app";
+const API_URL = "https://anthonyhalim-150-723848267249.us-central1.run.app";
+const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 function check_address_form(){
     const address_form = document.getElementById('address-form');
     if(address_form){
@@ -21,7 +21,7 @@ function check_address_form(){
             }
 
             try {
-                const response = await fetch(`${API_URL}/update-address`, {
+                const response = await fetch(`${API_URL_USER}/update-address`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -33,6 +33,7 @@ function check_address_form(){
 
                 if (result.success) {
                     alert('Wallet address updated successfully!');
+                    get_address(userID);
                 } else {
                     alert('Failed to update wallet address: ' + result.error);
                 }
@@ -105,7 +106,7 @@ async function confirm_deposit() {
     }
 
     try {
-        const response = await fetch(`${API_URL2}/check-transaction`, {
+        const response = await fetch(`${API_URL}/check-transaction`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -131,7 +132,7 @@ async function confirm_deposit() {
             }
 
             try {
-                const walletResponse = await fetch(`${API_URL}/update-wallet`, {
+                const walletResponse = await fetch(`${API_URL_USER}/update-wallet`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userID, amount }),
@@ -141,6 +142,7 @@ async function confirm_deposit() {
 
                 if (result.success) {
                     alert('Deposit Successful!');
+                    get_balance(userID);
                     sessionStorage.clear();
                 } else {
                     alert('Deposit failed: ' + result.error);
@@ -162,7 +164,60 @@ async function confirm_deposit() {
     }
 }
 
+// Function to fetch and update wallet balance
+async function get_balance(userID) {
+    try {
+        const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(userID)}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('current-balance').textContent = `${data.wallet || 0} CSP`;
+            } else {
+                console.error('Error fetching wallet:', data.error);
+                document.getElementById('current-balance').textContent = 'Error loading balance';
+            }
+        } else {
+            console.error('Request failed:', response.status, response.statusText);
+            document.getElementById('current-balance').textContent = 'Error loading balance';
+        }
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        document.getElementById('current-balance').textContent = 'Error loading balance';
+    }
+}
+
+// Function to fetch and update wallet address
+async function get_address(userID) {
+    try {
+        const response = await fetch(`${API_URL_USER}/get-address?userID=${encodeURIComponent(userID)}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('current-address').textContent = data.address || 'Not available';
+            } else {
+                console.error('Error fetching address:', data.error);
+                document.getElementById('current-address').textContent = 'Error loading address';
+            }
+        } else {
+            console.error('Request failed:', response.status, response.statusText);
+            document.getElementById('current-address').textContent = 'Error loading address';
+        }
+    } catch (error) {
+        console.error('Error fetching address:', error);
+        document.getElementById('current-address').textContent = 'Error loading address';
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
+    const userID = localStorage.getItem('userID'); // Assume userID is stored in localStorage
+
+    if (!userID) {
+        console.error('UserID is not available.');
+        return alert('User is not logged in.');
+    }
+    get_balance(userID);
+    get_address(userID);
     check_address_form();
     check_deposit_form();
     monitorPaymentStatus();
