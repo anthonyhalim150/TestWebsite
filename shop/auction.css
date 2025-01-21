@@ -3,48 +3,64 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%; /* Ensures full height for background */
+  height: 100%;
   overflow-x: hidden; /* Prevents horizontal scrolling */
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #4b79a1, #283e51); /* Updated teal gradient */
-  color: #ffda79; /* Gold text for better contrast */
+  background: linear-gradient(135deg, #4b79a1, #283e51); /* Teal gradient */
+  color: #ffda79; /* Gold text */
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Fixes possible overflow causing the line */
+  min-height: 100vh;
 }
-/* Header */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
+
+/* Header/Navbar */
+.navbar {
   background-color: rgba(20, 20, 20, 0.9); /* Semi-transparent black */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  color: #ffda79; /* Gold accent */
-}
-
-.navbar {
+  padding: 20px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  width: 100%;
+  align-items: center; /* Align all child items vertically */
+  color: #ffda79;
+  flex-wrap: wrap; /* Ensures proper wrapping on smaller screens */
 }
 
-.navbar h1 {
-  margin: 0;
-  font-size: 2em;
-  flex: 1; /* Pushes other content to adjust properly */
-  text-align: left; /* Align text to the left */
+#current-balance-symbol {
+  font-size: 1rem;
+  color: #ffda79;
+  margin: 0 15px; /* Add horizontal spacing */
 }
 
 .controls {
   display: flex;
-  flex: 1;
-  justify-content: center; /* Center align search and sort */
   gap: 10px;
+  flex-wrap: nowrap;
+  align-items: center; /* Align vertically in the center */
+  justify-content: center; /* Center horizontally */
+}
+
+.navbar-collapse {
+  flex: 1;
+  display: flex;
+  justify-content: center; /* Center-align the content inside the collapse */
+  align-items: center; /* Align vertically in the center */
+}
+
+.header-icons {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  flex: 1 1 auto; /* Ensures icons align on the right */
+  align-items: center; /* Align vertically in the center */
+}
+
+.header-icons .d-flex {
+  display: flex;
+  align-items: center; /* Align balance text vertically */
+  margin-right: 15px; /* Add spacing from the icons */
 }
 
 #search-input {
@@ -52,7 +68,9 @@ header {
   font-size: 1em;
   border-radius: 5px;
   border: 1px solid #ccc;
-  width: 250px;
+  width: 300px; /* Adjust width */
+  max-height: 40px;
+  max-width: 90%; /* Ensure responsiveness */
 }
 
 #sort-select {
@@ -62,17 +80,9 @@ header {
   border: 1px solid #ccc;
 }
 
-.header-icons {
-  display: flex;
-  gap: 15px;
-  flex: 1;
-  justify-content: flex-end; /* Align icons to the right */
-}
-
 .header-icons img {
   width: 40px;
   height: 40px;
-  cursor: pointer;
   transition: transform 0.2s;
 }
 
@@ -80,6 +90,23 @@ header {
   transform: scale(1.1);
 }
 
+/* Auction Items and Product Overview */
+.auction-container {
+  flex: 1;
+  padding: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+
+.navbar-brand {
+  font-size: 1.8rem !important;
+  font-weight: bold !important;
+  color: #ffda79 !important; /* Gold */
+  flex: 1 1 auto !important; /* Allows the brand to shrink or grow as needed */
+}
 
 /* Auction Items Container */
 #auction-items {

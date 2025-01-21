@@ -2,6 +2,7 @@ let auctionItems = []; // Array to store auction items
 let filteredItems = []; // Array to store filtered items
 let timerIntervals = []; // Store timers for auction items
 const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
+const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 
 // Fetch auction items from the server
 const fetchAuctionItems = async () => {
@@ -15,7 +16,7 @@ const fetchAuctionItems = async () => {
     const response = await fetch(`${API_URL}/get-bid-by-user?userID=${userID}`);
     const data = await response.json();
 
-    auctionItems = data.map(item => ({
+    auctionItems = data.items.map(item => ({
       id: item.id,
       name: item.item_name,
       stock: item.stock,
@@ -41,7 +42,7 @@ const fetchHighestBid = async (itemId) => {
   try {
     const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${itemId}`);
     const data = await response.json();
-    return data.highestBid || 0;
+    return data.length > 0 ? data[0] : { bid_amount: 0, username: null }; // Return the first item or a default object
   } catch (error) {
     console.error("Error fetching highest bid:", error);
     return 0;
@@ -64,34 +65,13 @@ const placeBid = async (itemId, bidAmount) => {
     const data = await response.json();
     if (response.ok) {
       alert("Bid placed successfully!");
-      renderAuctionItems(); // Re-fetch and re-render auction items
+      await get_balance();
+      await fetchAuctionItems(); // Re-fetch and re-render auction items
     } else {
       alert(data.message || "Failed to place bid.");
     }
   } catch (error) {
     console.error("Error placing bid:", error);
-  }
-};
-
-// Cancel a bid
-const cancelBid = async (itemId) => {
-  const userId = localStorage.getItem("userID");
-  if (!userId){
-    alert("You must be logged in to cancel bid!");
-    return;
-  }
-  try {
-    const response = await fetch(`${API_URL}/bids?auction_item_id=${itemId}&user_id=${userId}`, {
-      method: "DELETE",
-    });
-    if (response.ok) {
-      alert("Bid canceled successfully!");
-      renderAuctionItems(); // Re-fetch and re-render auction items
-    } else {
-      alert("Failed to cancel bid.");
-    }
-  } catch (error) {
-    console.error("Error canceling bid:", error);
   }
 };
 
@@ -101,11 +81,13 @@ const renderAuctionItems = async (items = filteredItems) => {
   auctionContainer.innerHTML = ""; // Clear existing items
 
   for (const item of items) {
-    const highestBid = await fetchHighestBid(item.id);
+    const data = await fetchHighestBid(item.id);
+    const highestBid = data.bid_amount || 0;
     const itemElement = document.createElement("div");
     itemElement.classList.add("auction-item");
     const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
-    const highestBidText = highestBid > 0 ? `$${formattedBid}` : "No bids yet";
+    const user = data.username || 'None'; //Jangan sampe None
+    const highestBidText = highestBid > 0 ? `$${formattedBid}<br>Submitted by ${user}` : "No bids yet";
     const startingPrice = item.startingPrice || 0; 
     const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');
     itemElement.innerHTML = `
@@ -115,14 +97,12 @@ const renderAuctionItems = async (items = filteredItems) => {
       <p>Current Highest Bid: ${highestBidText}</p>
       <p class="timer" id="timer-${item.id}"></p>
       <button class="bid-btn" id="bid-btn-${item.id}">Place Bid</button>
-      <button class="cancel-bid-btn" id="cancel-bid-btn-${item.id}">Cancel Bid</button>
     `;
 
     auctionContainer.appendChild(itemElement);
 
     startItemTimer(item); // Start countdown for each item
 
-    // Add click events to bid and cancel bid buttons
     const bid_button =  document.getElementById(`bid-btn-${item.id}`);
     if (bid_button){
       bid_button.addEventListener("click", (event) => {
@@ -139,7 +119,7 @@ const renderAuctionItems = async (items = filteredItems) => {
           alert("Bid amount too high! Please enter a number below 500 billion!");
           return;
         }
-        if (bidAmount && parseFloat(bidAmount) > parseFloat(highestBid)) {
+        if (bidAmount && (parseFloat(bidAmount) > parseFloat(highestBid)) && parseFloat(bidAmount) > parseFloat(startingPrice)) {
           placeBid(item.id, parseFloat(bidAmount));
         } 
         else {
@@ -147,25 +127,8 @@ const renderAuctionItems = async (items = filteredItems) => {
         }
       });
     }
-    const cancel_bid_button = document.getElementById(`cancel-bid-btn-${item.id}`);
-    if (cancel_bid_button){
-      document.getElementById(`cancel-bid-btn-${item.id}`).addEventListener("click", (event) => {
-        event.stopPropagation(); 
-        const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);//Get time converts it to miliseconds(Since UNIX epoch 1 JAN 1970)
-        const currentTime = new Date();
-        const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
-        if (timeLeft < 1){
-          alert("Auction has already ended! Cannot cancel bid!");
-          return;
-        }
-        if (confirm("Are you sure you want to cancel your bid?")) {
-          cancelBid(item.id);
-        }
-      });
-    }
-
     // Add click event to display product overview
-    itemElement.addEventListener("click", () => showProductOverview(item, highestBid));
+    itemElement.addEventListener("click", () => showProductOverview(item, highestBid, user));
   }
 };
 
@@ -194,7 +157,7 @@ const startItemTimer = (item) => {
 };
 
 // Show product overview in a popup
-const showProductOverview = (item, highestBid) => {
+const showProductOverview = (item, highestBid, user) => {
   const overviewSection = document.getElementById("product-overview");
   overviewSection.style.display = "block";
 
@@ -211,7 +174,7 @@ const showProductOverview = (item, highestBid) => {
 
   const highestBidElement = document.createElement("p");
   const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
-  const highestBidText = formattedBid > 0 ? `$${formattedBid}` : "No bids yet";
+  const highestBidText = formattedBid > 0 ? `$${formattedBid} by ${user}` : "No bids yet";
   
   highestBidElement.textContent = `Current Highest Bid: ${highestBidText}`;
   highestBidElement.style.marginTop = "10px";
@@ -259,11 +222,31 @@ const attachEventListeners = () => {
   document.getElementById("sort-select").addEventListener("change", applySearchAndSort);
 };
 
-// Initialize auction
-const initializeAuction = () => {
-  fetchAuctionItems();
-  attachEventListeners();
-};
+async function get_balance() {
+  const userID = localStorage.getItem('userID');
+  try {
+      const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(userID)}`);
+      if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+              const originalDisplay = document.getElementById('current-balance').style.display;
+              document.getElementById('current-balance').textContent = `${data.wallet || 0} CSP`;
+              document.getElementById('current-balance').style.display = "none"; // Force re-render
+              document.getElementById('current-balance').style.display = originalDisplay;
+          } else {
+              console.error('Error fetching wallet:', data.error);
+              document.getElementById('current-balance').textContent = 'Error loading balance';
+          }
+      } else {
+          console.error('Request failed:', response.status, response.statusText);
+          document.getElementById('current-balance').textContent = 'Error loading balance';
+      }
+  } catch (error) {
+      console.error('Error fetching wallet:', error);
+      document.getElementById('current-balance').textContent = 'Error loading balance';
+  }
+}
+
 async function customer_support(){
   customer_support_button = document.getElementById('customer-support');
   if (customer_support_button){
@@ -288,5 +271,9 @@ async function customer_support(){
   }  
 }
 
-initializeAuction();
-customer_support();
+document.addEventListener('DOMContentLoaded', () => {
+  get_balance();
+  fetchAuctionItems();
+  attachEventListeners();
+  customer_support();
+});

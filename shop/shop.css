@@ -49,7 +49,7 @@ h2, h3 {
 }
 /* Shopmate logo */
 .navbar-brand {
-    font-size: 1.8rem;
+    font-size: 1.8rem !important;
     margin-right: 10px; /* Adds some space from the top and left edges */
     font-weight: bold;
     color: white;
@@ -92,20 +92,52 @@ h2, h3 {
 .nav-item a:hover {
     color: var(--highlight-color);
 }
+/* Adjust icons for smaller screens */
+.navbar-toggler {
+    border: none;
+}
+
+.navbar-icons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.navbar-nav .nav-item {
+    margin: 0 5px; /* Add spacing between icons */
+}
+
+.navbar-toggler-icon {
+    background-color: var(--primary-color); /* Match your primary color */
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+}
+
+
+/* General styles for nav-item */
+.navbar-icons .nav-item {
+    margin: 0;                /* Prevent unwanted spacing */
+    padding: 0;               /* Reset padding */
+    display: flex;            /* Ensure child elements align properly */
+    justify-content: center;  /* Center child content */
+    align-items: center;      /* Center child content */
+}
+
 
 
 .btn-primary {
-    background-color: var(--primary-color);
-    border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 25px;
-    transition: background-color 0.3s;
+    background-color: var(--primary-color) !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    font-size: 1rem !important;
+    border-radius: 25px !important;
+    transition: background-color 0.3s !important;
 }
 
 .btn-primary:hover {
-    background-color: var(--highlight-color);
-    color: var(--text-color);
+    background-color: var(--highlight-color) !important;
+    color: var(--text-color) !important;
 }
 
 footer {
@@ -233,11 +265,19 @@ input[type="number"] {
     margin-top: 15px;
 }
 
+
+.item-overview .close-btn:hover {
+    background-color: var(--highlight-color);
+    color: var(--text-color);
+}
+
 .item-overview .close-btn{
-    background-color: rgb(230, 115, 115);
-    width: 60px;
+    background-color: var(--primary-color);
+    width: 90px;
     height: 40px;
-    border-radius: 10%;
+    border: none;
+    border-radius: 25px;
+    transition: background-color 0.3s;
 }
 
 
@@ -385,24 +425,6 @@ input[type="number"] {
     color: gold;
 }
 
-/* Navbar container */
-.navbar-icons {
-    display: flex;            /* Align children horizontally */
-    justify-content: center;  /* Center the buttons horizontally */
-    align-items: center;      /* Align buttons vertically */
-    gap: 5px;                 /* Add consistent space between buttons */
-    margin: 0;                /* Reset default list margin */
-    padding: 0;               /* Reset default list padding */
-}
-
-/* General styles for nav-item */
-.navbar-icons .nav-item {
-    margin: 0;                /* Prevent unwanted spacing */
-    padding: 0;               /* Reset padding */
-    display: flex;            /* Ensure child elements align properly */
-    justify-content: center;  /* Center child content */
-    align-items: center;      /* Center child content */
-}
 
 /* General styles for buttons */
 .cart-btn, .support-btn, .profile-btn {

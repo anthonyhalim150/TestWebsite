@@ -59,7 +59,8 @@ const placeBid = async (itemId, bidAmount) => {
     const data = await response.json();
     if (response.ok) {
       alert("Bid placed successfully!");
-      fetchAuctionItems(); // Re-fetch and re-render auction items
+      await get_balance();
+      await fetchAuctionItems(); // Re-fetch and re-render auction items
     } else {
       alert(data.message || "Failed to place bid.");
     }
@@ -222,7 +223,10 @@ async function get_balance() {
       if (response.ok) {
           const data = await response.json();
           if (data.success) {
+              const originalDisplay = document.getElementById('current-balance').style.display;
               document.getElementById('current-balance').textContent = `${data.wallet || 0} CSP`;
+              document.getElementById('current-balance').style.display = "none"; // Force re-render
+              document.getElementById('current-balance').style.display = originalDisplay;
           } else {
               console.error('Error fetching wallet:', data.error);
               document.getElementById('current-balance').textContent = 'Error loading balance';
@@ -236,11 +240,7 @@ async function get_balance() {
       document.getElementById('current-balance').textContent = 'Error loading balance';
   }
 }
-// Initialize auction
-const initializeAuction = () => {
-  fetchAuctionItems();
-  attachEventListeners();
-};
+
 async function customer_support(){
   customer_support_button = document.getElementById('customer-support');
   if (customer_support_button){
@@ -265,6 +265,9 @@ async function customer_support(){
   }  
 }
 
-initializeAuction();
-customer_support();
-get_balance();
+document.addEventListener('DOMContentLoaded', () => {
+  get_balance();
+  fetchAuctionItems();
+  attachEventListeners();
+  customer_support();
+});
