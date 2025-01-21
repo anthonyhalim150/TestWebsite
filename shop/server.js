@@ -613,10 +613,10 @@ app.get('/shop-metrics', async (req, res) => {
 
 
 app.post('/add-new-product', upload.single('product-image'), async (req, res) => {
-    const { name, category, price, stock, description } = req.body;
+    const { name, category, price, stock, description, userID } = req.body;
 
     // Validate required fields
-    if (!name || !category || !price || !stock || !req.file || !description) {
+    if (!name || !category || !price || !stock || !req.file || !description || !userID) {
         return res.status(400).json({ success: false, error: 'All fields are required.' });
     }
 
@@ -651,10 +651,10 @@ app.post('/add-new-product', upload.single('product-image'), async (req, res) =>
                 try {
                     // Insert product details into the database
                     const query = `
-                        INSERT INTO ITEMS (name, category, price, stock, image, description) 
-                        VALUES (?, ?, ?, ?, ?, ?)
+                        INSERT INTO ITEMS (name, category, price, stock, image, description, created_by) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                     `;
-                    const values = [name, category, price, stock, imagePath, description];
+                    const values = [name, category, price, stock, imagePath, description, userID];
 
                     await connection.query(query, values);
                     res.status(200).json({ success: true, message: 'Product added successfully!' });
@@ -673,6 +673,7 @@ app.post('/add-new-product', upload.single('product-image'), async (req, res) =>
         res.status(500).json({ success: false, error: 'Internal server error.', details: error.message });
     }
 });
+
 
 app.delete('/remove-product', async (req, res) => {
     const { productId } = req.body;
@@ -1229,14 +1230,14 @@ app.get('/auctions', async (req, res) => {
     }
 });
 app.post("/add-new-auction", upload.single("product-image"), async (req, res) => {
-    const { name, price, starting_time, description, stock, category, duration } = req.body;
+    const { name, price, starting_time, description, stock, category, duration, userID } = req.body;
     let time;
     if (starting_time){
         time = new Date(starting_time);
     }
   
     // Validate inputs
-    if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !req.file || !category || !duration || duration <= 0) {
+    if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !req.file || !category || !duration || duration <= 0 || !userID) {
       return res.status(400).json({ success: false, error: "All fields are required, and price/stock/duration must be positive numbers." });
     }
   
@@ -1263,10 +1264,10 @@ app.post("/add-new-auction", upload.single("product-image"), async (req, res) =>
           const connection = await pool.getConnection();
           try {
             const query = `
-              INSERT INTO AUCTION_ITEMS (item_name, stock, description, category, image, starting_price, duration, starting_time) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO AUCTION_ITEMS (item_name, stock, description, category, image, starting_price, duration, starting_time, created_by) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
-            const values = [name, stock, description, category, imageUrl, price, duration, time||null];
+            const values = [name, stock, description, category, imageUrl, price, duration, time||null, userID];
   
             const [result] = await connection.query(query, values);
             res.status(201).json({
@@ -1289,6 +1290,7 @@ app.post("/add-new-auction", upload.single("product-image"), async (req, res) =>
       res.status(500).json({ success: false, error: "Internal server error." });
     }
   });
+
 
   // Delete an auction item
 app.delete("/remove-auction", async (req, res) => {
@@ -1392,33 +1394,6 @@ app.get("/auction", async (req, res) => {
     }
 });
 
-app.post("/update-auction-status", async (req, res) => {
-    const { id } = req.body;
-  
-    if (!id) {
-      return res.status(400).json({ success: false, message: "AuctionID is required" });
-    }
-  
-    const query = "UPDATE AUCTION_ITEMS SET is_expired = TRUE WHERE id = ?";
-  
-    try {
-      const connection = await pool.getConnection();
-      try {
-        const [results] = await connection.query(query, [id]);
-  
-        if (results.affectedRows > 0) {
-          res.json({ success: true, message: "Auction marked as expired" });
-        } else {
-          res.status(404).json({ success: false, message: "Item not found" });
-        }
-      } finally {
-        connection.release();
-      }
-    } catch (err) {
-      console.error("Failed to update auction status:", err);
-      res.status(500).json({ success: false, message: "Database error" });
-    }
-  });
 app.get('/bid-list', async (req, res) => {
     const { auction_item_id } = req.query;
 
@@ -1447,47 +1422,80 @@ app.get('/bid-list', async (req, res) => {
         res.status(500).json({ success: false, message: 'Database query failed' });
     }
 });
-app.post("/bids", async (req, res) => {
+app.post('/bids', async (req, res) => {
     const { auction_item_id, user_id, bid_amount } = req.body;
   
-    const sql = `
-      INSERT INTO BIDS (auction_item_id, user_id, bid_amount)
-      VALUES (?, ?, ?)
-      ON DUPLICATE KEY UPDATE bid_amount = VALUES(bid_amount);
-    `;
-  
-    try {
-      const connection = await pool.getConnection();
-      try {
-        await connection.query(sql, [auction_item_id, user_id, bid_amount]);
-        res.json({ message: "Bid placed successfully." });
-      } finally {
-        connection.release();
-      }
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Error placing bid." });
+    if (!auction_item_id || !user_id || !bid_amount) {
+      return res.status(400).json({ message: "Missing required parameters." });
     }
-  });
   
-app.delete("/bids", async (req, res) => {
-    const { auction_item_id, user_id } = req.query;
-  
-    const sql = "DELETE FROM BIDS WHERE auction_item_id = ? AND user_id = ?";
-  
+    const connection = await pool.getConnection();
     try {
-      const connection = await pool.getConnection();
-      try {
-        await connection.query(sql, [auction_item_id, user_id]);
-        res.json({ message: "Bid canceled successfully." });
-      } finally {
-        connection.release();
+      await connection.beginTransaction();
+  
+      // Get the current highest bid for the auction
+      const [currentBid] = await connection.query(
+        `SELECT user_id, bid_amount FROM BIDS
+         WHERE auction_item_id = ?
+         ORDER BY bid_amount DESC LIMIT 1`,
+        [auction_item_id]
+      );
+      const { user_id: previousBidderId, bid_amount: previousBidAmount } = currentBid[0];
+      if (currentBid.length > 0) {
+        // Refund the previous highest bidder
+        await connection.query(
+          `UPDATE USERS
+           SET wallet = wallet + ?
+           WHERE id = ?`,
+          [previousBidAmount, previousBidderId]
+        );
       }
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Error canceling bid." });
+  
+      // Check the bidder's wallet
+      const [bidder] = await connection.query(
+        `SELECT wallet FROM USERS
+         WHERE id = ?`,
+        [user_id]
+      );
+      //If wallet is same or  more than bid_amount
+      if (bidder[0].wallet < bid_amount) {
+        await connection.query(
+            `UPDATE USERS
+             SET wallet = wallet - ?
+             WHERE id = ?`,
+            [previousBidAmount, previousBidderId]
+          );
+        return res.status(400).json({ message: "Insufficient funds." });
+      }
+  
+      // Deduct the bid amount from the new bidder's wallet
+      await connection.query(
+        `UPDATE USERS
+         SET wallet = wallet - ?
+         WHERE id = ?`,
+        [bid_amount, user_id]
+      );
+  
+      // Insert the new bid
+      await connection.query(
+        `INSERT INTO BIDS (auction_item_id, user_id, bid_amount)
+         VALUES (?, ?, ?)`,
+        [auction_item_id, user_id, bid_amount]
+      );
+  
+      // Commit the transaction
+      await connection.commit();
+  
+      res.json({ message: "Bid placed successfully." });
+    } catch (error) {
+      console.error("Error placing bid:", error);
+      await connection.rollback();
+      res.status(500).json({ message: "Error placing bid." });
+    } finally {
+      connection.release();
     }
 });
+  
 
 app.get("/get-bid-by-user", async (req, res) => {
     const { userID } = req.query;
@@ -1567,27 +1575,11 @@ app.post('/check-transaction', async (req, res) => {
         // Validate transaction details
         const payment = txnInfo.transaction['asset-transfer-transaction']; // Asset transfer details
         const transactionNote = Buffer.from(txnInfo.transaction.note, 'base64').toString();
-
-        console.log("Payment.receiver", payment.receiver);
-        console.log("Expected receiver address", recipientAddress);
-
-        console.log("Asset ID in payment", payment['asset-id']);
-        console.log("Expected Asset ID", assetId);
-
-        console.log("Payment amount", payment.amount);
-        console.log("Expected amount", amount);
-
-        console.log("Transaction note", transactionNote);
-
-        // Encode the expected transaction note to match the frontend encoding
-        const expectedNote = encodeURIComponent(`order_${orderId} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`);
-        console.log("Expected transaction note", expectedNote);
-
         if (
           payment.receiver === recipientAddress &&
           payment['asset-id'] === assetId &&
-          payment.amount === amount &&
-          transactionNote === expectedNote // Compare with the encoded note
+          parseFloat(payment.amount) === parseFloat(amount) &&
+          transactionNote === orderId // Compare with the encoded note
         ) {
           return res.json({
             completed: true,
@@ -1595,6 +1587,7 @@ app.post('/check-transaction', async (req, res) => {
             sender: txnInfo.transaction.sender,
             amount: payment.amount,
             assetId: payment['asset-id'],
+            note: orderId,
           });
         } else {
           return res.json({

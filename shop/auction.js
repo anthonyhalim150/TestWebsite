@@ -6,7 +6,6 @@ const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 
 // Fetch auction items from the server
 const fetchAuctionItems = async () => {
-  get_balance();
   try {
     const response = await fetch(`${API_URL}/auction`);
     const data = await response.json();
@@ -60,34 +59,12 @@ const placeBid = async (itemId, bidAmount) => {
     const data = await response.json();
     if (response.ok) {
       alert("Bid placed successfully!");
-      renderAuctionItems(); // Re-fetch and re-render auction items
+      fetchAuctionItems(); // Re-fetch and re-render auction items
     } else {
       alert(data.message || "Failed to place bid.");
     }
   } catch (error) {
     console.error("Error placing bid:", error);
-  }
-};
-
-// Cancel a bid
-const cancelBid = async (itemId) => {
-  const userId = localStorage.getItem("userID");
-  if (!userId){
-    alert("You must be logged in to cancel bid!");
-    return;
-  }
-  try {
-    const response = await fetch(`${API_URL}/bids?auction_item_id=${itemId}&user_id=${userId}`, {
-      method: "DELETE",
-    });
-    if (response.ok) {
-      alert("Bid canceled successfully!");
-      fetchAuctionItems(); // Re-fetch and re-render auction items
-    } else {
-      alert("Failed to cancel bid.");
-    }
-  } catch (error) {
-    console.error("Error canceling bid:", error);
   }
 };
 
@@ -113,14 +90,12 @@ const renderAuctionItems = async (items = filteredItems) => {
       <p>Current Highest Bid: ${highestBidText}</p>
       <p class="timer" id="timer-${item.id}"></p>
       <button class="bid-btn" id="bid-btn-${item.id}">Place Bid</button>
-      <button class="cancel-bid-btn" id="cancel-bid-btn-${item.id}">Cancel Bid</button>
     `;
 
     auctionContainer.appendChild(itemElement);
 
     startItemTimer(item); // Start countdown for each item
 
-    // Add click events to bid and cancel bid buttons
     const bid_button =  document.getElementById(`bid-btn-${item.id}`);
     if (bid_button){
       bid_button.addEventListener("click", (event) => {
@@ -137,7 +112,7 @@ const renderAuctionItems = async (items = filteredItems) => {
           alert("Bid amount too high! Please enter a number below 500 billion!");
           return;
         }
-        if (bidAmount && parseFloat(bidAmount) > parseFloat(highestBid)) {
+        if (bidAmount && (parseFloat(bidAmount) > parseFloat(highestBid)) && parseFloat(bidAmount) > parseFloat(startingPrice)) {
           placeBid(item.id, parseFloat(bidAmount));
         } 
         else {
@@ -145,23 +120,6 @@ const renderAuctionItems = async (items = filteredItems) => {
         }
       });
     }
-    const cancel_bid_button = document.getElementById(`cancel-bid-btn-${item.id}`);
-    if (cancel_bid_button){
-      document.getElementById(`cancel-bid-btn-${item.id}`).addEventListener("click", (event) => {
-        event.stopPropagation(); 
-        const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);//Get time converts it to miliseconds(Since UNIX epoch 1 JAN 1970)
-        const currentTime = new Date();
-        const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
-        if (timeLeft < 1){
-          alert("Auction has already ended! Cannot cancel bid!");
-          return;
-        }
-        if (confirm("Are you sure you want to cancel your bid?")) {
-          cancelBid(item.id);
-        }
-      });
-    }
-
     // Add click event to display product overview
     itemElement.addEventListener("click", () => showProductOverview(item, highestBid, user));
   }
@@ -309,3 +267,4 @@ async function customer_support(){
 
 initializeAuction();
 customer_support();
+get_balance();
