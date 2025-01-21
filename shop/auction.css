@@ -294,3 +294,7 @@ header {
 .cancel-bid-btn:hover {
   background-color: #c82333;
 }
+#current-balance-symbol{
+  padding-left : 20px;
+}
+

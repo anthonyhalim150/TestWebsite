@@ -2,9 +2,11 @@ let auctionItems = []; // Array to store auction items
 let filteredItems = []; // Array to store filtered items
 let timerIntervals = []; // Store timers for auction items
 const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
+const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 
 // Fetch auction items from the server
 const fetchAuctionItems = async () => {
+  get_balance();
   try {
     const response = await fetch(`${API_URL}/auction`);
     const data = await response.json();
@@ -255,6 +257,27 @@ const attachEventListeners = () => {
   document.getElementById("sort-select").addEventListener("change", applySearchAndSort);
 };
 
+async function get_balance() {
+  const userID = localStorage.getItem('userID');
+  try {
+      const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(userID)}`);
+      if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+              document.getElementById('current-balance').textContent = `${data.wallet || 0} CSP`;
+          } else {
+              console.error('Error fetching wallet:', data.error);
+              document.getElementById('current-balance').textContent = 'Error loading balance';
+          }
+      } else {
+          console.error('Request failed:', response.status, response.statusText);
+          document.getElementById('current-balance').textContent = 'Error loading balance';
+      }
+  } catch (error) {
+      console.error('Error fetching wallet:', error);
+      document.getElementById('current-balance').textContent = 'Error loading balance';
+  }
+}
 // Initialize auction
 const initializeAuction = () => {
   fetchAuctionItems();
