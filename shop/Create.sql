@@ -120,6 +120,7 @@ CREATE TABLE AUCTION_ITEMS(
 	is_expired BOOLEAN DEFAULT FALSE,
     duration INT NOT NULL, 
     created_by INT NOT NULL DEFAULT 1,
+    processed BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE;
 );
 
@@ -136,6 +137,7 @@ CREATE TABLE BIDS(
     FOREIGN KEY (auction_item_id) REFERENCES AUCTION_ITEMS(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE
 );
+-- To store the procedure, change the delimiter first as procedures are long, and it might execute if you use the delimiter ;
 DELIMITER $$
 
 CREATE PROCEDURE ExpireAuctionsAndUpdateWallet()
@@ -145,19 +147,25 @@ BEGIN
     SET is_expired = TRUE
     WHERE is_expired = FALSE AND NOW() >= DATE_ADD(starting_time, INTERVAL duration SECOND);
 
-    -- Add the highest bid from each expired auction to the creators' wallets
+    -- Add the highest bid from each expired and unprocessed auction to the creators' wallets
     UPDATE USERS u
     JOIN (
-        SELECT ai.created_by, MAX(b.bid_amount) AS highest_bid
+        SELECT ai.created_by, MAX(b.bid_amount) AS highest_bid, ai.id AS auction_id
         FROM AUCTION_ITEMS ai
         JOIN BIDS b ON ai.id = b.auction_item_id
-        WHERE ai.is_expired = TRUE
+        WHERE ai.is_expired = TRUE AND ai.processed = FALSE
         GROUP BY ai.created_by, ai.id
     ) revenue ON u.id = revenue.created_by
     SET u.wallet = u.wallet + revenue.highest_bid;
+
+    -- Mark auctions as processed after transferring payments
+    UPDATE AUCTION_ITEMS
+    SET processed = TRUE
+    WHERE is_expired = TRUE AND processed = FALSE;
 END$$
 
 DELIMITER ;
+
 
 
 CREATE EVENT ExpireAuctionEvent
