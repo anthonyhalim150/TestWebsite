@@ -38,6 +38,9 @@ async function addProduct(event) {
     formData.append('product-image', imageFile); // Key must match the backend's expected key
     formData.append('category', category);
     formData.append('duration', duration);
+    const userID = localStorage.getItem('userID');
+    formData.append('userID', userID);
+
 
 
     try {

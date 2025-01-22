@@ -5,15 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShopMate - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href = "shop.css">
-    <link rel = "stylesheet" href = "login.css">
+    <link rel="stylesheet" href="shop.css">
+    <link rel="stylesheet" href="login.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand text-white" href="index.html"><strong>ShopMate</strong></a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto" id = "navbar-links">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- Added id for the collapse to match the data-bs-target -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" id="navbar-links">
+                    <!-- Navigation links will be dynamically rendered here -->
                 </ul>
             </div>
         </div>
@@ -26,8 +31,6 @@
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" required>
             </div>
-            <!-- form-control itu class dari bootstrap, yang biar neat -->
-            <!-- required makes the field required-->
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" required>
@@ -43,5 +46,6 @@
 
     <script src="login.js"></script>
     <script src="items.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
