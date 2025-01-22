@@ -16,7 +16,7 @@ const fetchAuctionItems = async () => {
     const response = await fetch(`${API_URL}/get-bid-by-user?userID=${userID}`);
     const data = await response.json();
 
-    auctionItems = data.items.map(item => ({
+    auctionItems = data.map(item => ({
       id: item.id,
       name: item.item_name,
       stock: item.stock,

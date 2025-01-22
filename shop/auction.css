@@ -107,6 +107,16 @@ body {
   color: #ffda79 !important; /* Gold */
   flex: 1 1 auto !important; /* Allows the brand to shrink or grow as needed */
 }
+.navbar-toggler {
+  border: none;
+}
+
+.navbar-toggler-icon {
+  background-color: #ffda79; /* Gold toggle icon */
+  border-radius: 5px;
+  width: 30px;
+  height: 30px;
+}
 
 /* Auction Items Container */
 #auction-items {

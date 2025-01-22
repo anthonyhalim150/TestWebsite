@@ -7,7 +7,9 @@ const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 // Fetch auction items from the server
 const fetchAuctionItems = async () => {
   try {
-    const response = await fetch(`${API_URL}/auction`);
+    const userID = localStorage.getItem('userID');
+    const encodedUserID = encodeURIComponent(userID);
+    const response = await fetch(`${API_URL}/auction?userID=${encodedUserID}`);
     const data = await response.json();
 
     auctionItems = data.items.map(item => ({

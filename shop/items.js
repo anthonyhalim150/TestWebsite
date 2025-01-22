@@ -141,8 +141,10 @@ function clear_login() {
 
 // Fetch items from the backend
 async function fetchItems() {
+    const userID = localStorage.getItem('userID');
     try {
-        const response = await fetch(`${API_URL}/items`);//Since it is a part of async function
+        const encodedUserID = encodeURIComponent(userID);
+        const response = await fetch(`${API_URL}/items?userID=${encodedUserID}`);//Since it is a part of async function
         const data = await response.json();
 
         if (data.success && data.items) {

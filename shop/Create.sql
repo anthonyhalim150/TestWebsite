@@ -6,20 +6,6 @@ USE ecommerce;
 -- Hence, I removed itemID as a referential integrity constraint
 
 
-ALTER TABLE sale_items DROP FOREIGN KEY fk_sale_items_item_id;
-
-
-ALTER TABLE AUCTION_ITEMS
-ADD COLUMN created_by INT NOT NULL DEFAULT 1,
-ADD CONSTRAINT fk_userID FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE;
-
-ALTER TABLE USERS
-MODIFY COLUMN address VARCHAR(255) UNIQUE DEFAULT 'AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU';
-
-ALTER TABLE USERS
-ADD COLUMN wallet DECIMAL(15, 2) DEFAULT 0;
-
-
 
 CREATE TABLE ITEMS (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -137,6 +123,8 @@ CREATE TABLE AUCTION_ITEMS(
     FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE;
 );
 
+ALTER TABLE AUCTION_ITEMS
+ADD COLUMN is_expired BOOLEAN DEFAULT FALSE;
 
 
 CREATE TABLE BIDS(
@@ -148,36 +136,34 @@ CREATE TABLE BIDS(
     FOREIGN KEY (auction_item_id) REFERENCES AUCTION_ITEMS(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE
 );
-drop table BIDS;
-USE ECOMMERCE;
+DELIMITER $$
 
-INSERT INTO AUCTION_ITEMS (item_name, stock, description, category, image, starting_price, starting_time, duration)
-VALUES
-('Vintage Clock', 5, 'A beautifully preserved vintage clock.', 'Antiques', 'Products/coal.png', 120.50, '2025-01-10 15:00:00', 3600),
-('Vintage Clock', 5, 'A beautifully preserved vintage clock.', 'Antiques', 'clock.jpg', 120.50, '2025-01-10 15:00:00', 3600),
-('Gaming Laptop', 3, 'High-performance gaming laptop with RTX 3060.', 'Electronics', 'laptop.jpg', 1500.00, '2025-01-10 16:00:00', 5400),
-('Diamond Necklace', 1, 'Exquisite diamond necklace with 24k gold chain.', 'Jewelry', 'necklace.jpg', 7500.00, '2025-01-10 17:00:00', 7200),
-('Oil Painting', 2, 'Original hand-painted oil painting.', 'Art', 'painting.jpg', 450.00, '2025-01-10 18:00:00', 3600);
+CREATE PROCEDURE ExpireAuctionsAndUpdateWallet()
+BEGIN
+    -- Update is_expired for auctions where current time exceeds start time + duration
+    UPDATE AUCTION_ITEMS
+    SET is_expired = TRUE
+    WHERE is_expired = FALSE AND NOW() >= DATE_ADD(starting_time, INTERVAL duration SECOND);
+
+    -- Add the highest bid from each expired auction to the creators' wallets
+    UPDATE USERS u
+    JOIN (
+        SELECT ai.created_by, MAX(b.bid_amount) AS highest_bid
+        FROM AUCTION_ITEMS ai
+        JOIN BIDS b ON ai.id = b.auction_item_id
+        WHERE ai.is_expired = TRUE
+        GROUP BY ai.created_by, ai.id
+    ) revenue ON u.id = revenue.created_by
+    SET u.wallet = u.wallet + revenue.highest_bid;
+END$$
+
+DELIMITER ;
 
 
--- Example data
-INSERT INTO auction_items (item_name, starting_price, time)
-VALUES 
-('Vintage Watch', 100.00, 1),
-('Antique Vase', 200.00, 1),
-('Signed Baseball', 150.00, 1);
+CREATE EVENT ExpireAuctionEvent
+ON SCHEDULE EVERY 1 MINUTE
+DO
+CALL ExpireAuctionsAndUpdateWallet();
 
-drop table comments;
-use ecommerce;
-INSERT INTO items (name, description, category, price, stock, image) VALUES 
-('Laptop', 'I am a laptop', 'Electronics', 1000.00, 10, 'https://via.placeholder.com/300'),
-('Phone', 800.00, 15, 'https://via.placeholder.com/300');
 
-INSERT INTO items (name, category, description, price, stock, image) VALUES 
-('Laptop', 'I am a laptop', 'Electronics', 1000.00, 10, 'https://via.placeholder.com/300');
-
-INSERT INTO USERS (username, email, password) VALUES ('testuser', 'test@example.com', 'hashedpassword');
-UPDATE USERS
-SET role = 'admin'
-WHERE id = 1;
-
+SHOW EVENTS FROM ecommerce;
