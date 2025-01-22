@@ -31,12 +31,26 @@ h1 {
     justify-content: space-between;
 }
 
-.wallet-details {
+.payment-option label {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 10px;
-    font-size: 0.9rem;
+}
+
+.wallet-details {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 25px; /* Align with the label */
+}
+
+#balance-text {
+    font-size: 1rem;
+}
+
+#current-balance {
+    font-size: 1rem;
+    font-weight: bold;
 }
 
 /* Buttons */
@@ -64,6 +78,17 @@ button.back-button:hover {
     background-color: #b3b3b3; /* Slightly darker grey */
 }
 
+/* Smaller button for the + icon */
+button.wallet-recharge {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    background-color: #ff6600;
+}
+
+button.wallet-recharge:hover {
+    background-color: #e65c00;
+}
+
 .form-actions {
     display: flex;
     justify-content: center;
@@ -76,6 +101,19 @@ button.back-button:hover {
 input[type="radio"] {
     margin-right: 10px;
 }
+
+.payment-amount {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    text-align: center; /* Center the content */
+}
+
+.payment-amount h4, 
+.payment-amount #current-payable {
+    display: inline-block; /* Keeps the heading and amount aligned */
+    margin: 0; /* Reset default margin for centering */
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

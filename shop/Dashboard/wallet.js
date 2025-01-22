@@ -171,7 +171,7 @@ async function get_balance(userID) {
         if (response.ok) {
             const data = await response.json();
             if (data.success) {
-                document.getElementById('current-balance').textContent = `${data.wallet || 0} CSP`;
+                document.getElementById('current-balance').textContent = `${parseFloat(data.wallet).toLocaleString('en-US') || 0} CSP`;
             } else {
                 console.error('Error fetching wallet:', data.error);
                 document.getElementById('current-balance').textContent = 'Error loading balance';

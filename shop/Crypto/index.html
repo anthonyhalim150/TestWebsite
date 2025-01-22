@@ -22,10 +22,14 @@
                     Pay with Wallet
                 </label>
                 <div class="wallet-details">
-                    <span>Balance:</span>
+                    <span id="balance-text">Wallet Balance:</span>
                     <span id="current-balance">Loading...</span>
-                    <button type="button" onclick="redirectToDashboard()">+</button>
+                    <button type="button" class="wallet-recharge" onclick="redirectToDashboard()">+</button>
                 </div>
+            </div>
+            <div class="payment-amount">
+                <h4>Amount to Pay:</h4>
+                <a id="current-payable">Loading...</a>
             </div>
             <div class="form-actions">
                 <button type="button" class="back-button" onclick="handleBack()">Back</button>
