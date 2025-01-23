@@ -562,3 +562,13 @@ button[type="submit"]:hover {
     width: 24px; /* Adjust size */
     height: 24px; /* Adjust size, this is for auction list icon */
 }
+/* Styles for Amount input box */
+#deposit-amount,
+#withdraw-amount {
+    width: 150px; /* Adjust width as needed */
+    padding: 8px; /* Adjust padding for better usability */
+    font-size: 14px; /* Adjust font size if needed */
+    border: 1px solid #ccc; /* Optional: Styling for border */
+    border-radius: 4px; /* Optional: Rounded corners */
+    margin: 5px 0; /* Optional: Add margin for spacing */
+}

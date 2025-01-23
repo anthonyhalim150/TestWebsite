@@ -51,7 +51,7 @@ function check_deposit_form(){
         deposit_form.addEventListener('submit', async function (event) {
             event.preventDefault(); 
 
-            const deposit_amount = document.getElementById('deposit-amount').value.trim();
+            const deposit_amount = parseFloat(document.getElementById('deposit-amount').value.replace(/,/g, '').trim());
             const userID = localStorage.getItem('userID'); 
             if (!deposit_amount) {
                 alert('Please enter how much you want to deposit!');
@@ -208,6 +208,59 @@ async function get_address(userID) {
     }
 }
 
+function format_amount(){
+    const depositInput = document.getElementById("deposit-amount");
+    const withdrawInput = document.getElementById("withdraw-amount");
+
+    // Helper function for real-time formatting
+    function formatWithCommas(value) {
+        return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Real-time formatting for deposit amount
+    if (depositInput) {
+        depositInput.addEventListener("input", (event) => {
+            let value = event.target.value.replace(/,/g, ''); // Remove commas
+            if (!isNaN(value) && value !== "") {
+                event.target.value = formatWithCommas(value); // Add commas back
+            }
+        });
+
+        depositInput.addEventListener("blur", (event) => {
+            let value = event.target.value.replace(/,/g, ''); // Remove commas for processing
+            if (value === "" || isNaN(value)) {
+                event.target.value = ""; // Clear invalid input
+            } else {
+                event.target.value = parseFloat(value).toLocaleString('en-US', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                });
+            }
+        });
+    }
+
+    // Real-time formatting for withdraw amount
+    if (withdrawInput) {
+        withdrawInput.addEventListener("input", (event) => {
+            let value = event.target.value.replace(/,/g, ''); // Remove commas
+            if (!isNaN(value) && value !== "") {
+                event.target.value = formatWithCommas(value); // Add commas back
+            }
+        });
+
+        withdrawInput.addEventListener("blur", (event) => {
+            let value = event.target.value.replace(/,/g, ''); // Remove commas for processing
+            if (value === "" || isNaN(value)) {
+                event.target.value = ""; // Clear invalid input
+            } else {
+                event.target.value = parseFloat(value).toLocaleString('en-US', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                });
+            }
+        });
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const userID = localStorage.getItem('userID'); // Assume userID is stored in localStorage
@@ -220,6 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
     get_address(userID);
     check_address_form();
     check_deposit_form();
+    format_amount();
     monitorPaymentStatus();
 });
-
