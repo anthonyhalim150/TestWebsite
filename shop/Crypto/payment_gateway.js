@@ -34,6 +34,7 @@ function redirectToDashboard() {
 // Confirm the payment
 async function confirmPayment() {
     const paymentMethod = document.querySelector('input[name="payment-method"]:checked');
+    const amount = sessionStorage.getItem('transaction_amount');
     if (!paymentMethod) {
         alert('Please select a payment method.');
         return;
@@ -44,31 +45,31 @@ async function confirmPayment() {
         return;
     }
 
-    const transactionAmount = parseFloat(prompt('Enter the payment amount:'));
-    if (isNaN(transactionAmount) || transactionAmount <= 0) {
+    if (isNaN(amount) || amount <= 0) {
         alert('Invalid payment amount.');
         return;
     }
 
-    const response = await fetch(`${API_URL_USER}/checkout`, {
+    const response = await fetch(`${API_URL_USER}/wallet-checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userID: localStorage.getItem('userID'), amount: transactionAmount }),
+        body: JSON.stringify({ userID: localStorage.getItem('userID'), amount: amount}),
     });
 
     const result = await response.json();
 
     if (result.success) {
-        sessionStorage.setItem('payment_status', 'TRUE');
+        sessionStorage.setItem('payment_status', 'success');
         window.location.href = '../cart.html';
     } else {
+        sessionStorage.setItem('payment_status', 'failed');
         alert(result.message || 'Payment failed.');
     }
 }
 
 // Handle the back button
 function handleBack() {
-    sessionStorage.setItem('payment_status', 'FALSE');
+    sessionStorage.setItem('payment_status', 'failed');
     window.location.href = '../cart.html';
 }
 
