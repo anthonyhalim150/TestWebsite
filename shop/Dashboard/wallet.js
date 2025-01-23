@@ -78,8 +78,12 @@ function check_deposit_form(){
     }
 }
 
-function check_withdraw_form(){
-    const withdraw_form = document.getElementByID('withdraw-form');
+
+async function check_withdraw_form(){
+    const userID = localStorage.getItem('userID');
+    const amount = await get_balance(userID);
+    const address = await get_address(userID);
+    const withdraw_form = document.getElementById('withdraw-form');
     if (withdraw_form){
         withdraw_form.addEventListener('submit', async function(event){
             event.preventDefault();
@@ -193,6 +197,7 @@ async function get_balance(userID) {
             const data = await response.json();
             if (data.success) {
                 document.getElementById('current-balance').textContent = `${parseFloat(data.wallet).toLocaleString('en-US') || 0} CSP`;
+                return parseFloat(data.wallet);
             } else {
                 console.error('Error fetching wallet:', data.error);
                 document.getElementById('current-balance').textContent = 'Error loading balance';
@@ -215,6 +220,7 @@ async function get_address(userID) {
             const data = await response.json();
             if (data.success) {
                 document.getElementById('current-address').textContent = data.address || 'Not available';
+                return data.address || 'Not available';
             } else {
                 console.error('Error fetching address:', data.error);
                 document.getElementById('current-address').textContent = 'Error loading address';
@@ -293,6 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
     get_address(userID);
     check_address_form();
     check_deposit_form();
+    check_withdraw_form();
     format_amount();
     monitorPaymentStatus();
+
 });

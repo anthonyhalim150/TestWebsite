@@ -404,6 +404,9 @@ async function customer_support(){
 // Initial rendering of items and cart
 document.addEventListener('DOMContentLoaded', async () => {
     document.body.classList.add('loading');
+    loadUserSettings().then(() => {
+        document.body.classList.remove('loading');
+    });
     await fetchLikedItems(); //To show whats liked and whats not
     await update_login();
     await fetchItems(); // Fetch items when page loads
@@ -414,9 +417,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     else{
         await renderItems();
     }
-    loadUserSettings().then(() => {
-        document.body.classList.remove('loading');
-    });
     customer_support();
 });
 
