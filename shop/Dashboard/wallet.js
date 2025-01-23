@@ -78,6 +78,27 @@ function check_deposit_form(){
     }
 }
 
+function check_withdraw_form(){
+    const withdraw_form = document.getElementByID('withdraw-form');
+    if (withdraw_form){
+        withdraw_form.addEventListener('submit', async function(event){
+            event.preventDefault();
+            const withdraw_amount = parseFloat(document.getElementById('withdraw-amount').value.replace(/,/g, '').trim());
+            if (!withdraw_amount) {
+                alert('Please enter how much you want to deposit!');
+                return;
+            }
+            const userID = localStorage.getItem('userID'); 
+            if (!userID) {
+                alert('User ID is missing. Please log in again.');
+                return;
+            }
+            
+
+        })
+    }
+}
+
 function monitorPaymentStatus() {
     const interval = setInterval(() => {
       const paymentStatus = sessionStorage.getItem("payment_status");
@@ -212,12 +233,12 @@ function format_amount(){
     const depositInput = document.getElementById("deposit-amount");
     const withdrawInput = document.getElementById("withdraw-amount");
 
-    // Helper function for real-time formatting
+
     function formatWithCommas(value) {
         return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    // Real-time formatting for deposit amount
+
     if (depositInput) {
         depositInput.addEventListener("input", (event) => {
             let value = event.target.value.replace(/,/g, ''); // Remove commas
@@ -239,7 +260,6 @@ function format_amount(){
         });
     }
 
-    // Real-time formatting for withdraw amount
     if (withdrawInput) {
         withdrawInput.addEventListener("input", (event) => {
             let value = event.target.value.replace(/,/g, ''); // Remove commas

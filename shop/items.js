@@ -190,6 +190,7 @@ async function addToCart(itemID) {
     const item = items.find(i => i.id === itemID);
 
     if (!userID) {
+        window.location.href = 'signup.html';
         alert('You must be logged in to add items to the cart.');
         return;
     }
