@@ -7,7 +7,8 @@ const API_URL = "https://anthonyhalim-150-723848267249.us-central1.run.app";
 const recipientAddress = sessionStorage.getItem('address'); // Replace with your recipient address
 const note = sessionStorage.getItem('note');
 const assetId = 732664447; // Your CSP asset ID
-const amount = sessionStorage.getItem('transaction_amount'); // Amount to transfer in micro-units (1 CSP = 100 micro-units)
+const asset_decimal = 2;
+const amount = parseFloat(sessionStorage.getItem('transaction_amount')) * Math.pow(10, asset_decimal);
 
 // Generate QR code with payment details
 function generateQRCode() {
@@ -43,11 +44,11 @@ async function monitorTransaction(txid) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        txid, // Transaction ID
-        amount, // Amount in micro-units
-        assetId, // Asset ID
-        recipientAddress, // Recipient address
-        orderId: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`, // Include the note (or the expected value)
+        txid, 
+        amount, 
+        assetId, 
+        recipientAddress, 
+        orderId: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`, // Include the note (or the expected value) to double check
       }),
     });
     const userID = localStorage.getItem('userID');

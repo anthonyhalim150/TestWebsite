@@ -80,26 +80,48 @@ function check_deposit_form(){
 
 
 async function check_withdraw_form(){
-    const userID = localStorage.getItem('userID');
-    const amount = await get_balance(userID);
-    const address = await get_address(userID);
     const withdraw_form = document.getElementById('withdraw-form');
     if (withdraw_form){
-        withdraw_form.addEventListener('submit', async function(event){
+        withdraw_form.addEventListener('submit', async function (event) {
             event.preventDefault();
+        
             const withdraw_amount = parseFloat(document.getElementById('withdraw-amount').value.replace(/,/g, '').trim());
+        
             if (!withdraw_amount) {
-                alert('Please enter how much you want to deposit!');
+                alert('Please enter a valid amount!');
                 return;
             }
-            const userID = localStorage.getItem('userID'); 
+        
+            const userID = localStorage.getItem('userID');
             if (!userID) {
                 alert('User ID is missing. Please log in again.');
                 return;
             }
-            
-
-        })
+        
+            try {
+                const response = await fetch(`${API_URL_USER}/withdraw`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userID: userID,
+                        amount: withdraw_amount,
+                    }),
+                });
+        
+                const result = await response.json();
+                if (response.ok) {
+                    alert(`Withdrawal Successful! Transaction ID: ${result.blockchainTransaction.transaction_id}`);
+                    get_balance(userID);
+                } else {
+                    alert(`Withdrawal failed: ${result.error || result.message}`);
+                }
+            } catch (error) {
+                console.error("Error during withdrawal:", error);
+                alert("An error occurred. Please try again.");
+            }
+        });
     }
 }
 
@@ -123,7 +145,8 @@ async function confirm_deposit() {
     const recipientAddress = "AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU"; 
     const note = sessionStorage.getItem('note');
     const assetId = 732664447; // Your CSP asset ID
-    const amount = sessionStorage.getItem('transaction_amount');
+    const asset_decimal = 2;
+    const amount = parseFloat(sessionStorage.getItem('transaction_amount')) * Math.pow(10, asset_decimal);
     const txid = sessionStorage.getItem('txid'); // Ensure transaction ID is fetched from session storage
     if (!txid || !amount || !note || !recipientAddress) {
         alert("Missing required transaction details. Please try again.");
@@ -138,7 +161,7 @@ async function confirm_deposit() {
             },
             body: JSON.stringify({
                 txid, // Transaction ID
-                amount, // Amount in micro-units
+                amount, // Amount in CSP
                 assetId, // Asset ID
                 recipientAddress, // Recipient address
                 orderId: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`, // Include the note (or the expected value)
@@ -155,12 +178,12 @@ async function confirm_deposit() {
                 window.location.href = '../index.html'; // Fixed syntax for redirection
                 return;
             }
-
+            const converted_amount = parseFloat(amount) / Math.pow(10, asset_decimal);
             try {
                 const walletResponse = await fetch(`${API_URL_USER}/update-wallet`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userID, amount }),
+                    body: JSON.stringify({ userID, amount: converted_amount }),
                 });
 
                 const result = await walletResponse.json();
