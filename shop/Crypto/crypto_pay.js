@@ -61,7 +61,7 @@ async function monitorTransaction(txid) {
     if (data.completed) {
       // Redirect after confirmation
       setTimeout(() => {
-        transactionStatus.textContent = `Transaction confirmed! Amount: ${data.amount} CSP. Redirecting...`;
+        transactionStatus.textContent = `Transaction confirmed! Amount: ${amount} CSP. Redirecting...`;
         transactionStatus.classList.add("success");
         const homeButton = document.getElementById("back-to-home");
         const type = sessionStorage.getItem('type');
