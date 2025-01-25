@@ -1,3 +1,52 @@
+This is my directory structure
+game/my-app
+├── public/                       # Static files accessible directly by the browser
+│   ├── favicon.ico               # Favicon for the app
+│   ├── index.html                # Main HTML file
+│   ├── images/                   # Static images
+│   │   ├── miner.png
+│   │   ├── upgrade.png
+│   │   └── background.jpg
+│
+├── src/                          # Source code for the React frontend
+│   ├── components/               # Reusable React components
+│   │   ├── Header.js             # Displays the header with tokens
+│   │   ├── Miner.js              # Component for mining tokens
+│   │   ├── Upgrade.js            # Component for upgrading mining power
+│   │   └── ...other components
+│   ├── App.css              
+│   │       
+│   ├── App.js                    # Main React component
+│   ├── index.js                  # Entry point for React
+│   └── api/                      # API utility functions
+│       └── wallet.js             # Wallet update and other API calls
+│
+├── backend/                      # Backend API code
+│   ├── controllers/              # Request handlers
+│   │   ├── userController.js     # Logic for wallet updates and user management
+│   │   └── ...other controllers
+│   ├── entities/                 # Database interaction logic
+│   │   ├── userEntity.js         # User-related database queries
+│   │   └── ...other entities
+│   ├── routes/                   # Express routes
+│   │   ├── userRoutes.js         # User-related API routes
+│   │   └── ...other routes
+│   ├── db/                       # Database connection and configuration
+│   │   └── index.js              # Database connection setup
+│   ├── app.js                    # Express app setup
+│   ├── server.js                 # Server entry point
+│   └── middleware/               # Middleware (e.g., authentication)
+│       └── authMiddleware.js 
+|       └── loggerMiddleware.js 
+|       └── errorHandlerMiddleware.js 
+├── process.env  
+├── package.json                  # Project dependencies and scripts
+├── package-lock.json             # Locked dependency tree
+├── README.md                     # Project documentation
+└── .gitignore                    # Files and directories to ignore in Git
+
+
+
 CREATE DATABASE ecommerce;
 USE ecommerce;
 
