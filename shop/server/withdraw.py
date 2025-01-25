@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 
 # Mnemonic (replace with your actual mnemonic phrase)
-MNEMONIC_PHRASE = "quick supply prize soft image avoid that artefact tooth recipe good emerge burden hair profit awake deer path maximum hope cross frog describe abstract december"
+MNEMONIC_PHRASE = "blablabla123"
 
 
 # Convert mnemonic to private key and public address
