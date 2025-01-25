@@ -4,7 +4,7 @@ function Header({ tokens }) {
   return (
     <header className="header">
       <h1>Mining Simulator</h1>
-      <p>Tokens: {tokens}</p>
+      <p>Tokens: {tokens.toFixed(2)}</p>
     </header>
   );
 }
