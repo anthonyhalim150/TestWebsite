@@ -638,7 +638,7 @@ app.get("/expired-auction", async (req, res) => {
     const query = `
     SELECT * 
     FROM AUCTION_ITEMS 
-    WHERE (starting_time + INTERVAL duration SECOND) < NOW() 
+    WHERE is_expired = TRUE
     AND created_by = ?`;//NOW() is guranteed to be the server date and cannot be manipulated
   
     try {
@@ -840,8 +840,99 @@ app.get('/get-address', async (req, res) => {
     }
 });
 
+app.post('/wallet-checkout', async(req, res)=> {
+    const { userID, amount } = req.body;
+    if (!userID || !amount){
+        return res.status(400).json({ success: false, error: 'UserID and amount is required.' });
+    }
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = 
+                `UPDATE USERS
+                 SET wallet = wallet - ?
+                 WHERE id = ?`; // Replace `id` with your user identifier column name if different
+  
+            const [results] = await connection.query(query, [amount,userID]);
 
+            if (results.affectedRows > 0) {
+                res.json({ success: true});
+            } else {
+                res.status(404).json({ success: false, error: 'User not found.' });
+            }
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        res.status(500).json({ success: false, error: 'Error fetching wallet.' });
+    }
 
+});
+app.post('/withdraw', async (req, res) => {
+    const { userID, amount } = req.body;
+
+    if (!userID || !amount) {
+        return res.status(400).json({ message: "User ID and amount are required." });
+    }
+
+    const connection = await pool.getConnection();
+
+    try {
+        // Start database transaction
+        await connection.beginTransaction();
+
+        // Check the user's current wallet balance and address
+        const [rows] = await connection.query('SELECT wallet, address FROM USERS WHERE id = ?', [userID]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const currentBalance = parseFloat(rows[0].wallet);
+        const userAddress = rows[0].address;
+
+        if (currentBalance < amount) {
+            return res.status(400).json({ message: "Insufficient balance." });
+        }
+
+        // Call Flask endpoint for blockchain withdrawal
+        try {
+            const flaskResponse = await axios.post(`https://crypto-723848267249.us-central1.run.app/withdraw`, {
+                address: userAddress,
+                amount: amount,
+            });
+
+            // Check if the Flask API succeeded
+            if (flaskResponse.data.status !== 'success') {
+                throw new Error("Blockchain withdrawal failed.");
+            }
+
+            // Deduct the amount from the wallet only after Flask withdrawal succeeds
+            const newBalance = currentBalance - amount;
+            await connection.query('UPDATE USERS SET wallet = ? WHERE id = ?', [newBalance, userID]);
+
+            // Commit the database transaction
+            await connection.commit();
+
+            // Return success response
+            return res.json({
+                message: "Withdrawal successful.",
+                newBalance,
+                blockchainTransaction: flaskResponse.data,
+            });
+        } catch (flaskError) {
+            console.error("Error in Flask withdraw API:", flaskError.response?.data || flaskError.message);
+            throw new Error("Blockchain withdrawal failed.");
+        }
+    } catch (error) {
+        // Rollback transaction on any failure
+        await connection.rollback();
+        console.error("Error processing withdrawal:", error.message);
+        return res.status(500).json({ error: error.message });
+    } finally {
+        connection.release(); // Ensure connection is always released
+    }
+});
 
 // Start server
 const PORT = 8080||process.env.PORT; // Cloud Run will use the PORT environment variable

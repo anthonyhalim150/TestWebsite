@@ -165,15 +165,50 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal server error.' });
     }
 });
-
-
-// Fetch items for the shop
-app.get('/items', async (req, res) => {
+app.get('/all-items', async (req, res) => {
     try {
         const connection = await pool.getConnection();
         try {
             const query = `SELECT * FROM ITEMS`;
             const [results] = await connection.query(query);
+            res.json({ success: true, items: results });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        res.json({ success: false, error: 'Error fetching items.' });
+    }
+});
+app.get("/auction", async (req, res) => {
+    const userID = req.query.userID; 
+    const query = `
+    SELECT * 
+    FROM AUCTION_ITEMS 
+    WHERE (starting_time + INTERVAL duration SECOND) > NOW() AND starting_time < NOW() AND created_by != ?
+    `;//NOW() is guranteed to be the server date and cannot be manipulated
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        const [results] = await connection.query(query, [userID]);
+        res.json({ success: true, items: results });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error("Error fetching auction items:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+});
+// Fetch items for the shop
+app.get('/items', async (req, res) => {
+    try {
+        const userID = req.query.userID; 
+        const connection = await pool.getConnection();
+        try {
+            const query = `SELECT * FROM ITEMS WHERE created_by != ?`;
+            const [results] = await connection.query(query, [userID]);
             res.json({ success: true, items: results });
         } finally {
             connection.release();
@@ -473,9 +508,12 @@ app.post('/checkout', async (req, res) => {
 
         const cartID = cart[0].cart_id;
 
-        // 2. Get the items from the cart
+        // 2. Get the items from the cart along with the creators
         const [cartItems] = await connection.query(
-            'SELECT item_id, quantity, price FROM CARTITEMS WHERE cart_id = ?',
+            `SELECT ci.item_id, ci.quantity, ci.price, i.created_by
+             FROM CARTITEMS ci
+             JOIN ITEMS i ON ci.item_id = i.id
+             WHERE ci.cart_id = ?`,
             [cartID]
         );
 
@@ -485,37 +523,55 @@ app.post('/checkout', async (req, res) => {
 
         const totalAmount = cartItems.reduce((total, item) => total + (item.quantity * item.price), 0);
 
+        // 3. Record the transaction
         const [transactionResult] = await connection.query(
             'INSERT INTO TRANSACTIONS (user_id, total_amount) VALUES (?, ?)',
             [userID, totalAmount]
         );
 
-        const transactionID = transactionResult.insertId;
+        const transactionID = transactionResult.insertId;//Gets the transaction id from the transaction
 
+        // 4. Process each item in the cart
         for (const item of cartItems) {
+            const itemTotal = item.quantity * item.price;
+
+            // Record sale item
             await connection.query(
                 'INSERT INTO SALE_ITEMS (transaction_id, item_id, quantity, price) VALUES (?, ?, ?, ?)',
                 [transactionID, item.item_id, item.quantity, item.price]
             );
+
+            // Update stock
             await connection.query(
                 'UPDATE ITEMS SET stock = stock - ? WHERE id = ?',
                 [item.quantity, item.item_id]
             );
+
+            // Credit the wallet of the product creator
+            await connection.query(
+                'UPDATE USERS SET wallet = wallet + ? WHERE id = ?',
+                [itemTotal, item.created_by]
+            );
         }
 
+        // 5. Clear the cart
         await connection.query('DELETE FROM CARTITEMS WHERE cart_id = ?', [cartID]);
         await connection.query('DELETE FROM CART WHERE cart_id = ?', [cartID]);
 
-        await connection.commit(); //Commit to the database, biar kalo ada error di tengah bisa di rollback, sblm dicommit
+        // Commit the transaction
+        await connection.commit();
         res.json({ success: true, message: 'Checkout completed successfully.' });
     } catch (error) {
+        // Rollback the transaction in case of error
         await connection.rollback();
         console.error('Error during checkout:', error);
         res.status(500).json({ success: false, error: 'Checkout failed.' });
     } finally {
-        connection.release();//Buat pool
+        // Release the connection back to the pool
+        connection.release();
     }
 });
+
 
 app.get('/shop-metrics', async (req, res) => {
     const { startDate, endDate } = req.query;
@@ -1335,7 +1391,7 @@ app.get("/expired-auction", async (req, res) => {
     const query = `
     SELECT * 
     FROM AUCTION_ITEMS 
-    WHERE (starting_time + INTERVAL duration SECOND) < NOW()
+    WHERE is_expired = TRUE
     `;//NOW() is guranteed to be the server date and cannot be manipulated
   
     try {
@@ -1373,7 +1429,7 @@ app.get("/upcoming-auction", async (req, res) => {
     }
 });
 //Ongoing auctions
-app.get("/auction", async (req, res) => {
+app.get("/all-ongoing-auction", async (req, res) => {
     const query = `
     SELECT * 
     FROM AUCTION_ITEMS 
@@ -1424,78 +1480,86 @@ app.get('/bid-list', async (req, res) => {
 });
 app.post('/bids', async (req, res) => {
     const { auction_item_id, user_id, bid_amount } = req.body;
-  
+
     if (!auction_item_id || !user_id || !bid_amount) {
-      return res.status(400).json({ message: "Missing required parameters." });
+        return res.status(400).json({ message: "Missing required parameters." });
     }
-  
+
     const connection = await pool.getConnection();
     try {
-      await connection.beginTransaction();
-  
-      // Get the current highest bid for the auction
-      const [currentBid] = await connection.query(
-        `SELECT user_id, bid_amount FROM BIDS
-         WHERE auction_item_id = ?
-         ORDER BY bid_amount DESC LIMIT 1`,
-        [auction_item_id]
-      );
-      const { user_id: previousBidderId, bid_amount: previousBidAmount } = currentBid[0];
-      if (currentBid.length > 0) {
-        // Refund the previous highest bidder
-        await connection.query(
-          `UPDATE USERS
-           SET wallet = wallet + ?
-           WHERE id = ?`,
-          [previousBidAmount, previousBidderId]
+        await connection.beginTransaction();
+
+        // Get the current highest bid for the auction
+        const [currentBid] = await connection.query(
+            `SELECT user_id, bid_amount FROM BIDS
+             WHERE auction_item_id = ?
+             ORDER BY bid_amount DESC LIMIT 1`,
+            [auction_item_id]
         );
-      }
-  
-      // Check the bidder's wallet
-      const [bidder] = await connection.query(
-        `SELECT wallet FROM USERS
-         WHERE id = ?`,
-        [user_id]
-      );
-      //If wallet is same or  more than bid_amount
-      if (bidder[0].wallet < bid_amount) {
+
+        // Check if there is a previous highest bidder
+        let previousBidderId = null;
+        let previousBidAmount = 0;
+        if (currentBid.length > 0) {
+            ({ user_id: previousBidderId, bid_amount: previousBidAmount } = currentBid[0]);
+
+            // Refund the previous highest bidder
+            await connection.query(
+                `UPDATE USERS
+                 SET wallet = wallet + ?
+                 WHERE id = ?`,
+                [previousBidAmount, previousBidderId]
+            );
+        }
+
+        // Check the bidder's wallet
+        const [bidder] = await connection.query(
+            `SELECT wallet FROM USERS
+             WHERE id = ?`,
+            [user_id]
+        );
+
+        if (bidder[0].wallet < bid_amount) {
+            // Revert the previous refund if it was made
+            if (previousBidderId) {
+                await connection.query(
+                    `UPDATE USERS
+                     SET wallet = wallet - ?
+                     WHERE id = ?`,
+                    [previousBidAmount, previousBidderId]
+                );
+            }
+            return res.status(400).json({ message: "Insufficient funds." });
+        }
+
+        // Deduct the bid amount from the new bidder's wallet
         await connection.query(
             `UPDATE USERS
              SET wallet = wallet - ?
              WHERE id = ?`,
-            [previousBidAmount, previousBidderId]
-          );
-        return res.status(400).json({ message: "Insufficient funds." });
-      }
-  
-      // Deduct the bid amount from the new bidder's wallet
-      await connection.query(
-        `UPDATE USERS
-         SET wallet = wallet - ?
-         WHERE id = ?`,
-        [bid_amount, user_id]
-      );
-  
-      // Insert the new bid
-      await connection.query(
-        `INSERT INTO BIDS (auction_item_id, user_id, bid_amount)
-         VALUES (?, ?, ?)`,
-        [auction_item_id, user_id, bid_amount]
-      );
-  
-      // Commit the transaction
-      await connection.commit();
-  
-      res.json({ message: "Bid placed successfully." });
+            [bid_amount, user_id]
+        );
+
+        // Insert the new bid
+        await connection.query(
+            `INSERT INTO BIDS (auction_item_id, user_id, bid_amount)
+             VALUES (?, ?, ?)`,
+            [auction_item_id, user_id, bid_amount]
+        );
+
+        // Commit the transaction
+        await connection.commit();
+
+        res.json({ message: "Bid placed successfully." });
     } catch (error) {
-      console.error("Error placing bid:", error);
-      await connection.rollback();
-      res.status(500).json({ message: "Error placing bid." });
+        console.error("Error placing bid:", error);
+        await connection.rollback();
+        res.status(500).json({ message: "Error placing bid." });
     } finally {
-      connection.release();
+        connection.release();
     }
 });
-  
+
 
 app.get("/get-bid-by-user", async (req, res) => {
     const { userID } = req.query;
@@ -1528,8 +1592,7 @@ app.get("/highest-bid", async (req, res) => {
     //Faster than using max
     const sql = `
         SELECT 
-            b.bid_amount,
-            u.username
+            b.bid_amount
         FROM 
             BIDS b
         JOIN 
@@ -1545,7 +1608,7 @@ app.get("/highest-bid", async (req, res) => {
       const connection = await pool.getConnection();
       try {
         const [results] = await connection.query(sql, [auction_item_id]);
-        res.json(results);
+        res.json(results[0]);
       } finally {
         connection.release();
       }
