@@ -3,22 +3,37 @@ const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 
 
-function getCookie(name) {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    console.log(document.cookie);
-    console.log(match);
-    console.log(decodeURIComponent(match[2]));
-    return match ? decodeURIComponent(match[2]) : null;
-}
 
-function get_user_role() {
-    const role = getCookie('role'); // Retrieve role from the cookie
-    if (!role) {
-        console.error('User role not found in cookies.');
+let cachedUserRole = null;
+
+async function get_user_role() {
+    // Return cached role if available
+    if (cachedUserRole) {
+        return cachedUserRole;
+    }
+
+    try {
+        // Fetch user details from the server
+        const response = await fetch("https://anthonyhalim-150-723848267249.us-central1.run.app/me", {
+            method: "GET",
+            credentials: "include", // Include cookies for authentication
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const userRole = sanitizeInput(data.user.role); // Sanitize the role from the response
+            cachedUserRole = userRole; // Cache the role
+            return cachedUserRole;
+        } else {
+            console.error("Failed to fetch user role: User not authenticated");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user role:", error);
         return null;
     }
-    return role;
 }
+
 
 // Function to fetch and cache userID securely
 async function getUserID() {
@@ -48,10 +63,10 @@ async function getUserID() {
 }
 
 // Function to ensure user is authenticated
-async function ensureAuthenticated(path) {
+async function getCookie(path ="login.html") {
     const userID = await getUserID();
     if (!userID && redirectOnFail) {
-        console.error("User not authenticated. Redirecting to login.");
+        console.error("Login Expired. Redirecting to login....");
         window.location.href = sanitizeURL(path); // Redirect safely
     }
     return userID;

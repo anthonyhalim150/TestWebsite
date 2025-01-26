@@ -33,8 +33,7 @@ async function checkLoginStatus() {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            alert(`Welcome, ${data.user.username}!`);
+            await response.json();
             window.location.href = "./index.html"; // Redirect to the dashboard
         } else {
             alert("User not verified. Please log in again.");

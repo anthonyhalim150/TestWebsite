@@ -1,7 +1,7 @@
 
 // Fetch user settings from the server
 async function applyInitialSettings() {
-    const userID = getCookie('userID'); // Use the shared getCookie function
+    const userID = getCookie(); // Use the shared getCookie function
     if (!userID) {
         alert('User not logged in.');
         window.location.href = './login.html';
@@ -34,7 +34,7 @@ async function applyInitialSettings() {
 
 // Save user settings to the server
 async function saveSettings() {
-    const userID = getCookie('userID'); // Use the shared getCookie function
+    const userID = getCookie(); // Use the shared getCookie function
     if (!userID) {
         alert('User not logged in.');
         return;

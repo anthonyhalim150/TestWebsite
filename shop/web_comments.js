@@ -4,7 +4,7 @@ async function submitComment(event) {
     event.preventDefault(); // Prevent form reload
 
     // Ensure user is authenticated
-    const userID = await getUserID();
+    const userID = await getCookie();
     if (!userID) { // This should not happen if ensureAuthenticated is working correctly
         alert('You must be logged in to give a comment!');
         window.location.href = 'login.html';
@@ -71,7 +71,7 @@ function updateStars(rating, stars) {
 document.addEventListener('DOMContentLoaded', async () => {
     await ensureAuthenticated(); // Ensure the user is authenticated
 
-    const userID = await getUserID();
+    const userID = await getCookie();
     if (!userID) { // This should not happen if ensureAuthenticated is working correctly
         alert('You must be logged in to give a comment!');
         window.location.href = 'login.html';

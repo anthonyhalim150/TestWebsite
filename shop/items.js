@@ -9,7 +9,7 @@ async function update_login() {
     const navbarLinks = document.getElementById('navbar-links');
     
     // Fetch userID and role using the functions from auth.js
-    const userID = await getUserID();  // Use auth.js to get the user ID securely
+    const userID = await getCookie();  // Use auth.js to get the user ID securely
     const role = get_user_role();  // Get the user role using the provided function from auth.js
 
     if (userID) {
@@ -91,7 +91,7 @@ async function update_login() {
 
 // Function to show likes, now using getCookie for userID retrieval
 function show_likes() {
-    const userID = getCookie('userID'); // Get userID from cookies
+    const userID = getCookie(); // Get userID from cookies
     if (!userID) {
         window.location.href = 'login.html';
         return;
@@ -101,7 +101,7 @@ function show_likes() {
 
 // Function to prevent cart access, now using getCookie for userID retrieval
 function prevent_cart() {
-    const userID = getCookie('userID'); // Get userID from cookies
+    const userID = getCookie(); // Get userID from cookies
     const cartNav = document.getElementById('cart_nav');
     if (cartNav) {
         cartNav.addEventListener('click', (event) => {
@@ -150,7 +150,7 @@ function clear_login() {
 
 // Fetch items from the backend
 async function fetchItems() {
-    const userID = getCookie('userID'); // Get userID from cookies
+    const userID = getCookie(); // Get userID from cookies
     if (!userID) {
         return;
     }
@@ -174,7 +174,7 @@ async function fetchItems() {
 
 // Fetch cart items to keep track of quantities
 async function fetchCartItems() {
-    const userID = getCookie('userID'); // Get userID from cookies
+    const userID = getCookie(); // Get userID from cookies
     if (!userID) return; // If the user is not logged in, skip fetching cart items
 
     try {
@@ -197,7 +197,7 @@ async function fetchCartItems() {
 
 // Add item to cart
 async function addToCart(itemID) {
-    const userID = getCookie('userID'); // Get userID from cookies
+    const userID = getCookie(); // Get userID from cookies
     const quantityInput = document.getElementById(`quantity-${itemID}`);
     const quantity = parseInt(quantityInput.value, 10);
     const item = items.find(i => i.id === itemID);
@@ -451,7 +451,7 @@ if (searchBar) {
 // Fetch liked items on page load
 // Fetch liked items on page load
 async function fetchLikedItems() {
-    const currentUserID = getCookie('userID'); // Use getCookie to fetch userID
+    const currentUserID = getCookie(); // Use getCookie to fetch userID
     if (!currentUserID) {
         console.error("User not logged in.");
         return;
@@ -479,7 +479,7 @@ async function fetchLikedItems() {
 
 async function toggleLike(itemID) {
     const isLiked = likedItems.some(item => item.id === itemID);
-    const currentUserID = getCookie('userID'); // Use getCookie for user authentication
+    const currentUserID = getCookie(); // Use getCookie for user authentication
     if (!currentUserID) {
         alert('Login to like an item!');
         window.location.href = 'signup.html';
@@ -532,7 +532,7 @@ async function toggleLike(itemID) {
     }
 }
 async function loadUserSettings() {
-    const userID = getCookie('userID'); // Fetch the userID using getCookie to align with your secure cookie handling.
+    const userID = getCookie(); // Fetch the userID using getCookie to align with your secure cookie handling.
     if (!userID) return;
 
     const sanitizedUserID = sanitizeInput(userID); // Sanitize the userID to prevent XSS or unsafe characters
