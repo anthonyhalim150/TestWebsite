@@ -5,6 +5,9 @@ const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 
 function getCookie(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    console.log(document.cookie);
+    console.log(match);
+    console.log(decodeURIComponent(match[2]));
     return match ? decodeURIComponent(match[2]) : null;
 }
 
