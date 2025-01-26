@@ -135,18 +135,31 @@ function setup_icon() {
         });
     }
 }
-// Function to clear login data
-function clear_login() {
+async function clear_login() {
     const login = document.getElementById('logout_nav');
-    login.addEventListener('click', () => {
-        // Clear user info and refresh the page
-        document.cookie = "userID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; // Clear userID cookie
-        document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; // Clear role cookie
-        document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; // Clear role cookie
-        alert('You have logged out.');
-        window.location.href = 'login.html';
+    login.addEventListener('click', async () => {
+        try {
+            // Make a POST request to the logout endpoint
+            const response = await fetch('/logout', {
+                method: 'POST',
+                credentials: 'include', // Include cookies in the request
+            });
+
+            if (response.ok) {
+                alert('You have logged out.');
+                window.location.href = 'login.html'; // Redirect to login page
+            } else {
+                const data = await response.json();
+                console.error('Logout failed:', data.message);
+                alert('Failed to log out. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+            alert('An error occurred while logging out.');
+        }
     });
 }
+
 
 // Fetch items from the backend
 async function fetchItems() {
