@@ -1,29 +1,45 @@
-document.getElementById('login_form').addEventListener('submit', async (event) => {
+document.getElementById("login_form").addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+
     try {
         const response = await fetch(`${API_URL}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+            credentials: "include", // Ensures cookies are included
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-            alert('Login successful!');
-            localStorage.setItem('userID', result.userID); // Save user ID (or token if available)
-            localStorage.setItem('username', username); // Save username
-            localStorage.setItem('role', result.role);
-            localStorage.setItem('token', result.token); // Store the token in localStorage after login
-            window.location.href = './index.html'; // Redirect to shop or dashboard
+        if (response.ok) {
+            alert("Login successful!");
+            await checkLoginStatus(); // Verify user status after login
         } else {
-            document.getElementById('login_message').innerText = `Login failed: ${result.error}`;
+            const result = await response.json();
+            document.getElementById("login_message").innerText = `Login failed: ${result.error}`;
         }
     } catch (error) {
-        console.error('Error during login:', error);
-        document.getElementById('login_message').innerText = 'Error connecting to server.';
+        console.error("Error during login:", error);
+        document.getElementById("login_message").innerText = "Error connecting to server.";
     }
 });
+
+async function checkLoginStatus() {
+    try {
+        const response = await fetch(`${API_URL}/me`, {
+            method: "GET",
+            credentials: "include", // Include cookies
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            alert(`Welcome, ${data.user.username}!`);
+            window.location.href = "./index.html"; // Redirect to the dashboard
+        } else {
+            alert("User not verified. Please log in again.");
+        }
+    } catch (error) {
+        console.error("Error checking login status:", error);
+    }
+}

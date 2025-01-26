@@ -1,28 +1,32 @@
-
 let selectedRating = 0;
+
 async function submitComment(event) {
     event.preventDefault(); // Prevent form reload
-    const userID = localStorage.getItem('userID');
-    if (!userID){//Jangan sampe masuk sini, error handling is present when the user presses the feedback button.
-        alert('You must be logged in to give a comment! Alert Developer of this error!');
-        window.location.href = 'login.html'
+
+    // Ensure user is authenticated
+    const userID = await getUserID();
+    if (!userID) { // This should not happen if ensureAuthenticated is working correctly
+        alert('You must be logged in to give a comment!');
+        window.location.href = 'login.html';
         return;
     }
-    if(selectedRating === 0){
+
+    if (selectedRating === 0) {
         alert('Please add a rating for the website!');
         return;
     }
+
     // Get form data
     const comment_text = document.getElementById('comment-text').value.trim();
 
-    // Validate form input, jgn sampe sini karena ada form control required
+    // Validate form input
     if (!comment_text) {
         alert('Comment cannot be empty.');
         return;
     }
 
     // Construct the comment object
-    const newComment = {userID, comment_text, selectedRating};
+    const newComment = { userID, comment_text, selectedRating };
 
     try {
         const response = await fetch(`${API_URL}/add-new-comment`, {
@@ -38,7 +42,7 @@ async function submitComment(event) {
             alert('Comment submitted successfully!');
             document.getElementById('comment-form').reset(); // Clear the form
             const stars = document.querySelectorAll('#star-rating span');
-            if (stars){ //Refresh stars
+            if (stars) { // Refresh stars
                 updateStars(0, stars);
             }
             selectedRating = 0;
@@ -52,7 +56,7 @@ async function submitComment(event) {
 }
 
 function updateStars(rating, stars) {
-    if (stars){
+    if (stars) {
         stars.forEach(star => {
             const starValue = parseFloat(star.dataset.value);
             if (starValue <= rating) {
@@ -64,21 +68,23 @@ function updateStars(rating, stars) {
     }
 }
 
+document.addEventListener('DOMContentLoaded', async () => {
+    await ensureAuthenticated(); // Ensure the user is authenticated
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    const userID = localStorage.getItem('userID');
-    if (!userID){
+    const userID = await getUserID();
+    if (!userID) { // This should not happen if ensureAuthenticated is working correctly
         alert('You must be logged in to give a comment!');
-        window.location.href = 'login.html'
+        window.location.href = 'login.html';
         return;
     }
+
     const commentForm = document.getElementById('comment-form');
     if (commentForm) {
         commentForm.addEventListener('submit', submitComment);
     }
+
     const stars = document.querySelectorAll('#star-rating span');
-    if (stars){
+    if (stars) {
         stars.forEach(star => {
             star.addEventListener('click', () => {
                 selectedRating = parseFloat(star.dataset.value);

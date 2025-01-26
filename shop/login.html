@@ -15,7 +15,6 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <!-- Added id for the collapse to match the data-bs-target -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto" id="navbar-links">
                     <!-- Navigation links will be dynamically rendered here -->
@@ -26,7 +25,7 @@
     
     <main class="container my-5">
         <h2>Login</h2>
-        <form id="login_form">
+        <form id="login_form" autocomplete="off">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" required>
