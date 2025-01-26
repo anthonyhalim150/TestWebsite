@@ -1,7 +1,9 @@
 const express = require("express");
-const { updateUserWallet } = require("./controllers/userController");
+const { updateUserWallet } = require("../controllers/userController");
 const router = express.Router();
 
-router.post("/api/update-wallet", updateUserWallet);
+router.post("/update-wallet", updateUserWallet);
+  
+router.get("/wallet/:userId", getWalletBalance);
 
 module.exports = router;

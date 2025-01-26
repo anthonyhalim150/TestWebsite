@@ -1,12 +1,12 @@
 This is my directory structure
 game/my-app
 ├── public/                       # Static files accessible directly by the browser
-│   ├── favicon.ico               # Favicon for the app
+│   ├── favicon.ico               #Assume this exists
 │   ├── index.html                # Main HTML file
 │   ├── images/                   # Static images
-│   │   ├── miner.png
-│   │   ├── upgrade.png
-│   │   └── background.jpg
+│   │   ├── miner.png             #Assume this exists
+│   │   ├── upgrade.png           #Assume this exists
+│   │   └── background.jpg        #Assume this exists
 │
 ├── src/                          # Source code for the React frontend
 │   ├── components/               # Reusable React components
@@ -32,18 +32,18 @@ game/my-app
 │   │   ├── userRoutes.js         # User-related API routes
 │   │   └── ...other routes
 │   ├── db/                       # Database connection and configuration
-│   │   └── index.js              # Database connection setup
+│   │   └── index.js              #Assume this exists
 │   ├── app.js                    # Express app setup
 │   ├── server.js                 # Server entry point
 │   └── middleware/               # Middleware (e.g., authentication)
-│       └── authMiddleware.js 
-|       └── loggerMiddleware.js 
-|       └── errorHandlerMiddleware.js 
-├── process.env  
-├── package.json                  # Project dependencies and scripts
-├── package-lock.json             # Locked dependency tree
-├── README.md                     # Project documentation
-└── .gitignore                    # Files and directories to ignore in Git
+│       └── authMiddleware.js   
+|       └── loggerMiddleware.js   #Assume this exists
+|       └── errorHandlerMiddleware.js #Assume this exists
+├── process.env                   #Assume this exists
+├── package.json                  #Assume this exists
+├── package-lock.json             #Assume this exists
+├── README.md                     #Assume this exists
+└── .gitignore                    #Assume this exists
 
 
 

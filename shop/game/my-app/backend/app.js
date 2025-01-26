@@ -8,11 +8,17 @@ const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
+
 // Apply middleware
 app.use(bodyParser.json()); // Parse JSON requests
-app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(logger); // Log requests
 
+
+app.get("/", (req, res) => {
+    res.send("Welcome to the API!");
+  });
+  
 // Routes
 app.use("/api", userRoutes); // Add authentication middleware if needed
 // app.use("/api", authenticateToken, userRoutes);

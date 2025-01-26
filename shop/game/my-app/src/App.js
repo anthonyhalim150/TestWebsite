@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Miner from "./components/Miner";
 import Upgrade from "./components/Upgrade";
+import { updateWallet } from "./api/wallet";
 
 function App() {
   const [tokens, setTokens] = useState(0);
@@ -13,25 +14,22 @@ function App() {
     setTokensToSync((prev) => prev + miningPower);
   };
 
-  const syncTokensWithServer = async () => {
-    if (tokensToSync > 0) {
-      try {
-        const response = await fetch("/api/update-wallet", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: 1, tokens: tokensToSync }), // Replace `1` with actual user ID
-        });
-        if (!response.ok) throw new Error("Failed to sync tokens");
-        setTokensToSync(0); // Reset after syncing
-      } catch (error) {
-        console.error("Error syncing tokens:", error);
-      }
+
+  const handleWalletUpdate = async () => {
+    try {
+      const userId = 1; // Ensure this is the correct user ID
+      const result = await updateWallet(userId, tokensToSync);
+      console.log("Wallet updated!");
+      setTokensToSync(0); // Reset after syncing
+    } catch (error) {
+      console.error("Failed to update wallet:", error);
     }
   };
+  
 
   // Sync tokens with the server every 5 seconds
   useEffect(() => {
-    const interval = setInterval(syncTokensWithServer, 5000);
+    const interval = setInterval(handleWalletUpdate, 5000);
     return () => clearInterval(interval);
   }, [tokensToSync]);
 
