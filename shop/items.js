@@ -93,8 +93,7 @@ async function update_login() {
 function show_likes() {
     const userID = getCookie('userID'); // Get userID from cookies
     if (!userID) {
-        window.location.href = 'signup.html';
-        alert('You must be logged in to access likes. Alert Developer of this error!');
+        window.location.href = 'login.html';
         return;
     }
     renderItems(likedItems);
@@ -153,8 +152,6 @@ function clear_login() {
 async function fetchItems() {
     const userID = getCookie('userID'); // Get userID from cookies
     if (!userID) {
-        alert('You must be logged in to fetch items!');
-        window.location.href = 'login.html';
         return;
     }
 
