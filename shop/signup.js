@@ -54,13 +54,6 @@ if (sign_up_form) {
     });
 }
 
-// Utility function to sanitize input
-function sanitizeInput(input) {
-    const div = document.createElement("div");
-    div.textContent = input;
-    return div.innerHTML;
-}
-
 // Utility function to validate email
 function validateEmail(email) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,13 +66,3 @@ function validatePassword(password) {
     return regex.test(password);
 }
 
-// Utility function to sanitize URLs
-function sanitizeURL(url) {
-    try {
-        const sanitizedURL = new URL(url, window.location.origin);
-        return sanitizedURL.href;
-    } catch (e) {
-        console.error("Invalid URL:", e);
-        return "/";
-    }
-}

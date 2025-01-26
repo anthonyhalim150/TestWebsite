@@ -8,6 +8,14 @@ function getCookie(name) {
     return match ? decodeURIComponent(match[2]) : null;
 }
 
+function get_user_role() {
+    const role = getCookie('role'); // Retrieve role from the cookie
+    if (!role) {
+        console.error('User role not found in cookies.');
+        return null;
+    }
+    return role;
+}
 
 // Function to fetch and cache userID securely
 async function getUserID() {

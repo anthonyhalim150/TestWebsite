@@ -1,57 +1,64 @@
 let items = [];
 let cartItems = {};  // To store the quantities of items in the cart
 let likedItems = [];
+
+
+
 // Function to update the login state
 async function update_login() {
     const navbarLinks = document.getElementById('navbar-links');
-    const userID = localStorage.getItem('userID');
-    const role = localStorage.getItem('role'); 
-    if (get_user_role() !== role){
-        alert("Token changed, alert developer of the error!"); //Jangan sampe masuk sini
-        window.location.href = './index.html';
-    }
+    
+    // Fetch userID and role using the functions from auth.js
+    const userID = await getUserID();  // Use auth.js to get the user ID securely
+    const role = get_user_role();  // Get the user role using the provided function from auth.js
+
     if (userID) {
         if (role === 'admin') {
-            window.location.href = './admin/index.html';
+            window.location.href = './admin/index.html'; // Redirect to admin dashboard
+            return;
         }
-        // User is logged in
+        
+        // User is logged in, update the navbar links
         navbarLinks.innerHTML = `
         <ul class="navbar-icons">
             <li class="nav-item">
                 <a class="cart-btn" href="cart.html" id="cart_nav">
-                    <img src="Icons/cart.png"  title="Cart" alt="Transparent Cart Icon">
+                    <img src="Icons/cart.png" title="Cart" alt="Transparent Cart Icon">
                 </a>
             </li>
             <li class="nav-item dropdown">
                 <a class="dropdown-toggle" href="#" id="profileDropdown" role="button">
-                    <img src="Icons/profile.png"  title="Profile" alt="Profile Icon" class="profile-btn">
+                    <img src="Icons/profile.png" title="Profile" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" id="settings_nav" href="Dashboard/index.html">Dashboard</a></li>
-                    <li><a class="dropdown-item" id="settings_nav" href="auction.html">Auctions</a></li>
-                    <li><a class="dropdown-item" id="settings_nav" href="settings.html">Settings</a></li>
-                    <li><a class="dropdown-item" id="likes_nav" href="#">Likes</a></li>
+                    <li><a class="dropdown-item" href="Dashboard/index.html">Dashboard</a></li>
+                    <li><a class="dropdown-item" href="auction.html">Auctions</a></li>
+                    <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                    <li><a class="dropdown-item" href="#">Likes</a></li>
                     <li><a class="dropdown-item" id="logout_nav" href="#">Logout</a></li>
                 </ul>
             </li>
             <li class="nav-item">
                 <button id="customer-support" class="support-btn">
-                    <img src="Icons/customer-support.png"  title="Customer Support" alt="Feedback">
+                    <img src="Icons/customer-support.png" title="Customer Support" alt="Feedback">
                 </button>
             </li>
         </ul>
         `;
+
+        // Event listener for 'Likes'
         const likesNav = document.getElementById('likes_nav');
         if (likesNav) {
             likesNav.addEventListener('click', (event) => {
                 event.preventDefault(); 
-                show_likes(userID);
+                show_likes(userID);  // Show liked items
                 window.location.href = 'like.html';
-            })
+            });
         }
-        clear_login();
+
+        clear_login();  // Call function to clear login data (if needed)
     } else {
-        // User is logged out
+        // User is logged out, show login/signup links
         navbarLinks.innerHTML = `
         <ul class="navbar-icons">
             <li class="nav-item">
@@ -75,13 +82,17 @@ async function update_login() {
             </li>
         </ul>
         `;
-        prevent_cart(userID);
-   
+
+        prevent_cart(userID);  // Prevent access to the cart if not logged in
     }
-    setup_icon(); 
+
+    setup_icon();  // Initialize profile dropdown or other settings
 }
-function show_likes(userID){
-    if (!userID) {//Jangan sampe masuk sini
+
+// Function to show likes, now using getCookie for userID retrieval
+function show_likes() {
+    const userID = getCookie('userID'); // Get userID from cookies
+    if (!userID) {
         window.location.href = 'signup.html';
         alert('You must be logged in to access likes. Alert Developer of this error!');
         return;
@@ -89,31 +100,31 @@ function show_likes(userID){
     renderItems(likedItems);
 }
 
-function prevent_cart(userID){
+// Function to prevent cart access, now using getCookie for userID retrieval
+function prevent_cart() {
+    const userID = getCookie('userID'); // Get userID from cookies
     const cartNav = document.getElementById('cart_nav');
-        if (cartNav) {
-            cartNav.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent navigation
-                if (!userID) {
-                    window.location.href = 'signup.html';
-                    alert('You must be logged in to access your cart.');
-                    return;
-                }
-            });
-        }
+    if (cartNav) {
+        cartNav.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent navigation
+            if (!userID) {
+                window.location.href = 'signup.html';
+                alert('You must be logged in to access your cart.');
+                return;
+            }
+        });
+    }
 }
 
+// Function to set up the profile icon dropdown
 function setup_icon() {
-
-    // Attach profileDropdown event listener
     const profileDropdown = document.querySelector('#profileDropdown');
     if (profileDropdown) {
         profileDropdown.addEventListener('click', function (event) {
             event.preventDefault(); // Prevent default link behavior
             const dropdownMenu = this.nextElementSibling; // Get the dropdown menu
-            // Toggle visibility
-            dropdownMenu.style.display = 
-                dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            // Toggle visibility of the dropdown menu
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
         });
 
         // Close dropdown if clicking outside
@@ -125,13 +136,14 @@ function setup_icon() {
         });
     }
 }
-
 // Function to clear login data
 function clear_login() {
     const login = document.getElementById('logout_nav');
     login.addEventListener('click', () => {
         // Clear user info and refresh the page
-        localStorage.clear();
+        document.cookie = "userID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; // Clear userID cookie
+        document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; // Clear role cookie
+        document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; // Clear role cookie
         alert('You have logged out.');
         window.location.href = 'login.html';
     });
@@ -139,10 +151,16 @@ function clear_login() {
 
 // Fetch items from the backend
 async function fetchItems() {
-    const userID = localStorage.getItem('userID');
+    const userID = getCookie('userID'); // Get userID from cookies
+    if (!userID) {
+        alert('You must be logged in to fetch items!');
+        window.location.href = 'login.html';
+        return;
+    }
+
     try {
         const encodedUserID = encodeURIComponent(userID);
-        const response = await fetch(`${API_URL}/items?userID=${encodedUserID}`);//Since it is a part of async function
+        const response = await fetch(`${API_URL}/items?userID=${encodedUserID}`);
         const data = await response.json();
 
         if (data.success && data.items) {
@@ -159,7 +177,7 @@ async function fetchItems() {
 
 // Fetch cart items to keep track of quantities
 async function fetchCartItems() {
-    const userID = localStorage.getItem('userID');
+    const userID = getCookie('userID'); // Get userID from cookies
     if (!userID) return; // If the user is not logged in, skip fetching cart items
 
     try {
@@ -182,7 +200,7 @@ async function fetchCartItems() {
 
 // Add item to cart
 async function addToCart(itemID) {
-    const userID = localStorage.getItem('userID');
+    const userID = getCookie('userID'); // Get userID from cookies
     const quantityInput = document.getElementById(`quantity-${itemID}`);
     const quantity = parseInt(quantityInput.value, 10);
     const item = items.find(i => i.id === itemID);
@@ -220,6 +238,7 @@ async function addToCart(itemID) {
         alert('An error occurred. Please try again later.');
     }
 }
+
 function searchItems() {
     const query = document.getElementById('search-bar').value.trim().toLowerCase();
     let desc_match = 0;
@@ -264,6 +283,7 @@ function searchItems() {
     renderItems(filteredItems);
 }
 // Render shop items with updated stock, //Event propagation stops it from displaying the showItemOverview for specific buttons
+// Function to render items with the ability to filter and display cart quantity
 async function renderItems(filteredItems = null) {
     const itemsToRender = filteredItems || items; // Use filtered items if provided, otherwise render all items
     const itemsContainer = document.getElementById('items');
@@ -273,18 +293,23 @@ async function renderItems(filteredItems = null) {
         const cartQuantity = cartItems[item.id] || 0; // Quantity of the item in the cart
         const availableStock = item.stock - cartQuantity; // Stock available after subtracting cart quantity
 
+        // Sanitize dynamic content to prevent XSS using sanitizeInput from auth.js
+        const sanitizedItemName = sanitizeInput(item.name);
+        const sanitizedItemDescription = sanitizeInput(item.description);
+        const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
+
         // Check if the item is liked (use `likedItems` to track liked items)
         const isLiked = likedItems.some(liked => liked.id === item.id); // `likedItems` is a Set of liked item IDs
-        const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
+
         return `
             <div class="col-md-4 mb-4">
                 <div class="card" onclick="showItemOverview(${item.id})">
                     <div class="like-icon" onclick="event.stopPropagation(); toggleLike(${item.id})">
                         <img src="${isLiked ? 'Icons/red-heart.png' : 'Icons/white-heart.png'}" alt="Like" />
                     </div>
-                    <img src="${item.image}" class="card-img-top" alt="${item.name} ">
+                    <img src="${item.image}" class="card-img-top" alt="${sanitizedItemName}">
                     <div class="card-body text-center">
-                        <h5 class="card-title">${item.name}</h5>
+                        <h5 class="card-title">${sanitizedItemName}</h5>
                         <p class="card-text">$${formattedPrice}</p>
                         <p class="card-text">Stock: ${availableStock}</p>
                         <div class="quantity-control">
@@ -300,15 +325,17 @@ async function renderItems(filteredItems = null) {
     }).join('');
 }
 
+// Function to update the quantity of an item
 async function updateQuantity(itemID, stock) {
     const quantityInput = document.getElementById(`quantity-${itemID}`);
     const newQuantity = parseInt(quantityInput.value);
 
     if (newQuantity < 1 || newQuantity > stock) {
-        quantityInput.value = stock; // Reset to max kalo invalid, this is from input.
+        quantityInput.value = stock; // Reset to max if invalid
         return;
     }
 }
+
 // Adjust the quantity value in the input field
 function changeQuantity(itemId, delta) {
     const quantityInput = document.getElementById(`quantity-${itemId}`);
@@ -322,36 +349,33 @@ function changeQuantity(itemId, delta) {
         quantityInput.value = newQuantity;
     }
 }
-function get_user_role() {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
 
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
-        return payload.role;
-    } catch (error) {
-        console.error('Error decoding token:', error);
-        return null;
-    }
-}
-
+// Function to show item overview, sanitized to prevent XSS
 function showItemOverview(itemId) {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
 
     const overviewContainer = document.getElementById('item-overview');
+
+    // Sanitize dynamic content before rendering
+    const sanitizedItemName = sanitizeInput(item.name);
+    const sanitizedItemDescription = sanitizeInput(item.description);
+    const sanitizedItemCategory = sanitizeInput(item.category || 'N/A'); // Default 'N/A' if category is not available
     const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
+    
+    // Render sanitized content
     overviewContainer.innerHTML = `
-        <h3>${item.name}</h3>
-        <img src="${item.image}" alt="${item.name}" style="width: 180px; height: 180px; margin-bottom: 15px;">
-        <p class="item-description"><strong>Description:</strong> ${item.description}</p>
+        <h3>${sanitizedItemName}</h3>
+        <img src="${item.image}" alt="${sanitizedItemName}" style="width: 180px; height: 180px; margin-bottom: 15px;">
+        <p class="item-description"><strong>Description:</strong> ${sanitizedItemDescription}</p>
         <p class="item-description"><strong>Price:</strong> $${formattedPrice}</p>
         <p class="item-description"><strong>Stock:</strong> ${item.stock}</p>
-        <p class="item-description"><strong>Category:</strong> ${item.category || 'N/A'}</p>
+        <p class="item-description"><strong>Category:</strong> ${sanitizedItemCategory}</p>
         <button class="close-btn" onclick="closeItemOverview()">Close</button>
     `;
     overviewContainer.style.display = 'block';
 }
+
 
 document.addEventListener('click', (event) => {
     const overviewSection = document.getElementById('item-overview');
@@ -427,15 +451,28 @@ if (searchBar) {
 } 
 
 
-
+// Fetch liked items on page load
 // Fetch liked items on page load
 async function fetchLikedItems() {
-    const currentUserID = localStorage.getItem('userID');
+    const currentUserID = getCookie('userID'); // Use getCookie to fetch userID
+    if (!currentUserID) {
+        console.error("User not logged in.");
+        return;
+    }
+
     try {
-        const response = await fetch(`${API_URL}/like-list?userID=${currentUserID}`);
+        // Ensure the userID is encoded before inserting it into the URL
+        const encodedUserID = encodeURIComponent(currentUserID); 
+
+        const response = await fetch(`${API_URL}/like-list?userID=${encodedUserID}`);
         const data = await response.json();
         if (data.success) {
-            likedItems = data.likedItems;
+            likedItems = data.likedItems.map(item => ({
+                ...item,
+                name: sanitizeInput(item.name), // Sanitize item name
+                description: sanitizeInput(item.description), // Sanitize item description
+                category: sanitizeInput(item.category), // Sanitize category
+            }));
         }
     } catch (error) {
         console.error('Error fetching liked items:', error);
@@ -445,44 +482,47 @@ async function fetchLikedItems() {
 
 async function toggleLike(itemID) {
     const isLiked = likedItems.some(item => item.id === itemID);
-    const currentUserID = localStorage.getItem('userID');
-    if (!currentUserID){
+    const currentUserID = getCookie('userID'); // Use getCookie for user authentication
+    if (!currentUserID) {
         alert('Login to like an item!');
         window.location.href = 'signup.html';
         return;
     }
+
+    // Sanitize the itemID to ensure it's safe
+    const sanitizedItemID = sanitizeInput(itemID); // Sanitize itemID before making API calls
+
     try {
         if (isLiked) {
             // Unlike the item
             const response = await fetch(`${API_URL}/delete-like`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: currentUserID, itemID }),
+                body: JSON.stringify({ userID: currentUserID, itemID: sanitizedItemID }),
             });
 
             const data = await response.json();
             if (data.success) {
-                if (likedItems.length == 1){
+                if (likedItems.length == 1) {
                     location.reload();
-                }
-                else{
-                    likedItems = likedItems.filter(item => item.id !== itemID); // Remove item with matching ID
+                } else {
+                    likedItems = likedItems.filter(item => item.id !== sanitizedItemID); // Remove item with matching ID
                 }
             } else {
                 console.error(data.error);
             }
         } else {
             // Like the item
-            const response = await fetch(`${API_URL}/add-like` , {
+            const response = await fetch(`${API_URL}/add-like`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID: currentUserID, itemID }),
+                body: JSON.stringify({ userID: currentUserID, itemID: sanitizedItemID }),
             });
 
             const data = await response.json();
             if (data.success) {
-                likedItems.push({ id: itemID});
-                await fetchLikedItems();//Klo ga ada ini, nnti pas ke like pertama kali, bakal blm ke fetch liked itemsnya, karena di array cuma store id.
+                likedItems.push({ id: sanitizedItemID });
+                await fetchLikedItems(); // Fetch liked items after liking the item
             } else {
                 console.error(data.error);
             }
@@ -495,23 +535,32 @@ async function toggleLike(itemID) {
     }
 }
 async function loadUserSettings() {
-    const userID = localStorage.getItem('userID');
+    const userID = getCookie('userID'); // Fetch the userID using getCookie to align with your secure cookie handling.
     if (!userID) return;
+
+    const sanitizedUserID = sanitizeInput(userID); // Sanitize the userID to prevent XSS or unsafe characters
+    
     try {
         const response = await fetch(`${API_URL}/get-user-settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID }),
+            body: JSON.stringify({ userID: sanitizedUserID }), // Send sanitized userID
         });
+
         const data = await response.json();
         if (data.success) {
             // Apply the settings
             const { dark_mode, color_scheme } = data.settings;
-            document.documentElement.style.setProperty('--primary-color', color_scheme);
+
+            // Sanitize color_scheme to ensure it is a valid value
+            const sanitizedColorScheme = sanitizeInput(color_scheme);
+            document.documentElement.style.setProperty('--primary-color', sanitizedColorScheme);
+
+            // Ensure dark_mode is boolean and safe
             document.documentElement.style.setProperty('--secondary-color', dark_mode ? '#333' : 'light');
             document.documentElement.style.setProperty('--text-color', dark_mode ? '#FFFFFF' : 'black');
         }
-        else{
+        else {
             console.error(data.message);
         }
     } catch (error) {
