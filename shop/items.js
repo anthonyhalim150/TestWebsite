@@ -1,5 +1,3 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
-
 let items = [];
 let cartItems = {};  // To store the quantities of items in the cart
 let likedItems = [];

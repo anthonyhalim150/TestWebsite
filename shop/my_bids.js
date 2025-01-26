@@ -1,8 +1,7 @@
 let auctionItems = []; // Array to store auction items
 let filteredItems = []; // Array to store filtered items
 let timerIntervals = []; // Store timers for auction items
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
-const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
+
 
 // Fetch auction items from the server
 const fetchAuctionItems = async () => {

@@ -1,46 +1,85 @@
-const sign_up_form = document.getElementById('sign-up-form');
-if (sign_up_form){
-    sign_up_form.addEventListener('submit', async (event) => {
+const sign_up_form = document.getElementById("sign-up-form");
+
+if (sign_up_form) {
+    sign_up_form.addEventListener("submit", async (event) => {
         event.preventDefault();
-    
-        // Extract form values
-        const username = document.getElementById('username').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
+
+        // Extract and sanitize form values
+        const username = sanitizeInput(document.getElementById("username").value.trim());
+        const email = sanitizeInput(document.getElementById("email").value.trim());
+        const password = document.getElementById("password").value;
         const confirm_password = document.getElementById("confirm_password").value;
-    
+
+        if (!validateEmail(email)) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            alert("Password must be at least 8 characters long, include a number, and have at least one special character.");
+            return;
+        }
+
         if (password !== confirm_password) {
             alert("Passwords do not match!");
             return;
         }
-    
-    
-        // Create the user object
+
+        // Create the sanitized user object
         const user = { username, email, password };
-    
-        // Define API URL (update nnti klo hosted on a server)
-    
+
         try {
-            // Send data to the server
             const response = await fetch(`${API_URL}/signup`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(user),
+                credentials: "include", // Include cookies for session tracking
             });
-    
-            // Process server response
+
             const result = await response.json();
-            console.log('Server response:', result);
+
             if (response.ok && result.success) {
                 alert(`Account created successfully for ${username}!`);
-                document.getElementById('sign-up-form').reset(); // Reset form
-                window.location.href = 'login.html';
+                sign_up_form.reset(); // Reset the form
+                window.location.href = sanitizeURL("login.html"); // Redirect securely
             } else {
-                document.getElementById('signup_message').innerText = 'Sign-Up Failed: ' + (result.error || 'Unknown error.');
+                document.getElementById("signup_message").innerText =
+                    `Sign-Up Failed: ${sanitizeInput(result.error || "Unknown error.")}`;
             }
         } catch (error) {
-            console.error('Error connecting to server:', error);
-            document.getElementById('signup_message').innerText = 'Error connecting to server. Please try again later.';
+            console.error("Error connecting to server:", error);
+            document.getElementById("signup_message").innerText =
+                "Error connecting to server. Please try again later.";
         }
-    });    
+    });
+}
+
+// Utility function to sanitize input
+function sanitizeInput(input) {
+    const div = document.createElement("div");
+    div.textContent = input;
+    return div.innerHTML;
+}
+
+// Utility function to validate email
+function validateEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}
+
+// Utility function to validate password
+function validatePassword(password) {
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+}
+
+// Utility function to sanitize URLs
+function sanitizeURL(url) {
+    try {
+        const sanitizedURL = new URL(url, window.location.origin);
+        return sanitizedURL.href;
+    } catch (e) {
+        console.error("Invalid URL:", e);
+        return "/";
+    }
 }
