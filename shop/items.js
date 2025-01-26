@@ -140,7 +140,7 @@ async function clear_login() {
     login.addEventListener('click', async () => {
         try {
             // Make a POST request to the logout endpoint
-            const response = await fetch('/logout', {
+            const response = await fetch(`${API_URL}/logout`, {
                 method: 'POST',
                 credentials: 'include', // Include cookies in the request
             });
