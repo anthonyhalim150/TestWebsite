@@ -75,9 +75,12 @@ async function getCookie(path ="/shop/login.html") {
 
 // Utility function to sanitize input and prevent XSS
 function sanitizeInput(input) {
-    const div = document.createElement("div");
-    div.textContent = input;
-    return div.innerHTML;
+    if (typeof input === 'string') {
+        const div = document.createElement("div");
+        div.textContent = input;
+        return div.innerHTML;
+    }
+    return input; // Return non-string inputs unchanged
 }
 
 // Utility function to sanitize URLs
