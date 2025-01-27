@@ -120,6 +120,8 @@ function check_withdraw_form() {
                 });
 
                 const result = await response.json();
+                console.log(response);
+                console.log(result);
                 if (response.ok && result.success) {
                     alert('Withdrawal Successful!');
                     get_balance(); // Update wallet balance
@@ -148,7 +150,6 @@ async function confirm_deposit() {
         const { txid, transaction_amount, note, recipient_address } = await transactionDetailsResponse.json();
 
         if (!txid || !transaction_amount || !note || !recipient_address) {
-            alert('Invalid transaction details. Please try again.');
             return;
         }
 
