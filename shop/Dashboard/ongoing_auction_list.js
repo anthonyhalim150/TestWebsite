@@ -7,7 +7,7 @@ async function fetch_products(sorted_items = null) {
 
 
         const encodedUserID = encodeURIComponent(sanitizeInput(userID)); // Sanitize and encode userID
-        const response = await fetch(`${API_URL}/auction?userID=${encodedUserID}`, {
+        const response = await fetch(`${API_URL}/ongoing-auction-user?userID=${encodedUserID}`, {
             method: 'GET',
             credentials: 'include', // Include cookies with the request
         });

@@ -304,9 +304,11 @@ function monitorPaymentStatus() {
                 clearInterval(interval);
                 alert("Payment failed. Please try again.");
             } else {
-                console.log("Waiting for payment...");
+                renderCart();
+                clearInterval(interval);
             }
         } catch (error) {
+            clearInterval(interval);
             console.error("Error monitoring payment status:", error);
         }
     }, 500);
@@ -334,6 +336,55 @@ async function confirm_checkout() {
         alert("An error occurred during checkout. Please try again.");
     }
 }
+function showItemOverview(itemId) {
+    // Find the item by ID securely
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+
+    const overviewContainer = document.getElementById('item-overview');
+    
+    // Sanitize and format the item details
+    const sanitizedName = sanitizeInput(item.name);
+    const sanitizedImage = sanitizeInput(item.image);
+    const sanitizedDescription = sanitizeInput(item.description);
+    const sanitizedPrice = parseFloat(item.price).toLocaleString('en-US');
+    const sanitizedStock = sanitizeInput(item.stock);
+    const sanitizedCategory = sanitizeInput(item.category || 'N/A');
+
+    // Inject sanitized content into the overview container
+    overviewContainer.innerHTML = `
+        <h3>${sanitizedName}</h3>
+        <img src="${sanitizedImage}" alt="${sanitizedName}" style="width: 180px; height: 180px; margin-bottom: 15px;">
+        <p class="item-description"><strong>Description:</strong> ${sanitizedDescription}</p>
+        <p class="item-description"><strong>Price:</strong> $${sanitizedPrice}</p>
+        <p class="item-description"><strong>Stock:</strong> ${sanitizedStock}</p>
+        <p class="item-description"><strong>Category:</strong> ${sanitizedCategory}</p>
+        <button class="close-btn" onclick="closeItemOverview()">Close</button>
+    `;
+    overviewContainer.style.display = 'block';
+}
+
+document.addEventListener('click', (event) => {
+    const overviewSection = document.getElementById('item-overview');
+    const isInsideOverview = overviewSection && overviewSection.contains(event.target);
+    const isCloseButton = event.target.closest('.close-btn');
+    const isTriggerElement = event.target.closest('.card'); // Adjust trigger as needed
+
+    if (isTriggerElement) {
+        const itemId = parseInt(isTriggerElement.dataset.itemId, 10);
+        showItemOverview(itemId);
+    } else if (!isInsideOverview || isCloseButton) {
+        closeItemOverview();
+    }
+});
+
+function closeItemOverview() {
+    const overviewContainer = document.getElementById('item-overview');
+    if (overviewContainer) {
+        overviewContainer.style.display = 'none';
+    }
+}
+
 
 
 document.addEventListener('DOMContentLoaded', () => {

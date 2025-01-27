@@ -3,7 +3,7 @@ async function get_balance() {
     const userID = await getCookie(); // Retrieve userID securely using auth.js
     try {
         // Fetch the wallet balance securely from the server
-        const response = await fetch(`${API_URL_USER}/get-wallet-user`, {
+        const response = await fetch(`${API_URL_USER}/get-wallet-user?userID=${encodeURIComponent(userID)}`, {
             method: 'GET',
             credentials: 'include', // Include cookies for authentication
         });

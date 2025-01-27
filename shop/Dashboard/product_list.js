@@ -152,6 +152,7 @@ async function saveProductChanges(productId) {
         const response = await fetch(`${API_URL}/items/${sanitizeInput(productId)}`, {
             method: 'PUT',
             body: formData, // FormData handles multipart/form-data encoding
+            credentials: 'include',
         });
 
         if (response.ok) {
@@ -178,6 +179,7 @@ async function delete_product(productId) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ productId: sanitizeInput(parseInt(productId, 10)) }),
+            credentials: 'include',
         });
 
         const result = await response.json();
