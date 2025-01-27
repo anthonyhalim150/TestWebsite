@@ -69,7 +69,7 @@ async function monitorTransaction(txid) {
           return;
       }
 
-      const { address: recipientAddress, transaction_amount, note } = await transactionDetailsResponse.json();
+      const { recipientAddress, transaction_amount, note } = await transactionDetailsResponse.json();
       const amount = parseFloat(transaction_amount) * Math.pow(10, 2);
 
       // Check transaction status
