@@ -91,10 +91,6 @@ async function update_login() {
 
 // Function to show likes, now using getCookie for userID retrieval
 function show_likes(userID) {
-    if (!userID) {
-        window.location.href = 'login.html';
-        return;
-    }
     renderItems(likedItems);
 }
 
@@ -105,7 +101,6 @@ function prevent_cart(userID) {
         cartNav.addEventListener('click', (event) => {
             event.preventDefault(); // Prevent navigation
             if (!userID) {
-                window.location.href = 'signup.html';
                 alert('You must be logged in to access your cart.');
                 return;
             }
@@ -206,12 +201,6 @@ async function addToCart(itemID) {
     const quantityInput = document.getElementById(`quantity-${itemID}`);
     const quantity = parseInt(quantityInput.value, 10);
     const item = items.find(i => i.id === itemID);
-
-    if (!userID) {
-        window.location.href = 'signup.html';
-        alert('You must be logged in to add items to the cart.');
-        return;
-    }
 
     if (quantity > item.stock - (cartItems[itemID] || 0)) {
         alert('Insufficient stock available.');
@@ -484,11 +473,6 @@ async function fetchLikedItems() {
 async function toggleLike(itemID) {
     const isLiked = likedItems.some(item => item.id === itemID);
     const currentUserID = getCookie(); // Use getCookie for user authentication
-    if (!currentUserID) {
-        alert('Login to like an item!');
-        window.location.href = 'signup.html';
-        return;
-    }
 
     // Sanitize the itemID to ensure it's safe
     const sanitizedItemID = sanitizeInput(itemID); // Sanitize itemID before making API calls

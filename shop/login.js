@@ -35,8 +35,6 @@ async function checkLoginStatus() {
         if (response.ok) {
             await response.json();
             window.location.href = "index.html"; // Redirect to the dashboard
-        } else {
-            alert("User not verified. Please log in again.");
         }
     } catch (error) {
         console.error("Error checking login status:", error);

@@ -1,7 +1,6 @@
 function crawler_check(){
-    const userRole = localStorage.getItem('role'); 
+    const userRole = get_user_role(); 
     if (window.location.pathname.includes('/shop/Dashboard') && (userRole !== 'user' || get_user_role()!== 'user')) {
-        console.log('tes');
         window.location.href = '../index.html';  // Redirect to non-users to homepage
     }
 }
