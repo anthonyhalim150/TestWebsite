@@ -192,6 +192,7 @@ async function confirm_deposit() {
 
             if (walletResponse.ok && result.success) {
                 alert('Deposit Successful!');
+                sessionStorage.clear();
                 get_balance(); // Update the user's balance
             } else {
                 alert(`Deposit failed: ${sanitizeInput(result.error)}`);

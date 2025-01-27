@@ -304,24 +304,19 @@ async function confirm_payment_status() {
         }
 
 
-        const asset_decimal = 2;
 
-        // Prepare the payload for transaction verification
-        const verificationPayload = {
-            txid,
-            amount:amount,
-            assetId,
-            recipientAddress,
-            orderId: sanitizeInput(note),
-        };
-
-        // Perform server-side transaction verification
         const response = await fetch(`${API_URL}/check-transaction`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(verificationPayload),
+            body: JSON.stringify({
+                txid,
+                amount: amount,
+                assetId,
+                recipientAddress,
+                orderId: sanitizeInput(note),
+            }),
             credentials: 'include', // Include cookies for authentication
         });
 
@@ -340,7 +335,7 @@ async function monitorPaymentStatus() {
             renderCart();
             return;
         }
-        if (result.success) {
+        if (result.completed) {
             sessionStorage.clear();
             confirm_checkout();
         } else {

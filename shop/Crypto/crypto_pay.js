@@ -96,7 +96,7 @@ async function monitorTransaction(txid) {
           transactionStatus.classList.add("success");
           const homeButton = document.getElementById("back-to-home");
 
-          const type = sessionStorage.getItem('type'); 
+          const type = sanitizeInput(sessionStorage.getItem('type')); 
 
           if (type === "cart") {
               if (homeButton) homeButton.style.display = "none";
@@ -181,14 +181,14 @@ setInterval(startTransactionMonitoring, 3000);
 
 // Redirect to home when button is clicked
 backToHomeButton.addEventListener("click", () => {
-  const type = sessionStorage.getItem('type');
-  confirm("Are you sure to cancel payment? If you have just paid, do not leave the page and wait to be redirected!");
-  if (type === 'cart'){
-    window.location.href = sanitizeURL("/shop/cart.html");;
-  }
-  else if (type === 'deposit'){
-    window.location.href = sanitizeURL("/shop/Dashboard/wallet.html");
-  }
-});
+    const type = sanitizeInput(sessionStorage.getItem('type')); 
+    confirm("Are you sure to cancel payment? If you have just paid, do not leave the page and wait to be redirected!");
+    if (type === 'cart'){
+        window.location.href = sanitizeURL("/shop/cart.html");;
+    }
+    else if (type === 'deposit'){
+        window.location.href = sanitizeURL("/shop/Dashboard/wallet.html");
+    }
+    });
 
 document.addEventListener("DOMContentLoaded", fetchTransactionDetails);
