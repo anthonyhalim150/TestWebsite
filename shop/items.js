@@ -156,7 +156,7 @@ async function clear_login() {
 
 // Fetch items from the backend
 async function fetchItems() {
-    const userID = getCookie(); // Get userID from cookies
+    const userID = await getCookie(); // Get userID from cookies
 
     try {
         const encodedUserID = encodeURIComponent(userID);
@@ -206,7 +206,6 @@ async function addToCart(itemID) {
         alert('Insufficient stock available.');
         return;
     }
-    console.log(userID);
     try {
         const response = await fetch(`${API_URL}/cart`, {
             method: 'POST',
@@ -445,7 +444,7 @@ if (searchBar) {
 // Fetch liked items on page load
 // Fetch liked items on page load
 async function fetchLikedItems() {
-    const currentUserID = getCookie(); // Use getCookie to fetch userID
+    const currentUserID = await getCookie(); // Use getCookie to fetch userID
     if (!currentUserID) {
         console.error("User not logged in.");
         return;
@@ -473,7 +472,7 @@ async function fetchLikedItems() {
 
 async function toggleLike(itemID) {
     const isLiked = likedItems.some(item => item.id === itemID);
-    const currentUserID = getCookie(); // Use getCookie for user authentication
+    const currentUserID = await getCookie(); // Use getCookie for user authentication
 
     // Sanitize the itemID to ensure it's safe
     const sanitizedItemID = sanitizeInput(itemID); // Sanitize itemID before making API calls
@@ -521,7 +520,7 @@ async function toggleLike(itemID) {
     }
 }
 async function loadUserSettings() {
-    const userID = getCookie(); // Fetch the userID using getCookie to align with your secure cookie handling.
+    const userID = await getCookie(); // Fetch the userID using getCookie to align with your secure cookie handling.
     if (!userID) return;
 
     const sanitizedUserID = sanitizeInput(userID); // Sanitize the userID to prevent XSS or unsafe characters

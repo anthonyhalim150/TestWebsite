@@ -6,7 +6,7 @@ let timerIntervals = []; // Store timers for auction items
 const fetchAuctionItems = async () => {
     try {
         // Retrieve the userID from cookies
-        const userID = getCookie();
+        const userID = await getCookie();
         if (!userID) {
             alert("You must be logged in to see your bids!");
             window.location.href = "login.html"; // Redirect to login page
@@ -300,7 +300,7 @@ const attachEventListeners = () => {
 
 async function get_balance() {
   try {
-      const userID = getCookie();
+      const userID = await getCookie();
 
       if (!userID) {
           console.error('User not authenticated. Redirecting to login.');

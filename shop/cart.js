@@ -1,6 +1,6 @@
 async function renderCart() {
     const cartContent = document.getElementById('cart-content');
-    const userID = getCookie(); // Securely fetch userID using getCookie()
+    const userID = await getCookie(); // Securely fetch userID using await getCookie()
 
     if (!cartContent || !userID) {
         console.error("User not authenticated or cart element missing.");
@@ -157,7 +157,7 @@ async function updateQuantity(itemID, stock) {
 }
 
 async function updateCart(itemID, newQuantity) {
-    const userID = getCookie(); // Securely fetch userID using getCookie()
+    const userID = await getCookie(); // Securely fetch userID using await getCookie()
 
     try {
         const response = await fetch(`${API_URL}/update-cart-item`, {
@@ -184,7 +184,7 @@ async function updateCart(itemID, newQuantity) {
 }
 
 async function removeItem(itemID) {
-    const userID = getCookie(); // Securely fetch userID using getCookie()
+    const userID = await getCookie(); // Securely fetch userID using await getCookie()
 
     let user_response = confirm('Are you sure to remove this item?');
     if (!user_response) {
@@ -217,7 +217,7 @@ async function removeItem(itemID) {
 
 
 async function clearCart() {
-    const userID = getCookie();
+    const userID = await getCookie();
 
 
 
@@ -242,7 +242,7 @@ async function clearCart() {
 }
 
 async function checkout(transactionAmount) {
-    const userID = getCookie();
+    const userID = await getCookie();
     sessionStorage.clear();
     const serverSecret = "OneTwoThreeOneTwoThrees"; // Replace with your server's secret
     const currentTime = new Date().toISOString();
@@ -277,7 +277,7 @@ function monitorPaymentStatus() {
 }
 
 async function confirm_checkout(){
-    const userID = getCookie();
+    const userID = await getCookie();
     try {
         const response = await fetch(`${API_URL}/checkout`, {
             method: 'POST',

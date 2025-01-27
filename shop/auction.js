@@ -5,7 +5,7 @@ let timerIntervals = []; // Store timers for auction items
 
 const fetchAuctionItems = async () => {
   try {
-      const userID = getCookie(); // Securely fetch userID using getCookie()
+      const userID = await getCookie(); // Securely fetch userID using await getCookie()
 
       if (!userID) {
           console.error("User not authenticated.");
@@ -72,7 +72,7 @@ const fetchHighestBid = async (itemId) => {
 
 // Place a bid
 const placeBid = async (itemId, bidAmount) => {
-  const userId = getCookie(); // Securely fetch userID using getCookie()
+  const userId = await getCookie(); // Securely fetch userID using await getCookie()
 
   try {
       const sanitizedItemId = sanitizeInput(itemId); // Sanitize itemId
@@ -322,7 +322,7 @@ const attachEventListeners = () => {
   document.getElementById("sort-select").addEventListener("change", applySearchAndSort);
 };
 async function get_balance() {
-  const userID = getCookie(); // Securely fetch userID using getCookie()
+  const userID = await getCookie(); // Securely fetch userID using await getCookie()
 
   if (!userID) {
       console.error("User not authenticated.");
