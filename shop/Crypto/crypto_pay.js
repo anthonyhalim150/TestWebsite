@@ -90,6 +90,7 @@ async function monitorTransaction(txid) {
       });
 
       const data = await response.json();
+      console.log(data);
 
       if (data.completed) {
           transactionStatus.textContent = `Transaction confirmed! Amount: ${amount / Math.pow(10, 2)} CSP. Redirecting...`;
@@ -126,10 +127,6 @@ async function getLatestTransactionId() {
           method: "GET",
           credentials: "include", // Include cookies in the request
       });
-
-      if (!transactionDetailsResponse.ok) {
-          throw new Error("Failed to fetch transaction details.");
-      }
 
       const { address: recipientAddress } = await transactionDetailsResponse.json();
       const sanitizedAddress = sanitizeInput(recipientAddress);

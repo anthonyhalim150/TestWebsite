@@ -198,7 +198,7 @@ async function confirm_deposit() {
                 alert(`Deposit failed: ${sanitizeInput(result.error)}`);
             }
         } else {
-            alert('Transaction validation failed. Please try again.');
+           return;
         }
     } catch (error) {
         return;
