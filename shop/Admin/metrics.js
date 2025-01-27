@@ -15,7 +15,7 @@ async function fetchFilteredMetrics() {
     }
 
     const params = new URLSearchParams({ startDate, endDate }).toString();
-    const url = `${API_URL}?${params}`;
+    const url = `${API_URL + '/shop-metrics'}?${params}`;
 
     try {
         const response = await fetch(url, {
