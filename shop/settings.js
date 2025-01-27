@@ -13,6 +13,7 @@ async function applyInitialSettings() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID }),
+            credentials: 'include',
         });
 
         const data = await response.json();
@@ -48,6 +49,7 @@ async function saveSettings() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID, dark_mode: isDarkMode, color_scheme: newColorScheme }),
+            credentials: 'include',
         });
 
         const data = await response.json();

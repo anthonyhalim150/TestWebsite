@@ -35,6 +35,7 @@ async function submitComment(event) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(newComment),
+            credentials: 'include',
         });
 
         const result = await response.json();

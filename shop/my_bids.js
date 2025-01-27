@@ -50,7 +50,11 @@ const fetchAuctionItems = async () => {
 
 const fetchHighestBid = async (itemId) => {
   try {
-      const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${encodeURIComponent(itemId)}`);
+        const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${encodeURIComponent(itemId)}`, {
+            method: "GET",
+            credentials: "include", // Ensures cookies are included in the request
+        });
+    
       if (!response.ok) {
           throw new Error(`Failed to fetch highest bid: ${response.statusText}`);
       }

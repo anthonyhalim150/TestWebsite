@@ -159,8 +159,10 @@ async function fetchItems() {
     const userID = await getCookie(); // Get userID from cookies
 
     try {
-        const encodedUserID = encodeURIComponent(userID);
-        const response = await fetch(`${API_URL}/items?userID=${encodedUserID}`);
+        const response = await fetch(`${API_URL}/items?userID=${encodeURIComponent(userID)}`, {
+            method: "GET",
+            credentials: "include", // Include cookies with the request
+        });
         const data = await response.json();
 
         if (data.success && data.items) {
@@ -178,7 +180,10 @@ async function fetchItems() {
 // Fetch cart items to keep track of quantities
 async function fetchCartItems(userID) {
     try {
-        const response = await fetch(`${API_URL}/cart-items?userID=${userID}`);
+        const response = await fetch(`${API_URL}/cart-items?userID=${encodeURIComponent(userID)}`, {
+            method: "GET",
+            credentials: "include", // Include cookies with the request
+        });        
         const data = await response.json();
 
         if (data.success && data.cartItems) {
@@ -454,7 +459,10 @@ async function fetchLikedItems() {
         // Ensure the userID is encoded before inserting it into the URL
         const encodedUserID = encodeURIComponent(currentUserID); 
 
-        const response = await fetch(`${API_URL}/like-list?userID=${encodedUserID}`);
+        const response = await fetch(`${API_URL}/like-list?userID=${encodedUserID}`, {
+            method: "GET",
+            credentials: "include", // Include cookies with the request for authentication
+        });        
         const data = await response.json();
         if (data.success) {
             likedItems = data.likedItems.map(item => ({
@@ -484,6 +492,7 @@ async function toggleLike(itemID) {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userID: currentUserID, itemID: sanitizedItemID }),
+                credentials: "include",
             });
 
             const data = await response.json();
@@ -502,6 +511,7 @@ async function toggleLike(itemID) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userID: currentUserID, itemID: sanitizedItemID }),
+                credentials: "include",
             });
 
             const data = await response.json();
@@ -530,6 +540,7 @@ async function loadUserSettings() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID: sanitizedUserID }), // Send sanitized userID
+            credentials: "include",
         });
 
         const data = await response.json();

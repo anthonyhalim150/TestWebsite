@@ -168,6 +168,7 @@ async function updateCart(itemID, newQuantity) {
                 itemID: sanitizeInput(itemID),
                 quantity: sanitizeInput(newQuantity),
             }),
+            credentials: "include",
         });
 
         const result = await response.json();
@@ -199,6 +200,7 @@ async function removeItem(itemID) {
                 userID: sanitizeInput(userID),
                 itemID: sanitizeInput(itemID),
             }),
+            credentials: "include",
         });
 
         const result = await response.json();
@@ -225,7 +227,8 @@ async function clearCart() {
         const response = await fetch(`${API_URL}/clear-cart`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID })
+            body: JSON.stringify({ userID }),
+            credentials: "include",
         });
         const result = await response.json();
 
@@ -282,7 +285,8 @@ async function confirm_checkout(){
         const response = await fetch(`${API_URL}/checkout`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID })
+            body: JSON.stringify({ userID }),
+            credentials: "include",
         });
         const result = await response.json();
 
