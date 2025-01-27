@@ -214,6 +214,7 @@ async function addToCart(itemID) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ userID, itemID, quantity }),
+            credentials: "include",
         });
 
         const result = await response.json();
