@@ -78,7 +78,7 @@ function check_deposit_form() {
                 const result = await response.json();
 
                 if (result.success) {
-                    window.location.href = sanitizeURL("/shop/Crypto/crypto_payment.html"); // Redirect safely
+                    window.location.href = sanitizeURL("/shop/Crypto/crypto_pay.html"); // Redirect safely
                 } else {
                     alert('Failed to initiate transaction: ' + result.error);
                 }

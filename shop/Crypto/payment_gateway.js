@@ -1,13 +1,11 @@
-const API_URL_USER = 'https://users-723848267249.us-central1.run.app'; 
 
-// Fetch the user's wallet balance
 async function get_balance() {
     const userID = localStorage.getItem('userID');
     const amount = sessionStorage.getItem('transaction_amount');
     const formattedTotal = `${parseFloat(amount).toLocaleString('en-US') || 0} CSP`
     document.getElementById('current-payable').textContent = formattedTotal;
     try {
-        const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(userID)}`);
+        const response = await fetch(`${API_URL_USER}/get-wallet-user?userID=${encodeURIComponent(userID)}`);
         if (response.ok) {
             const data = await response.json();
             if (data.success) {

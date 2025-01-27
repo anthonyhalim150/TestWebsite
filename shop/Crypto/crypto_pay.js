@@ -2,7 +2,7 @@
 const qrCodeCanvas = document.getElementById("qr-code");
 const transactionStatus = document.getElementById("transaction-status");
 const backToHomeButton = document.getElementById("back-to-home");
-const API_URL = "https://anthonyhalim-150-723848267249.us-central1.run.app";
+
 
 async function fetchTransactionDetails() {
   try {
