@@ -96,7 +96,7 @@ async function monitorTransaction(txid) {
           transactionStatus.classList.add("success");
           const homeButton = document.getElementById("back-to-home");
 
-          const type = sessionStorage.getItem('type'); // Securely retrieve type from cookies
+          const type = sessionStorage.getItem('type'); 
 
           if (type === "cart") {
               if (homeButton) homeButton.style.display = "none";

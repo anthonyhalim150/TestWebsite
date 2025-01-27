@@ -81,12 +81,12 @@ async function confirmPayment() {
             alert('Invalid payment amount.');
             return;
         }
-
+        const userID = await getCookie();
         // Process the payment
-        const response = await fetch(`${API_URL_USER}/wallet-checkout`, {
+        const response = await fetch(`${API_URL_USER}/wallet-checkout-user`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID: await getCookie(), amount: sanitizedAmount }),
+            body: JSON.stringify({ userID: userID, amount: sanitizedAmount }),
             credentials: 'include', // Include cookies for authentication
         });
 

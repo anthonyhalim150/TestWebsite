@@ -280,38 +280,79 @@ async function checkout(transactionAmount) {
     }
 }
 
-function monitorPaymentStatus() {
-    const interval = setInterval(async () => {
-        try {
-            // Fetch the payment status securely using server cookies
-            const response = await fetch(`${API_URL}/get-transaction-details`, {
-                method: "GET",
-                credentials: "include", // Include cookies for authentication
-            });
+async function confirm_payment_status() {
+    try {
+        // Fetch transaction details from the server
+        const transactionDetailsResponse = await fetch(`${API_URL}/get-all-transactions`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies for authentication
+        });
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch transaction details.");
-            }
-
-            const { payment_status} = await response.json();
-
-            // Sanitize fetched data
-            const sanitizedPaymentStatus = sanitizeInput(payment_status);
-            if (sanitizedPaymentStatus === "success") {
-                clearInterval(interval);
-                confirm_checkout();
-            } else if (sanitizedPaymentStatus === "failed") {
-                clearInterval(interval);
-                alert("Payment failed. Please try again.");
-            } else {
-                renderCart();
-                clearInterval(interval);
-            }
-        } catch (error) {
-            clearInterval(interval);
-            console.error("Error monitoring payment status:", error);
+        
+        if (!transactionDetailsResponse.ok) {
+            throw new Error('Failed to fetch transaction details from the server.');
         }
-    }, 500);
+
+        // Parse response to extract all required variables
+        const { txid, amount, assetId, recipientAddress, note } = await transactionDetailsResponse.json();
+
+
+        // Validate required fields
+        if (!txid || !amount || !assetId || !recipientAddress || !note) {
+            alert('Missing required transaction details.');
+            return;
+        }
+
+
+        const asset_decimal = 2;
+        const calculatedAmount = parseFloat(amount) * Math.pow(10, asset_decimal);
+
+        // Prepare the payload for transaction verification
+        const verificationPayload = {
+            txid,
+            amount:calculatedAmount,
+            assetId,
+            recipientAddress,
+            orderId: `order_${sanitizeInput(note)} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
+        };
+
+        // Perform server-side transaction verification
+        const response = await fetch(`${API_URL}/check-transaction`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(verificationPayload),
+            credentials: 'include', // Include cookies for authentication
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error during payment confirmation:', error);
+        alert('An error occurred while confirming the payment. Please try again.');
+    }
+}
+
+async function monitorPaymentStatus() {
+    try {
+        const result = await confirm_payment_status();
+        if (!result){
+            sessionStorage.clear();
+            renderCart();
+            return;
+        }
+        if (result.success) {
+            sessionStorage.clear();
+            confirm_checkout();
+        } else {
+            sessionStorage.clear();
+            renderCart();
+        }
+    } catch (error) {
+        sessionStorage.clear();
+        console.error("Error monitoring payment status:", error);
+    }
 }
 
 async function confirm_checkout() {
@@ -324,7 +365,6 @@ async function confirm_checkout() {
             credentials: "include",
         });
         const result = await response.json();
-
         if (result.success) {
             alert("Checkout Successful!");
             renderCart(); // Update cart UI
