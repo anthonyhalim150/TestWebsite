@@ -33,7 +33,6 @@ if (sign_up_form) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(user),
-                credentials: "include", // Include cookies for session tracking
             });
 
             const result = await response.json();

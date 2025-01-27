@@ -67,8 +67,8 @@ async function getCookie(path ="/shop/login.html") {
     const userID = await getUserID();
     const currentPath = window.location.pathname;
     if (!userID && !currentPath.endsWith("login.html")) {
-        console.error("Login Expired. Redirecting to login....");
         window.location.href = sanitizeURL(path); // Redirect safely
+        alert("Login Expired. Redirecting to login....");
     }
     return userID;
 }
