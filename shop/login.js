@@ -1,7 +1,7 @@
 document.getElementById("login_form").addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const username = document.getElementById("username").value.trim();
+    const username = sanitizeInput(document.getElementById("username").value.trim()); // Sanitize username
     const password = document.getElementById("password").value;
 
     try {
@@ -34,7 +34,7 @@ async function checkLoginStatus() {
 
         if (response.ok) {
             await response.json();
-            window.location.href = "./index.html"; // Redirect to the dashboard
+            window.location.href = "index.html"; // Redirect to the dashboard
         } else {
             alert("User not verified. Please log in again.");
         }

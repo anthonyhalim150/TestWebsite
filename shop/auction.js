@@ -4,70 +4,109 @@ let timerIntervals = []; // Store timers for auction items
 const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 
-// Fetch auction items from the server
 const fetchAuctionItems = async () => {
   try {
-    const userID = localStorage.getItem('userID');
-    const encodedUserID = encodeURIComponent(userID);
-    const response = await fetch(`${API_URL}/auction?userID=${encodedUserID}`);
-    const data = await response.json();
+      const userID = getCookie(); // Securely fetch userID using getCookie()
 
-    auctionItems = data.items.map(item => ({
-      id: item.id,
-      name: item.item_name,
-      stock: item.stock,
-      description: item.description,
-      category: item.category,
-      image: item.image,
-      startingPrice: item.starting_price,
-      duration: item.duration,
-      startingTime: new Date(item.starting_time), // Convert to Date object
-    }));
+      if (!userID) {
+          console.error("User not authenticated.");
+          return;
+      }
 
-    // Initialize filtered items with all auction items
-    filteredItems = [...auctionItems];
+      const encodedUserID = encodeURIComponent(sanitizeInput(userID)); // Sanitize and encode userID
+      const response = await fetch(`${API_URL}/auction?userID=${encodedUserID}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies with the request
+      });
 
-    renderAuctionItems();
+      const data = await response.json();
+
+      if (data && data.items) {
+          auctionItems = data.items.map(item => ({
+              id: sanitizeInput(item.id),
+              name: sanitizeInput(item.item_name),
+              stock: sanitizeInput(item.stock),
+              description: sanitizeInput(item.description),
+              category: sanitizeInput(item.category),
+              image: sanitizeInput(item.image),
+              startingPrice: sanitizeInput(item.starting_price),
+              duration: sanitizeInput(item.duration),
+              startingTime: new Date(item.starting_time), // Convert to Date object
+          }));
+
+          // Initialize filtered items with all auction items
+          filteredItems = [...auctionItems];
+
+          renderAuctionItems();
+      } else {
+          console.error("Failed to fetch auction items: Invalid data structure.");
+      }
   } catch (error) {
-    console.error("Error fetching auction items:", error);
+      console.error("Error fetching auction items:", error);
   }
 };
 
-// Fetch current highest bid for a specific item
 const fetchHighestBid = async (itemId) => {
   try {
-    const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${itemId}`);
-    const data = await response.json();
-    return data.length > 0 ? data[0] : { bid_amount: 0, username: null }; // Return the first item or a default object
+      const sanitizedItemId = sanitizeInput(itemId); // Sanitize itemId
+      const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${encodeURIComponent(sanitizedItemId)}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies with the request
+      });
+
+      const data = await response.json();
+
+      if (Array.isArray(data) && data.length > 0) {
+          return {
+              bid_amount: sanitizeInput(data[0].bid_amount),
+              username: sanitizeInput(data[0].username),
+          };
+      }
+
+      return { bid_amount: 0, username: null }; // Default object if no data
   } catch (error) {
-    console.error("Error fetching highest bid:", error);
-    return 0;
+      console.error("Error fetching highest bid:", error);
+      return { bid_amount: 0, username: null }; // Default object for error handling
   }
 };
+
 
 // Place a bid
 const placeBid = async (itemId, bidAmount) => {
-  const userId = localStorage.getItem("userID");
-  if (!userId){
-    alert("You must be logged in to bid!");
-    return;
-  }
+  const userId = getCookie(); // Securely fetch userID using getCookie()
+
   try {
-    const response = await fetch(`${API_URL}/bids`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ auction_item_id: itemId, user_id: userId, bid_amount: bidAmount }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      alert("Bid placed successfully!");
-      await get_balance();
-      await fetchAuctionItems(); // Re-fetch and re-render auction items
-    } else {
-      alert(data.message || "Failed to place bid.");
-    }
+      const sanitizedItemId = sanitizeInput(itemId); // Sanitize itemId
+      const sanitizedBidAmount = parseFloat(bidAmount); // Parse and sanitize bid amount
+
+      if (isNaN(sanitizedBidAmount) || sanitizedBidAmount <= 0) {
+          alert("Invalid bid amount. Please enter a valid number.");
+          return;
+      }
+
+      const response = await fetch(`${API_URL}/bids`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              auction_item_id: sanitizedItemId,
+              user_id: sanitizeInput(userId),
+              bid_amount: sanitizedBidAmount,
+          }),
+          credentials: "include", // Ensure cookies are sent with the request
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+          alert("Bid placed successfully!");
+          await get_balance(); // Update user balance
+          await fetchAuctionItems(); // Re-fetch and re-render auction items
+      } else {
+          alert(sanitizeInput(data.message) || "Failed to place bid.");
+      }
   } catch (error) {
-    console.error("Error placing bid:", error);
+      console.error("Error placing bid:", error);
+      alert("An error occurred while placing the bid. Please try again later.");
   }
 };
 
@@ -77,160 +116,240 @@ const renderAuctionItems = async (items = filteredItems) => {
   auctionContainer.innerHTML = ""; // Clear existing items
 
   for (const item of items) {
-    const data = await fetchHighestBid(item.id);
-    const highestBid = data.bid_amount || 0;
-    const itemElement = document.createElement("div");
-    itemElement.classList.add("auction-item");
-    const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
-    const user = data.username || 'None'; //Jangan sampe None
-    const highestBidText = highestBid > 0 ? `$${formattedBid}<br>Submitted by ${user}` : "No bids yet";
-    const startingPrice = item.startingPrice || 0; 
-    const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');
-    itemElement.innerHTML = `
-      <img src="${item.image}" alt="${item.name}" class="item-image">
-      <h3>${item.name}</h3>
-      <p>Starting Price: $${formattedPrice}</p>
-      <p>Current Highest Bid: ${highestBidText}</p>
-      <p class="timer" id="timer-${item.id}"></p>
-      <button class="bid-btn" id="bid-btn-${item.id}">Place Bid</button>
-    `;
+      try {
+          // Fetch the highest bid securely
+          const data = await fetchHighestBid(sanitizeInput(item.id));
+          const highestBid = parseFloat(data.bid_amount || 0);
+          const user = sanitizeInput(data.username || "None"); // Sanitize username
+          const formattedBid = highestBid.toLocaleString("en-US"); // Format bid amount
+          const highestBidText =
+              highestBid > 0
+                  ? `$${formattedBid}<br>Submitted by ${user}`
+                  : "No bids yet";
 
-    auctionContainer.appendChild(itemElement);
+          const startingPrice = parseFloat(item.startingPrice || 0);
+          const formattedPrice = startingPrice.toLocaleString("en-US"); // Format starting price
 
-    startItemTimer(item); // Start countdown for each item
+          // Create auction item element
+          const itemElement = document.createElement("div");
+          itemElement.classList.add("auction-item");
+          itemElement.innerHTML = `
+              <img src="${sanitizeInput(item.image)}" alt="${sanitizeInput(item.name)}" class="item-image">
+              <h3>${sanitizeInput(item.name)}</h3>
+              <p>Starting Price: $${formattedPrice}</p>
+              <p>Current Highest Bid: ${highestBidText}</p>
+              <p class="timer" id="timer-${sanitizeInput(item.id)}"></p>
+              <button class="bid-btn" id="bid-btn-${sanitizeInput(item.id)}">Place Bid</button>
+          `;
 
-    const bid_button =  document.getElementById(`bid-btn-${item.id}`);
-    if (bid_button){
-      bid_button.addEventListener("click", (event) => {
-        event.stopPropagation(); 
-        const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);//Get time converts it to miliseconds(Since UNIX epoch 1 JAN 1970)
-        const currentTime = new Date();
-        const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
-        if (timeLeft < 1){
-          alert("Auction has already ended! Cannot add bid!");
-          return;
-        }
-        const bidAmount = prompt("Enter your bid amount:");
-        if (bidAmount > 499999999999.99){
-          alert("Bid amount too high! Please enter a number below 500 billion!");
-          return;
-        }
-        if (bidAmount && (parseFloat(bidAmount) > parseFloat(highestBid)) && parseFloat(bidAmount) > parseFloat(startingPrice)) {
-          placeBid(item.id, parseFloat(bidAmount));
-        } 
-        else {
-          alert("Bid amount must be higher than the current highest bid.");
-        }
-      });
-    }
-    // Add click event to display product overview
-    itemElement.addEventListener("click", () => showProductOverview(item, highestBid, user));
+          auctionContainer.appendChild(itemElement);
+
+          // Start countdown timer for the item
+          startItemTimer(item);
+
+          // Add event listener to bid button
+          const bidButton = document.getElementById(`bid-btn-${sanitizeInput(item.id)}`);
+          if (bidButton) {
+              bidButton.addEventListener("click", (event) => {
+                  event.stopPropagation();
+
+                  // Calculate remaining auction time
+                  const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);
+                  const currentTime = new Date();
+                  const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
+
+                  if (timeLeft < 1) {
+                      alert("Auction has already ended! Cannot place a bid!");
+                      return;
+                  }
+
+                  // Prompt user for bid amount
+                  const bidAmount = prompt("Enter your bid amount:");
+                  const sanitizedBidAmount = parseFloat(bidAmount);
+
+                  // Validate bid amount
+                  if (isNaN(sanitizedBidAmount)) {
+                      alert("Invalid bid amount. Please enter a valid number.");
+                      return;
+                  }
+
+                  if (sanitizedBidAmount > 499999999999.99) {
+                      alert("Bid amount too high! Please enter a number below 500 billion!");
+                      return;
+                  }
+
+                  if (
+                      sanitizedBidAmount > highestBid &&
+                      sanitizedBidAmount > startingPrice
+                  ) {
+                      placeBid(item.id, sanitizedBidAmount); // Place the bid securely
+                  } else {
+                      alert("Bid amount must be higher than the current highest bid and starting price.");
+                  }
+              });
+          }
+
+          // Add event listener to display product overview
+          itemElement.addEventListener("click", () =>
+              showProductOverview(item, highestBid, user)
+          );
+      } catch (error) {
+          console.error(`Error rendering item ${item.id}:`, error);
+      }
   }
 };
 
 // Start timer for a specific auction item
+
 const startItemTimer = (item) => {
-  const timerElement = document.getElementById(`timer-${item.id}`);
-  const endTime = new Date(item.startingTime.getTime() + item.duration * 1000);//Get time converts it to miliseconds(Since UNIX epoch 1 JAN 1970)
+  const timerElement = document.getElementById(`timer-${sanitizeInput(item.id)}`); // Sanitize item ID
+  const endTime = new Date(item.startingTime.getTime() + item.duration * 1000); // Calculate end time
 
   const interval = setInterval(() => {
-    const currentTime = new Date();
-    const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000));
+      try {
+          const currentTime = new Date();
+          const timeLeft = Math.max(0, Math.floor((endTime - currentTime) / 1000)); // Calculate remaining time
 
-    if (timeLeft <= 0) {
-      clearInterval(interval);
-      timerElement.textContent = "Auction ended";
-      fetchAuctionItems();
-    } 
-    else {
-      const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-      const seconds = (timeLeft % 60).toString().padStart(2, "0");
-      timerElement.textContent = `${minutes}:${seconds}`;
-    }
+          if (timeLeft <= 0) {
+              clearInterval(interval);
+              timerElement.textContent = "Auction ended";
+              fetchAuctionItems(); // Re-fetch auction items
+          } else {
+              const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+              const seconds = (timeLeft % 60).toString().padStart(2, "0");
+              timerElement.textContent = `${minutes}:${seconds}`; // Update timer display
+          }
+      } catch (error) {
+          console.error(`Error updating timer for item ${item.id}:`, error);
+          clearInterval(interval); // Stop the timer if an error occurs
+      }
   }, 1000);
 
-  timerIntervals.push(interval);
+  timerIntervals.push(interval); // Track the interval for cleanup
 };
 
+// Show product overview in a popup
 // Show product overview in a popup
 const showProductOverview = (item, highestBid, user) => {
   const overviewSection = document.getElementById("product-overview");
   overviewSection.style.display = "block";
 
-  document.getElementById("product-name").value = item.name;
-  const startingPrice = item.startingPrice || 0; 
-  const formattedPrice = parseFloat(startingPrice).toLocaleString('en-US');//Turn from 7000 to 7,000
+  // Sanitize and populate product details
+  document.getElementById("product-name").value = sanitizeInput(item.name);
+  const startingPrice = parseFloat(item.startingPrice || 0);
+  const formattedPrice = startingPrice.toLocaleString("en-US"); // Format starting price
   document.getElementById("product-price").value = formattedPrice;
-  document.getElementById("product-stock").value = item.stock;
-  document.getElementById("product-description").value = item.description;
-  document.getElementById("product-category").value = item.category;
+  document.getElementById("product-stock").value = sanitizeInput(item.stock);
+  document.getElementById("product-description").value = sanitizeInput(item.description);
+  document.getElementById("product-category").value = sanitizeInput(item.category);
 
+  // Handle product image
   const productImage = document.getElementById("product-image");
-  productImage.src = item.image || "placeholder.jpg";
+  productImage.src = sanitizeInput(item.image || "placeholder.jpg");
 
+  // Create and append highest bid information
   const highestBidElement = document.createElement("p");
-  const formattedBid = parseFloat(highestBid).toLocaleString('en-US');//Turn from 7000 to 7,000
-  const highestBidText = formattedBid > 0 ? `$${formattedBid} by ${user}` : "No bids yet";
-  
+  const formattedBid = parseFloat(highestBid || 0).toLocaleString("en-US");
+  const sanitizedUser = sanitizeInput(user || "No username"); // Sanitize username
+  const highestBidText = formattedBid > 0
+      ? `$${formattedBid} by ${sanitizedUser}`
+      : "No bids yet";
+
   highestBidElement.textContent = `Current Highest Bid: ${highestBidText}`;
   highestBidElement.style.marginTop = "10px";
 
   const detailsSection = document.querySelector(".details");
   detailsSection.appendChild(highestBidElement);
 
-  document.querySelector(".close-btn").addEventListener("click", () => {
-    overviewSection.style.display = "none";
-    highestBidElement.remove(); // Clean up the appended element??
+  // Handle close button click
+  const closeButton = document.querySelector(".close-btn");
+  closeButton.addEventListener("click", () => {
+      overviewSection.style.display = "none";
+      highestBidElement.remove(); // Remove dynamically created element
   });
 };
 
+
 // Apply search and sort together
 const applySearchAndSort = () => {
-  const searchInput = document.getElementById("search-input").value.toLowerCase();
-  const sortCriteria = document.getElementById("sort-select").value;
+  const searchInputElement = document.getElementById("search-input");
+  const sortSelectElement = document.getElementById("sort-select");
 
-  filteredItems = auctionItems.filter(item =>
-    item.name.toLowerCase().includes(searchInput) ||
-    item.description.toLowerCase().includes(searchInput)
-  );
-
-  switch (sortCriteria) {
-    case "price-asc":
-      filteredItems.sort((a, b) => a.startingPrice - b.startingPrice);
-      break;
-    case "price-desc":
-      filteredItems.sort((a, b) => b.startingPrice - a.startingPrice);
-      break;
-    case "name-asc":
-      filteredItems.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case "name-desc":
-      filteredItems.sort((a, b) => b.name.localeCompare(a.name));
-      break;
+  if (!searchInputElement || !sortSelectElement) {
+      console.error("Search input or sort select element is missing.");
+      return;
   }
 
+  // Retrieve and sanitize user input
+  const searchInput = sanitizeInput(searchInputElement.value.toLowerCase());
+  const sortCriteria = sanitizeInput(sortSelectElement.value);
+
+  // Filter auction items based on sanitized search input
+  filteredItems = auctionItems.filter(item => {
+      const sanitizedItemName = sanitizeInput(item.name.toLowerCase());
+      const sanitizedItemDescription = sanitizeInput(item.description.toLowerCase());
+      return (
+          sanitizedItemName.includes(searchInput) ||
+          sanitizedItemDescription.includes(searchInput)
+      );
+  });
+
+  // Sort filtered items based on sanitized sort criteria
+  switch (sortCriteria) {
+      case "price-asc":
+          filteredItems.sort((a, b) => a.startingPrice - b.startingPrice);
+          break;
+      case "price-desc":
+          filteredItems.sort((a, b) => b.startingPrice - a.startingPrice);
+          break;
+      case "name-asc":
+          filteredItems.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+      case "name-desc":
+          filteredItems.sort((a, b) => b.name.localeCompare(a.name));
+          break;
+      default:
+          console.error(`Unknown sort criteria: ${sortCriteria}`);
+  }
+
+  // Re-render auction items with filtered and sorted results
   renderAuctionItems();
 };
+
 
 // Attach event listeners for search and sort
 const attachEventListeners = () => {
   document.getElementById("search-input").addEventListener("input", applySearchAndSort);
   document.getElementById("sort-select").addEventListener("change", applySearchAndSort);
 };
-
 async function get_balance() {
-  const userID = localStorage.getItem('userID');
+  const userID = getCookie(); // Securely fetch userID using getCookie()
+
+  if (!userID) {
+      console.error("User not authenticated.");
+      document.getElementById('current-balance').textContent = 'Error loading balance';
+      return;
+  }
+
   try {
-      const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(userID)}`);
+      const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(sanitizeInput(userID))}`, {
+          method: 'GET',
+          credentials: 'include', // Ensure cookies are included in the request
+      });
+
       if (response.ok) {
           const data = await response.json();
           if (data.success) {
-              const originalDisplay = document.getElementById('current-balance').style.display;
-              document.getElementById('current-balance').textContent = `${data.wallet || 0} CSP`;
-              document.getElementById('current-balance').style.display = "none"; // Force re-render
-              document.getElementById('current-balance').style.display = originalDisplay;
+              const sanitizedBalance = sanitizeInput(data.wallet || 0);
+              const balanceElement = document.getElementById('current-balance');
+
+              if (balanceElement) {
+                  balanceElement.textContent = `${sanitizedBalance} CSP`;
+              } else {
+                  console.error("Balance element not found in the DOM.");
+              }
           } else {
-              console.error('Error fetching wallet:', data.error);
+              console.error('Error fetching wallet:', sanitizeInput(data.error));
               document.getElementById('current-balance').textContent = 'Error loading balance';
           }
       } else {

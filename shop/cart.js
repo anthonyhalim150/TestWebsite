@@ -1,11 +1,18 @@
 async function renderCart() {
     const cartContent = document.getElementById('cart-content');
-    const userID = localStorage.getItem('userID');
+    const userID = getCookie(); // Securely fetch userID using getCookie()
 
-    if (!cartContent || !userID) return;
+    if (!cartContent || !userID) {
+        console.error("User not authenticated or cart element missing.");
+        return;
+    }
 
     try {
-        const response = await fetch(`${API_URL}/cart-items?userID=${userID}`);
+        const response = await fetch(`${API_URL}/cart-items?userID=${encodeURIComponent(userID)}`, {
+            method: 'GET',
+            credentials: 'include', // Ensure cookies are included in the request
+        });
+
         const result = await response.json();
 
         if (!result.success || !result.cartItems || result.cartItems.length === 0) {
@@ -19,30 +26,35 @@ async function renderCart() {
         }
 
         const cartItems = result.cartItems;
-        //You can use the functions from another js file as long as your html has it.
-        const total_amount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+        // Calculate total amount
+        const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+        // Render cart items
         cartContent.innerHTML = `
             <ul class="list-group">
                 ${cartItems.map(item => {
                     const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
+                    const sanitizedName = sanitizeInput(item.name);
+                    const sanitizedImage = sanitizeInput(item.image);
                     return `
-                    <div class="card" onclick="showItemOverview(${item.id})">
+                    <div class="card" onclick="showItemOverview('${sanitizeInput(item.id)}')">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
-                                <img src="${item.image}" alt="${item.name}" class="img-thumbnail me-3" style="width: 50px; height: 50px;">
+                                <img src="${sanitizedImage}" alt="${sanitizedName}" class="img-thumbnail me-3" style="width: 50px; height: 50px;">
                                 <div>
-                                    <p class="mb-0"><strong>${item.name}</strong></p>
+                                    <p class="mb-0"><strong>${sanitizedName}</strong></p>
                                     <small>Price: $${formattedPrice}</small>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center">
                                 <div class="quantity-container me-3">
                                     <div class="quantity-control">
-                                        <button class="btn btn-secondary" onclick="handleClick(event, '${item.id}', -1, ${item.stock})">-</button>
-                                        <input type="number" id="quantity-${item.id}" value="${item.quantity}" min="0" max="${item.stock}" 
+                                        <button class="btn btn-secondary" onclick="handleClick(event, '${sanitizeInput(item.id)}', -1, ${sanitizeInput(item.stock)})">-</button>
+                                        <input type="number" id="quantity-${sanitizeInput(item.id)}" value="${sanitizeInput(item.quantity)}" min="0" max="${sanitizeInput(item.stock)}" 
                                             class="quantity-input" onclick="event.stopPropagation();" 
-                                            onchange="updateQuantity('${item.id}', ${item.stock})">
-                                        <button class="btn btn-secondary" onclick="handleClick(event, '${item.id}', 1, ${item.stock})">+</button>
+                                            onchange="updateQuantity('${sanitizeInput(item.id)}', ${sanitizeInput(item.stock)})">
+                                        <button class="btn btn-secondary" onclick="handleClick(event, '${sanitizeInput(item.id)}', 1, ${sanitizeInput(item.stock)})">+</button>
                                     </div>
                                 </div>
                                 <div class="price-container me-3">
@@ -50,7 +62,7 @@ async function renderCart() {
                                         $${(item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                 </div>
-                                <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); removeItem('${item.id}')">Remove All</button>
+                                <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); removeItem('${sanitizeInput(item.id)}')">Remove All</button>
                             </div>
                         </li>
                     </div>
@@ -58,13 +70,11 @@ async function renderCart() {
                 }).join('')}
             </ul>
             <div class="mt-3 text-end">
-                <h4>Total: $${
-                    total_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h4>
+                <h4>Total: $${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h4>
                 <button class="btn btn-warning me-3" onclick="clearCart()">Clear Cart</button>
-                <button class="btn btn-success" onclick="checkout(${total_amount})">Checkout</button>
+                <button class="btn btn-success" onclick="checkout(${totalAmount})">Checkout</button>
             </div>
         `;
-
     } catch (error) {
         console.error('Error fetching cart:', error);
         cartContent.innerHTML = `<p class="text-danger">Failed to load cart. Please try again later.</p>`;
@@ -92,55 +102,72 @@ function handleClick(event ,itemId, change, stock) {
 
 
 
-async function changeQuantity(itemID, delta, stock) {//From +-
-    const quantityInput = document.getElementById(`quantity-${itemID}`);
-    const newQuantity = parseInt(quantityInput.value) + delta;
+// Function to change quantity (triggered by + / - buttons)
+async function changeQuantity(itemID, delta, stock) {
+    try {
+        const quantityInput = document.getElementById(`quantity-${sanitizeInput(itemID)}`);
+        const newQuantity = parseInt(quantityInput.value) + delta;
 
-    if (newQuantity < 0 || newQuantity > stock) return;
+        // Validate new quantity
+        if (isNaN(newQuantity) || newQuantity < 0 || newQuantity > stock) return;
 
-    quantityInput.value = newQuantity;
-    if (newQuantity === 0){
-        const removed = await removeItem(itemID); // Await cannot use let, must use const
-        if (!removed){
-            quantityInput.value = 1; 
+        quantityInput.value = newQuantity;
+
+        if (newQuantity === 0) {
+            const removed = await removeItem(itemID); // Remove item if quantity is 0
+            if (!removed) {
+                quantityInput.value = 1; // Reset to 1 if removal fails
+            }
+        } else {
+            await updateCart(itemID, newQuantity); // Update cart with new quantity
         }
-    }
-    else{
-        await updateCart(itemID, newQuantity);
+    } catch (error) {
+        console.error("Error in changeQuantity:", error);
     }
 }
 
-
+// Function to update quantity (triggered by manual input change)
 async function updateQuantity(itemID, stock) {
-    const quantityInput = document.getElementById(`quantity-${itemID}`);
-    const newQuantity = parseInt(quantityInput.value);
-    if (newQuantity < 0){//Note: Cannot use !newQuantity here as it will think 0 is false
-        quantityInput.value = 1; 
-        return;
-    }
-    if (newQuantity > stock) {
-        quantityInput.value = stock; // Reset to max kalo invalid, this is from input.
-        return;
-    }
-    if (newQuantity === 0 || !newQuantity){
-        const removed = await removeItem(itemID); // Await cannot use let, must use const
-        if (!removed){
-            quantityInput.value = 1; 
+    try {
+        const quantityInput = document.getElementById(`quantity-${sanitizeInput(itemID)}`);
+        const newQuantity = parseInt(quantityInput.value);
+
+        // Validate new quantity
+        if (isNaN(newQuantity) || newQuantity < 0) {
+            quantityInput.value = 1; // Reset to 1 for invalid input
+            return;
         }
-    }
-    else{
-        await updateCart(itemID, newQuantity);
+
+        if (newQuantity > stock) {
+            quantityInput.value = stock; // Reset to max stock if input exceeds stock
+            return;
+        }
+
+        if (newQuantity === 0) {
+            const removed = await removeItem(itemID); // Remove item if quantity is 0
+            if (!removed) {
+                quantityInput.value = 1; // Reset to 1 if removal fails
+            }
+        } else {
+            await updateCart(itemID, newQuantity); // Update cart with new quantity
+        }
+    } catch (error) {
+        console.error("Error in updateQuantity:", error);
     }
 }
 
-// Function to update the cart on the backend
 async function updateCart(itemID, newQuantity) {
-    const userID = localStorage.getItem('userID');
+    const userID = getCookie(); // Securely fetch userID using getCookie()
+
     try {
         const response = await fetch(`${API_URL}/update-cart-item`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID, itemID, quantity: newQuantity })
+            body: JSON.stringify({
+                userID: sanitizeInput(userID),
+                itemID: sanitizeInput(itemID),
+                quantity: sanitizeInput(newQuantity),
+            }),
         });
 
         const result = await response.json();
@@ -149,7 +176,6 @@ async function updateCart(itemID, newQuantity) {
             alert('Failed to update cart. Please try again.');
         } else {
             renderCart(); // Refresh cart
-            return true;
         }
     } catch (error) {
         console.error('Error updating cart:', error);
@@ -158,17 +184,23 @@ async function updateCart(itemID, newQuantity) {
 }
 
 async function removeItem(itemID) {
+    const userID = getCookie(); // Securely fetch userID using getCookie()
+
     let user_response = confirm('Are you sure to remove this item?');
-    const userID = localStorage.getItem('userID');
-    if (!user_response){
-        return false;
+    if (!user_response) {
+        return;
     }
+
     try {
         const response = await fetch(`${API_URL}/remove-cart-item`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID, itemID })
+            body: JSON.stringify({
+                userID: sanitizeInput(userID),
+                itemID: sanitizeInput(itemID),
+            }),
         });
+
         const result = await response.json();
 
         if (result.success) {
@@ -183,10 +215,11 @@ async function removeItem(itemID) {
     }
 }
 
-async function clearCart() {
-    const userID = localStorage.getItem('userID');
 
-    if (!userID) return;
+async function clearCart() {
+    const userID = getCookie();
+
+
 
     try {
         const response = await fetch(`${API_URL}/clear-cart`, {
@@ -209,11 +242,7 @@ async function clearCart() {
 }
 
 async function checkout(transactionAmount) {
-    const userID = localStorage.getItem('userID');
-    if (!userID) {
-        alert('You must be logged in to checkout.');
-        return;
-    }
+    const userID = getCookie();
     sessionStorage.clear();
     const serverSecret = "OneTwoThreeOneTwoThrees"; // Replace with your server's secret
     const currentTime = new Date().toISOString();
@@ -248,7 +277,7 @@ function monitorPaymentStatus() {
 }
 
 async function confirm_checkout(){
-    const userID = localStorage.getItem('userID');
+    const userID = getCookie();
     try {
         const response = await fetch(`${API_URL}/checkout`, {
             method: 'POST',

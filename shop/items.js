@@ -34,7 +34,7 @@ async function update_login() {
                     <li><a class="dropdown-item" href="Dashboard/index.html">Dashboard</a></li>
                     <li><a class="dropdown-item" href="auction.html">Auctions</a></li>
                     <li><a class="dropdown-item" href="settings.html">Settings</a></li>
-                    <li><a class="dropdown-item" href="#">Likes</a></li>
+                    <li><a class="dropdown-item" id="likes_nav"  href="#">Likes</a></li>
                     <li><a class="dropdown-item" id="logout_nav" href="#">Logout</a></li>
                 </ul>
             </li>
@@ -90,8 +90,7 @@ async function update_login() {
 }
 
 // Function to show likes, now using getCookie for userID retrieval
-function show_likes() {
-    const userID = getCookie(); // Get userID from cookies
+function show_likes(userID) {
     if (!userID) {
         window.location.href = 'login.html';
         return;
@@ -100,8 +99,7 @@ function show_likes() {
 }
 
 // Function to prevent cart access, now using getCookie for userID retrieval
-function prevent_cart() {
-    const userID = getCookie(); // Get userID from cookies
+function prevent_cart(userID) {
     const cartNav = document.getElementById('cart_nav');
     if (cartNav) {
         cartNav.addEventListener('click', (event) => {
@@ -164,9 +162,6 @@ async function clear_login() {
 // Fetch items from the backend
 async function fetchItems() {
     const userID = getCookie(); // Get userID from cookies
-    if (!userID) {
-        return;
-    }
 
     try {
         const encodedUserID = encodeURIComponent(userID);
@@ -175,7 +170,7 @@ async function fetchItems() {
 
         if (data.success && data.items) {
             items = data.items; // Store items from the response
-            await fetchCartItems(); // Fetch cart items after fetching shop items
+            await fetchCartItems(userID); // Fetch cart items after fetching shop items
             renderItems(); // Render items after they are fetched
         } else {
             console.error('Failed to fetch items:', data.error);
@@ -186,10 +181,7 @@ async function fetchItems() {
 }
 
 // Fetch cart items to keep track of quantities
-async function fetchCartItems() {
-    const userID = getCookie(); // Get userID from cookies
-    if (!userID) return; // If the user is not logged in, skip fetching cart items
-
+async function fetchCartItems(userID) {
     try {
         const response = await fetch(`${API_URL}/cart-items?userID=${userID}`);
         const data = await response.json();
@@ -305,7 +297,6 @@ async function renderItems(filteredItems = null) {
 
         // Sanitize dynamic content to prevent XSS using sanitizeInput from auth.js
         const sanitizedItemName = sanitizeInput(item.name);
-        const sanitizedItemDescription = sanitizeInput(item.description);
         const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
 
         // Check if the item is liked (use `likedItems` to track liked items)
