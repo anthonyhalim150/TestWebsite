@@ -122,7 +122,7 @@ function check_withdraw_form() {
                 const result = await response.json();
                 console.log(response);
                 console.log(result);
-                if (response.ok && result.success) {
+                if (response.ok && result.message === 'Withdrawal successful.') {
                     alert('Withdrawal Successful!');
                     get_balance(); // Update wallet balance
                 } else {

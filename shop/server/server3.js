@@ -87,7 +87,7 @@ app.use(bodyParser.json());
 const pool = mysql.createPool({
     host: '34.67.118.54'||process.env.DB_HOST,
     user: 'root'||process.env.DB_USER,
-    password: ''||process.env.DB_PASSWORD,
+    password: 'Vvs319338'||process.env.DB_PASSWORD,
     database: 'ecommerce'||process.env.DB_NAME,
     port: '3306'||process.env.DB_PORT,
 });
@@ -250,6 +250,46 @@ app.get("/protected", authenticateToken, (req, res) => {
 app.get("/me", authenticateToken, (req, res) => {
     // `req.user` is set by the authenticateToken middleware
     res.status(200).json({ success: true, user: req.user });
+});
+
+app.post('/start-transaction', (req, res) => {
+    const { address, transaction_amount, note} = req.body;
+
+    if (!address || !transaction_amount || !note) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Set cookies for transaction details
+    res.cookie('address', address, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+    });
+    res.cookie('transaction_amount', transaction_amount, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+    });
+    res.cookie('note', note, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+    });
+    res.json({ success: true, message: 'Transaction initiated' });
+});
+app.get('/get-transaction-details', (req, res) => {
+    const { address, transaction_amount, note} = req.cookies;
+
+    // Ensure all required cookies are present
+    if (!address || !transaction_amount || !note) {
+        return res.status(400).json({ error: 'Required transaction details are missing.' });
+    }
+
+    res.json({
+        address,
+        transaction_amount,
+        note,
+    });
 });
 
 
@@ -1706,56 +1746,64 @@ app.get("/highest-bid", async (req, res) => {
       res.status(500).json({ error: "Database query failed" });
     }
 });
-
 app.post('/check-transaction', async (req, res) => {
     const { txid, amount, assetId, recipientAddress, orderId } = req.body; // Receive details from the frontend
   
     if (!txid || !amount || !assetId || !recipientAddress || !orderId) {
-      return res.status(400).json({ error: "Transaction ID, amount, asset ID, and recipient address are required." });
+        return res.status(400).json({ error: "Transaction ID, amount, asset ID, and recipient address are required." });
     }
   
     try {
-      // Query the Nodely Indexer API for transaction information
-      const response = await fetch(`https://testnet-idx.4160.nodely.dev/v2/transactions/${txid}`);
-      const txnInfo = await response.json();
+        // Query the Nodely Indexer API for transaction information
+        const response = await fetch(`https://testnet-idx.4160.nodely.dev/v2/transactions/${txid}`);
+        const txnInfo = await response.json();
   
-      if (!txnInfo || txnInfo.error) {
-        return res.status(500).json({ error: "Error fetching transaction info." });
-      }
-  
-      if (txnInfo.transaction && txnInfo.transaction['confirmed-round'] > 0) {
-        // Validate transaction details
-        const payment = txnInfo.transaction['asset-transfer-transaction']; // Asset transfer details
-        const transactionNote = Buffer.from(txnInfo.transaction.note, 'base64').toString();
-        if (
-          payment.receiver === recipientAddress &&
-          payment['asset-id'] === assetId &&
-          parseFloat(payment.amount) === parseFloat(amount) &&
-          transactionNote === orderId // Compare with the encoded note
-        ) {
-          return res.json({
-            completed: true,
-            confirmedRound: txnInfo.transaction['confirmed-round'],
-            sender: txnInfo.transaction.sender,
-            amount: payment.amount,
-            assetId: payment['asset-id'],
-            note: orderId,
-          });
-        } else {
-          return res.json({
-            completed: false,
-            error: "Transaction details do not match the expected values.",
-          });
+        if (!txnInfo || txnInfo.error) {
+            return res.status(500).json({ error: "Error fetching transaction info." });
         }
-      } else {
-        return res.json({ completed: false });
-      }
+  
+        if (txnInfo.transaction && txnInfo.transaction['confirmed-round'] > 0) {
+            // Validate transaction details
+            const payment = txnInfo.transaction['asset-transfer-transaction']; // Asset transfer details
+            const transactionNote = Buffer.from(txnInfo.transaction.note, 'base64').toString();
+            if (
+                payment.receiver === recipientAddress &&
+                payment['asset-id'] === assetId &&
+                parseFloat(payment.amount) === parseFloat(amount) &&
+                transactionNote === orderId // Compare with the encoded note
+            ) {
+                // Set a server-side cookie with payment_status
+                res.cookie('payment_status', 'true', {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'Strict',
+                    maxAge: 15 * 60 * 1000, // Cookie expires in 15 minutes
+                });
+
+                return res.json({
+                    completed: true,
+                    confirmedRound: txnInfo.transaction['confirmed-round'],
+                    sender: txnInfo.transaction.sender,
+                    amount: payment.amount,
+                    assetId: payment['asset-id'],
+                    note: orderId,
+                });
+            } else {
+                return res.json({
+                    completed: false,
+                    error: "Transaction details do not match the expected values.",
+                });
+            }
+        } else {
+            return res.json({ completed: false });
+        }
       
     } catch (error) {
-      console.error("Error checking transaction:", error);
-      return res.status(500).json({ error: "Error verifying transaction. Please try again." });
+        console.error("Error checking transaction:", error);
+        return res.status(500).json({ error: "Error verifying transaction. Please try again." });
     }
 });
+
 
 app.get('/items-user', async (req, res) => {
     const userID = req.query.userID; // Get userID from query parameter
@@ -2255,7 +2303,6 @@ app.post('/withdraw-user', async (req, res) => {
 
         const currentBalance = parseFloat(rows[0].wallet);
         const userAddress = rows[0].address;
-
         if (currentBalance < amount) {
             return res.status(400).json({ message: "Insufficient balance." });
         }

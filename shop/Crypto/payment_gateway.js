@@ -1,17 +1,36 @@
-
+// Function to fetch and display wallet balance
 async function get_balance() {
-    const userID = localStorage.getItem('userID');
-    const amount = sessionStorage.getItem('transaction_amount');
-    const formattedTotal = `${parseFloat(amount).toLocaleString('en-US') || 0} CSP`
-    document.getElementById('current-payable').textContent = formattedTotal;
+    const userID = await getCookie(); // Retrieve userID securely using auth.js
     try {
-        const response = await fetch(`${API_URL_USER}/get-wallet-user?userID=${encodeURIComponent(userID)}`);
+        // Fetch the wallet balance securely from the server
+        const response = await fetch(`${API_URL_USER}/get-wallet-user`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies for authentication
+        });
+
         if (response.ok) {
             const data = await response.json();
             if (data.success) {
-                document.getElementById('current-balance').textContent = `${parseFloat(data.wallet).toLocaleString('en-US') || 0} CSP`;
+                const sanitizedWallet = sanitizeInput(data.wallet); // Sanitize the wallet amount
+                document.getElementById('current-balance').textContent = `${parseFloat(sanitizedWallet).toLocaleString('en-US') || 0} CSP`;
+
+                // Fetch transaction amount securely
+                const transactionDetails = await fetch(`${API_URL}/get-transaction-details`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+
+                if (transactionDetails.ok) {
+                    const { transaction_amount } = await transactionDetails.json();
+                    const sanitizedAmount = sanitizeInput(transaction_amount);
+                    const formattedTotal = `${parseFloat(sanitizedAmount).toLocaleString('en-US') || 0} CSP`;
+                    document.getElementById('current-payable').textContent = formattedTotal;
+                } else {
+                    console.error('Error fetching transaction details.');
+                    document.getElementById('current-payable').textContent = 'Error loading transaction details';
+                }
             } else {
-                console.error('Error fetching wallet:', data.error);
+                console.error('Error fetching wallet:', sanitizeInput(data.error));
                 document.getElementById('current-balance').textContent = 'Error loading balance';
             }
         } else {
@@ -19,56 +38,76 @@ async function get_balance() {
             document.getElementById('current-balance').textContent = 'Error loading balance';
         }
     } catch (error) {
-        console.error('Error fetching wallet:', error);
+        console.error('Error fetching wallet or transaction details:', error);
         document.getElementById('current-balance').textContent = 'Error loading balance';
+        document.getElementById('current-payable').textContent = 'Error loading transaction details';
     }
 }
 
 // Redirect to the dashboard for wallet recharge
 function redirectToDashboard() {
-    window.location.href = '../Dashboard/index.html';
+    window.location.href = sanitizeURL('/shop/Dashboard/wallet.html');
 }
 
 // Confirm the payment
 async function confirmPayment() {
     const paymentMethod = document.querySelector('input[name="payment-method"]:checked');
-    const amount = sessionStorage.getItem('transaction_amount');
+
     if (!paymentMethod) {
         alert('Please select a payment method.');
         return;
     }
 
     if (paymentMethod.value === 'csp') {
-        window.location.href = 'crypto_pay.html';
+        window.location.href = sanitizeURL('/shop/Crypto/crypto_pay.html');
         return;
     }
 
-    if (isNaN(amount) || amount <= 0) {
-        alert('Invalid payment amount.');
-        return;
-    }
+    try {
+        // Fetch transaction details securely
+        const transactionDetailsResponse = await fetch(`${API_URL}/get-transaction-details`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies for authentication
+        });
 
-    const response = await fetch(`${API_URL_USER}/wallet-checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userID: localStorage.getItem('userID'), amount: amount}),
-    });
+        if (!transactionDetailsResponse.ok) {
+            throw new Error('Failed to fetch transaction details.');
+        }
 
-    const result = await response.json();
+        const { transaction_amount } = await transactionDetailsResponse.json();
+        const sanitizedAmount = sanitizeInput(transaction_amount);
 
-    if (result.success) {
-        sessionStorage.setItem('payment_status', 'success');
-        window.location.href = '../cart.html';
-    } else {
-        sessionStorage.setItem('payment_status', 'failed');
-        alert(result.message || 'Payment failed.');
+        if (isNaN(sanitizedAmount) || sanitizedAmount <= 0) {
+            alert('Invalid payment amount.');
+            return;
+        }
+
+        // Process the payment
+        const response = await fetch(`${API_URL_USER}/wallet-checkout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userID: await getCookie(), amount: sanitizedAmount }),
+            credentials: 'include', // Include cookies for authentication
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Payment successful!');
+            window.location.href = sanitizeURL('/shop/cart.html');
+        } else {
+            alert(sanitizeInput(result.message || 'Payment failed.'));
+        }
+    } catch (error) {
+        console.error('Error during payment:', error);
+        alert('An error occurred while processing the payment. Please try again.');
     }
 }
 
 // Handle the back button
 function handleBack() {
-    sessionStorage.setItem('payment_status', 'failed');
-    window.location.href = '../cart.html';
+    alert('Transaction canceled. Redirecting to cart...');
+    window.location.href = sanitizeURL('/shop/cart.html');
 }
 
 // Load the wallet balance on page load

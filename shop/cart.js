@@ -245,62 +245,94 @@ async function clearCart() {
 }
 
 async function checkout(transactionAmount) {
-    const userID = await getCookie();
-    sessionStorage.clear();
+    const userID = await getCookie(); // Retrieve user ID securely
     const serverSecret = "OneTwoThreeOneTwoThrees"; // Replace with your server's secret
     const currentTime = new Date().toISOString();
-    const note = btoa(`${userID}:${serverSecret}:${currentTime}`); // Simple Base64 encoding (replace with a secure hash if needed)
-    const owner_address = "AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU"
-    // Store transaction details in localStorage or sessionStorage
-    sessionStorage.setItem('address', owner_address)
-    sessionStorage.setItem('transaction_amount', transactionAmount);
-    sessionStorage.setItem('note', note);
-    sessionStorage.setItem('type', 'cart');
-    window.location.href = '/shop/Crypto/index.html';
+    const sanitizedTransactionAmount = sanitizeInput(transactionAmount); // Sanitize input
+    const note = btoa(`${userID}:${serverSecret}:${currentTime}`); // Base64 encoding for note
+    const owner_address = "AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU";
 
+    try {
+        // Start the transaction by sending data to the backend
+        const response = await fetch(`${API_URL}/start-transaction`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                address: sanitizeInput(owner_address), // Sanitize address
+                transaction_amount: sanitizedTransactionAmount,
+                note: sanitizeInput(note), // Sanitize note
+            }),
+            credentials: "include", // Include cookies for authentication
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Store the 'cart' type in sessionStorage
+            sessionStorage.setItem('type', 'cart');
+            window.location.href = sanitizeURL("/shop/Crypto/index.html"); // Redirect safely
+        } else {
+            alert(`Failed to initiate transaction: ${sanitizeInput(result.error)}`);
+        }
+    } catch (error) {
+        console.error("Error during transaction initiation:", error);
+        alert("An error occurred while starting the transaction. Please try again.");
+    }
 }
 
-// Monitor payment status when returning to the cart page
 function monitorPaymentStatus() {
-    const interval = setInterval(() => {
-      const paymentStatus = sessionStorage.getItem("payment_status");
-  
-      if (paymentStatus === "success") {
-        sessionStorage.clear(); 
-        clearInterval(interval);
-        confirm_checkout();
-      } else if (paymentStatus === "failed") {
-        alert("Payment failed. Please try again.");
-        sessionStorage.clear(); 
-        clearInterval(interval); 
-      }
-      renderCart();
-      clearInterval(interval); 
+    const interval = setInterval(async () => {
+        try {
+            // Fetch the payment status securely using server cookies
+            const response = await fetch(`${API_URL}/get-transaction-details`, {
+                method: "GET",
+                credentials: "include", // Include cookies for authentication
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch transaction details.");
+            }
+
+            const { payment_status} = await response.json();
+
+            // Sanitize fetched data
+            const sanitizedPaymentStatus = sanitizeInput(payment_status);
+            if (sanitizedPaymentStatus === "success") {
+                clearInterval(interval);
+                confirm_checkout();
+            } else if (sanitizedPaymentStatus === "failed") {
+                clearInterval(interval);
+                alert("Payment failed. Please try again.");
+            } else {
+                console.log("Waiting for payment...");
+            }
+        } catch (error) {
+            console.error("Error monitoring payment status:", error);
+        }
     }, 500);
 }
 
-async function confirm_checkout(){
-    const userID = await getCookie();
+async function confirm_checkout() {
+    const userID = await getCookie(); // Retrieve user ID securely
     try {
         const response = await fetch(`${API_URL}/checkout`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID }),
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userID: sanitizeInput(userID) }), // Sanitize userID
             credentials: "include",
         });
         const result = await response.json();
 
         if (result.success) {
-            alert('Checkout Successful!');
-            renderCart();
+            alert("Checkout Successful!");
+            renderCart(); // Update cart UI
         } else {
-            alert('Checkout failed: ' + result.error);
+            alert(`Checkout failed: ${sanitizeInput(result.error)}`);
         }
-      } 
-      catch (error) {
-          console.error('Error during checkout:', error);
-          alert('An error occurred during checkout. Please try again.');
-      }
+    } catch (error) {
+        console.error("Error during checkout:", error);
+        alert("An error occurred during checkout. Please try again.");
+    }
 }
 
 

@@ -96,7 +96,7 @@ async function monitorTransaction(txid) {
           transactionStatus.classList.add("success");
           const homeButton = document.getElementById("back-to-home");
 
-          const type = await getCookie('type'); // Securely retrieve type from cookies
+          const type = sessionStorage.getItem('type'); // Securely retrieve type from cookies
 
           if (type === "cart") {
               if (homeButton) homeButton.style.display = "none";
@@ -175,7 +175,7 @@ async function startTransactionMonitoring() {
 }
 
 // Call the monitoring function at a 5-second interval
-setInterval(startTransactionMonitoring, 2000);
+setInterval(startTransactionMonitoring, 3000);
 
 
 
