@@ -1,8 +1,9 @@
 async function crawler_check(){
     const userRole = get_user_role(); 
-    if (window.location.pathname.includes('/shop/admin') && (userRole !== 'admin')) {
-        window.location.href = sanitizeURL('/shop/login.html');  // Redirect to non-admins to homepage
-    }
+    console.log(userRole);
+    //if (window.location.pathname.includes('/shop/admin') && (userRole !== 'admin')) {
+       // window.location.href = sanitizeURL('/shop/login.html');  // Redirect to non-admins to homepage
+    //}
 }
 
 // Function to create the sidebar
