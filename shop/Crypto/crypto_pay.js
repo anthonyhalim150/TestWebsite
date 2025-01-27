@@ -7,7 +7,6 @@ const backToHomeButton = document.getElementById("back-to-home");
 // Function to fetch transaction details and generate QR code
 async function fetchTransactionDetails() {
   try {
-      generateQRCode(address, transaction_amount, note);
       const response = await fetch(`${API_URL}/get-transaction-details`, {
           method: "GET",
           credentials: "include", // Include cookies in the request
@@ -18,6 +17,7 @@ async function fetchTransactionDetails() {
       }
 
       const { address, transaction_amount, note } = await response.json();
+      generateQRCode(address, transaction_amount, note);
 
   } catch (error) {
       console.error("Error fetching transaction details:", error);
