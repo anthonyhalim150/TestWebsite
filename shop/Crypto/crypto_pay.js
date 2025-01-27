@@ -28,8 +28,8 @@ async function fetchTransactionDetails() {
 function generateQRCode(address, amount, note) {
   const paymentDetails = {
       recipient: address,
-      assetID: assetId,
-      amount_in: parseFloat(amount) * Math.pow(10, asset_decimal),
+      assetID: 732664447,
+      amount_in: parseFloat(amount) * Math.pow(10, 2),
       note: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
   };
   const qrCodeData = `algorand://${paymentDetails.recipient}?amount=${paymentDetails.amount_in}&asset=${paymentDetails.assetID}&note=${encodeURIComponent(paymentDetails.note)}`;
@@ -60,7 +60,7 @@ async function monitorTransaction(txid) {
       }
 
       const { address: recipientAddress, transaction_amount, note } = await transactionDetailsResponse.json();
-      const amount = parseFloat(transaction_amount) * Math.pow(10, asset_decimal);
+      const amount = parseFloat(transaction_amount) * Math.pow(10, 2);
 
       const response = await fetch(`${API_URL}/check-transaction`, {
           method: "POST",
@@ -70,7 +70,7 @@ async function monitorTransaction(txid) {
           body: JSON.stringify({
               txid,
               amount,
-              assetId,
+              assetId : 732664447,
               recipientAddress,
               orderId: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`, // Include the note
           }),

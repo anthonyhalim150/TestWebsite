@@ -151,7 +151,6 @@ async function confirm_deposit() {
         const { txid, transaction_amount, note, recipient_address } = await transactionDetailsResponse.json();
 
         if (!txid || !transaction_amount || !note || !recipient_address) {
-            alert("Missing required transaction details. Please try again.");
             return;
         }
 
