@@ -206,7 +206,7 @@ async function addToCart(itemID) {
         alert('Insufficient stock available.');
         return;
     }
-
+    console.log(userID);
     try {
         const response = await fetch(`${API_URL}/cart`, {
             method: 'POST',
