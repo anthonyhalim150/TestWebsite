@@ -1,94 +1,113 @@
-// Existing API URL and items array remain unchanged
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
-const API_URL_USER = 'https://users-723848267249.us-central1.run.app';
 let items = [];
 
 async function fetch_products(sorted_items = null) {
     try {
-        const userID = localStorage.getItem('userID'); // Retrieve userID from localStorage
+        const userID = await getCookie(); // Retrieve userID from localStorage
 
-        if (!userID) {
-            alert('User ID not found. Please log in.');
-            return;
-        }
-        const response = await fetch(`${API_URL_USER}/expired-auction?userID=${userID}`);
+        const encodedUserID = encodeURIComponent(userID); // Ensure the userID is safely encoded
+        const response = await fetch(`${API_URL}/expired-auction-user?userID=${encodedUserID}`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies with the request
+        })
         const data = await response.json();
 
         if (data.success && data.items) {
-            items = data.items;
+            items = data.items.map(item => ({
+                ...item,
+                id: sanitizeInput(item.id),
+                item_name: sanitizeInput(item.item_name),
+                starting_price: parseFloat(item.starting_price),
+                stock: sanitizeInput(item.stock),
+                description: sanitizeInput(item.description || "N/A"),
+                category: sanitizeInput(item.category || "N/A"),
+                duration: sanitizeInput(item.duration || "N/A"),
+                starting_time: sanitizeInput(item.starting_time),
+                image: sanitizeInput(item.image || "placeholder.jpg"),
+            }));
+
             if (sorted_items !== null) {
                 items = sorted_items;
             }
 
-            const productContainer = document.getElementById('product-container-tbody');
-            productContainer.innerHTML = '';
+            const productContainer = document.getElementById("product-container-tbody");
+            if (!productContainer) {
+                console.error("Product container element is missing.");
+                return;
+            }
+            productContainer.innerHTML = ""; // Clear existing content
 
             // Loop through each product and await the highest bid for each
             for (const product of items) {
-                const highestBid = await fetchHighestBid(product.id);  // Wait for the highest bid
-                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';
-                const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
-                const formattedBid = parseFloat(highestBid).toLocaleString('en-US');
+                const highestBid = await fetchHighestBid(product.id);
+                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : "N/A";
+                const formattedPrice = product.starting_price.toLocaleString("en-US");
+                const formattedBid = highestBid.toLocaleString("en-US");
                 const highestBidText = highestBid > 0 ? `$${formattedBid}` : "No Bids";
 
                 productContainer.innerHTML += `
-                <tr data-id="${product.id}">
-                    <td>
-                        <img src="${product.image}" alt="Not Found!" original-image="${product.image}" class="product-image">
-                    </td>
-                    <td>${product.item_name}</td>
-                    <td>$${formattedPrice}</td>
-                    <td>${product.stock}</td>
-                    <td>${product.description || 'N/A'}</td>
-                    <td>${product.category || 'N/A'}</td>
-                    <td>${product.duration || 'N/A'}</td>
-                    <td>${formattedStartingTime || 'N/A'}</td>
-                    <td>${highestBidText}</td>
-                    <td>
-                        <a href="bid_history.html?product_id=${product.id}" class="picture-link">
-                            <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
-                        </a>
-                    </td>
-                </tr>`;
+                    <tr data-id="${product.id}">
+                        <td>
+                            <img src="${product.image}" alt="Not Found!" class="product-image">
+                        </td>
+                        <td>${product.item_name}</td>
+                        <td>$${formattedPrice}</td>
+                        <td>${product.stock}</td>
+                        <td>${product.description}</td>
+                        <td>${product.category}</td>
+                        <td>${product.duration}</td>
+                        <td>${formattedStartingTime}</td>
+                        <td>${highestBidText}</td>
+                        <td>
+                            <a href="bid_history.html?product_id=${product.id}" class="picture-link">
+                                <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
+                            </a>
+                        </td>
+                    </tr>`;
             }
+        } else {
+            console.error("No products found or data retrieval failed.");
         }
     } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
     }
 }
-     
-const fetchHighestBid = async (itemId) => {
+
+// Fetch the highest bid for a specific product
+async function fetchHighestBid(itemId) {
     try {
-      const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${itemId}`);
-      const data = await response.json();
-      return data.bid_amount || 0;
+        const response = await fetch(`${API_URL}/highest-bid?auction_item_id=${encodeURIComponent(sanitizeInput(itemId))}`, {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+        return data.bid_amount || 0;
     } catch (error) {
-      console.error("Error fetching highest bid:", error);
-      return 0;
+        console.error("Error fetching highest bid:", error);
+        return 0;
     }
-  };
+}
 
+// Search through items based on user query
 function searchItems() {
-    const query = document.getElementById('search-bar').value.trim().toLowerCase();
-    let desc_match = 0;
-    let category_match = 0;
+    const searchBar = document.getElementById("search-bar");
+    if (!searchBar) {
+        console.error("Search bar element is missing.");
+        return;
+    }
 
-    if (query === '') {
-        fetch_products();
+    const query = sanitizeInput(searchBar.value.trim().toLowerCase());
+    if (query === "") {
+        fetch_products(); // Reset to full product list if query is empty
         return;
     }
 
     const filteredItems = items
         .map(item => {
-            const nameMatch = (item.item_name.toLowerCase().includes(query) ? 1 : 0);
-            if (item.description !== null) {
-                desc_match = (item.description.toLowerCase().includes(query) ? 1 : 0);
-            }
-            if (item.category !== null) {
-                category_match = (item.category.toLowerCase().includes(query) ? 1 : 0);
-            }
+            const nameMatch = item.item_name.toLowerCase().includes(query) ? 1 : 0;
+            const descMatch = item.description.toLowerCase().includes(query) ? 1 : 0;
+            const categoryMatch = item.category.toLowerCase().includes(query) ? 1 : 0;
 
-            const matchScore = nameMatch + desc_match + category_match;
+            const matchScore = nameMatch + descMatch + categoryMatch;
             return { ...item, matchScore };
         })
         .filter(item => item.matchScore > 0)
@@ -99,23 +118,25 @@ function searchItems() {
             return a.item_name.localeCompare(b.item_name);
         });
 
-    fetch_products(filteredItems);
+    fetch_products(filteredItems); // Render filtered items
 }
 
+// Format datetime for display
 function formatDateTime(dateTime) {
     const date = new Date(dateTime);
 
     const options = {
-        month: '2-digit', 
-        day: '2-digit', 
-        year: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        hour12: true // To use AM/PM format
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true, // Use AM/PM format
     };
 
-    return date.toLocaleString('en-US', options).replace(',', '');
+    return date.toLocaleString("en-US", options).replace(",", "");
 }
+
 // Existing event listeners remain unchanged
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products();

@@ -1,24 +1,27 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 async function addProduct(event) {
     event.preventDefault(); // Prevent form reload
 
     // Get form data
-    const name = document.getElementById('product-name').value;
-    const price = parseFloat(document.getElementById('product-price').value.replace(/,/g, ''));
-    const description = document.getElementById('product-description').value;
-    const stock = parseInt(document.getElementById('product-stock').value);
+    const name = sanitizeInput(document.getElementById('product-name').value);
+    const price = parseFloat(sanitizeInput(document.getElementById('product-price').value.replace(/,/g, '')));
+    const description = sanitizeInput(document.getElementById('product-description').value);
+    const stock = parseInt(sanitizeInput(document.getElementById('product-stock').value));
     const imageFile = document.getElementById('product-image').files[0]; // Get the selected file
-    const category = document.getElementById('product-category').value;
+    const category = sanitizeInput(document.getElementById('product-category').value);
 
     // Validate form inputs
     if (!name || !price || price <= 0 || !stock || stock <= 0 || !description || !imageFile || !category) {
         alert('All fields are required, and price/stock must be positive numbers.');
         return;
     }
-    if (price > 99999999.99 || stock > 99999999 ){
+
+    if (price > 99999999.99 || stock > 99999999) {
         alert('Price/stock too high, please enter a number below 99.99 million.');
         return;
     }
+
+    // Retrieve userID securely
+    const userID = await getCookie();
 
     // Create FormData object to send data, including the image file
     const formData = new FormData();
@@ -28,53 +31,52 @@ async function addProduct(event) {
     formData.append('stock', stock);
     formData.append('product-image', imageFile); // Key must match the backend's expected key
     formData.append('category', category);
-    
-    const userID = localStorage.getItem('userID');
-    formData.append('userID', userID);
-
+    formData.append('userID', sanitizeInput(userID));
 
     try {
-        const response = await fetch(`${API_URL}/add-new-product`, { // Adjust the endpoint as needed
+        const response = await fetch(`${API_URL}/add-new-product`, {
             method: 'POST',
-            body: formData, // FormData includes all fields and the file
+            body: formData,
+            credentials: 'include', // Ensure cookies are included with the request
         });
         const result = await response.json();
+
         if (result.success) {
             alert('Product added successfully!');
         } else {
+            console.error('Error adding product:', result.message);
             alert('Failed to add product. Please try again.');
         }
     } catch (error) {
-        alert('Failed to add product. Please try again.');//Have to be changed later
+        console.error('Error adding product:', error);
+        alert('An error occurred. Please try again.');
     }
 }
 
+// Handle formatting and validation for product price input
 const productPriceInput = document.getElementById("product-price");
-if (productPriceInput){
+if (productPriceInput) {
     productPriceInput.addEventListener("input", (event) => {
-        let value = event.target.value.replace(/,/g, ''); // Remove commas for the purpose of processing
-        // Check if it's a valid number, allowing for decimals
+        let value = event.target.value.replace(/,/g, ''); // Remove commas for processing
         if (!isNaN(value) && value !== "") {
-            event.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Add commas as thousands separator
+            event.target.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Add commas
         }
     });
 
     productPriceInput.addEventListener("blur", (event) => {
-        let value = event.target.value.replace(/,/g, ''); // Remove commas to handle the raw number
+        let value = event.target.value.replace(/,/g, ''); // Remove commas for validation
         if (value === "" || isNaN(value)) {
             event.target.value = ""; // Clear invalid input
         } else {
-            // Ensure two decimal places on blur and format with commas
-            event.target.value = parseFloat(value).toLocaleString('en-US', { 
-                minimumFractionDigits: 2, 
-                maximumFractionDigits: 2
+            event.target.value = parseFloat(value).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
             });
         }
     });
 }
 
-
-
+// Attach submit event listener to the product form
 document.addEventListener('DOMContentLoaded', () => {
     const product_form = document.getElementById('product-form');
     if (product_form) {

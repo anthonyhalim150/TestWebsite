@@ -1,26 +1,45 @@
-// Existing API URL and items array remain unchanged
-const API_URL = 'https://users-723848267249.us-central1.run.app';
 let items = [];
 
+// Fetch ongoing auction products and render them
 async function fetch_products(sorted_items = null) {
     try {
-        const userID = localStorage.getItem('userID'); // Retrieve userID from localStorage
+        const userID = await getCookie(); // Securely fetch userID using await getCookie()
 
-        if (!userID) {
-            alert('User ID not found. Please log in.');
-            return;
-        }
-        const response = await fetch(`${API_URL}/auction?userID=${userID}`);
+
+        const encodedUserID = encodeURIComponent(sanitizeInput(userID)); // Sanitize and encode userID
+        const response = await fetch(`${API_URL}/auction?userID=${encodedUserID}`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies with the request
+        });
+
         const data = await response.json();
         if (data.success && data.items) {
-            items = data.items;
+            items = data.items.map(item => ({
+                id: sanitizeInput(item.id),
+                item_name: sanitizeInput(item.item_name),
+                starting_price: parseFloat(item.starting_price || 0),
+                stock: sanitizeInput(item.stock),
+                description: sanitizeInput(item.description || "N/A"),
+                category: sanitizeInput(item.category || "N/A"),
+                duration: sanitizeInput(item.duration || "N/A"),
+                starting_time: sanitizeInput(item.starting_time),
+                image: sanitizeInput(item.image || "placeholder.jpg"),
+            }));
+
             if (sorted_items !== null) {
                 items = sorted_items;
             }
-            const productContainer = document.getElementById('product-container-tbody');
+
+            const productContainer = document.getElementById("product-container-tbody");
+            if (!productContainer) {
+                console.error("Product container element not found.");
+                return;
+            }
+
             productContainer.innerHTML = items.map(product => {
-                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
-                const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
+                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : "N/A";
+                const formattedPrice = product.starting_price.toLocaleString("en-US");
+
                 return `
                 <tr data-id="${product.id}">
                     <td>
@@ -30,10 +49,10 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.item_name}</td>
                     <td>$${formattedPrice}</td>
                     <td>${product.stock}</td>
-                    <td>${product.description || 'N/A'}</td>
-                    <td>${product.category || 'N/A'}</td>
-                    <td>${product.duration || 'N/A'}</td>
-                    <td>${formattedStartingTime|| 'N/A'}</td>
+                    <td>${product.description}</td>
+                    <td>${product.category}</td>
+                    <td>${product.duration}</td>
+                    <td>${formattedStartingTime}</td>
                     <td>
                         <a href="bid_history.html?product_id=${product.id}" class="picture-link">
                             <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
@@ -41,39 +60,38 @@ async function fetch_products(sorted_items = null) {
                     </td>
                 </tr>`;
             }).join('');
-
+        } else {
+            console.error('Failed to fetch products:', data.error);
         }
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching products:', error);
     }
-}  
-            
+}
 
+// Search through items based on user query
 function searchItems() {
-    const query = document.getElementById('search-bar').value.trim().toLowerCase();
-    let desc_match = 0;
-    let category_match = 0;
+    const searchBar = document.getElementById('search-bar');
+    if (!searchBar) {
+        console.error("Search bar element not found.");
+        return;
+    }
 
+    const query = sanitizeInput(searchBar.value.trim().toLowerCase());
     if (query === '') {
-        fetch_products();
+        fetch_products(); // Reset to full product list if query is empty
         return;
     }
 
     const filteredItems = items
         .map(item => {
-            const nameMatch = (item.item_name.toLowerCase().includes(query) ? 1 : 0);
-            if (item.description !== null) {
-                desc_match = (item.description.toLowerCase().includes(query) ? 1 : 0);
-            }
-            if (item.category !== null) {
-                category_match = (item.category.toLowerCase().includes(query) ? 1 : 0);
-            }
+            const nameMatch = item.item_name.toLowerCase().includes(query) ? 1 : 0;
+            const descMatch = item.description.toLowerCase().includes(query) ? 1 : 0;
+            const categoryMatch = item.category.toLowerCase().includes(query) ? 1 : 0;
 
-            const matchScore = nameMatch + desc_match + category_match;
+            const matchScore = nameMatch + descMatch + categoryMatch;
             return { ...item, matchScore };
         })
-        .filter(item => item.matchScore > 0)
+        .filter(item => item.matchScore > 0) // Keep items with positive match scores
         .sort((a, b) => {
             if (b.matchScore !== a.matchScore) {
                 return b.matchScore - a.matchScore;
@@ -81,31 +99,33 @@ function searchItems() {
             return a.item_name.localeCompare(b.item_name);
         });
 
-    fetch_products(filteredItems);
+    fetch_products(filteredItems); // Render filtered items
 }
 
+// Format datetime for display
 function formatDateTime(dateTime) {
     const date = new Date(dateTime);
 
     const options = {
-        month: '2-digit', 
-        day: '2-digit', 
-        year: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        hour12: true // To use AM/PM format
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true, // Use AM/PM format
     };
 
-    return date.toLocaleString('en-US', options).replace(',', '');
+    return date.toLocaleString("en-US", options).replace(',', '');
 }
-// Existing event listeners remain unchanged
+
+// Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    fetch_products();
+    fetch_products(); // Fetch initial list on page load
 });
 
-const searchBar = document.getElementById('search-bar');
+const searchBar = document.getElementById("search-bar");
 if (searchBar) {
-    searchBar.addEventListener('input', () => {
+    searchBar.addEventListener("input", () => {
         searchItems();
     });
 }

@@ -1,37 +1,34 @@
-const API_URL = 'https://users-723848267249.us-central1.run.app';
 let items = []; // Stores the transactions fetched from the server
 
 async function fetch_products(sorted_items = null) {
     try {
-        const userID = localStorage.getItem('userID');  // Retrieve userID from localStorage
-        if (!userID) {
-            alert('User ID not found. Please log in.');
-            return;
-        }
+        const userID = await getCookie(); // Retrieve userID from cookies
 
-        const response = await fetch(`${API_URL}/transactions?userID=${userID}`);  // Pass userID as a query parameter
+        const response = await fetch(`${API_URL}/transactions-user?userID=${encodeURIComponent(userID)}`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies for authentication
+        });
+
         const data = await response.json();
-
 
         if (Array.isArray(data)) { // Check if data is an array of transactions
             items = sorted_items || data; // Use sorted items if provided, otherwise use fetched data
 
             const productContainer = document.getElementById('product-container tbody');
             productContainer.innerHTML = items
-            .map(transaction => {
-                const formattedAmount = parseFloat(transaction.total_amount).toLocaleString('en-US'); // Turn 7000 to 7,000
-                return `
-                    <tr>
-                        <td>${transaction.transaction_id}</td>
-                        <td>${transaction.username}</td>
-                        <td class="total-amount">$${formattedAmount}</td>
-                        <td><pre>${transaction.description}</pre></td>
-                        <td class="created-at">${new Date(transaction.created_at).toLocaleString()}</td>
-                    </tr>
-                `;
-            })
-    .join('');
-
+                .map(transaction => {
+                    const formattedAmount = parseFloat(transaction.total_amount).toLocaleString('en-US'); // Turn 7000 to 7,000
+                    return `
+                        <tr>
+                            <td>${sanitizeInput(transaction.transaction_id)}</td>
+                            <td>${sanitizeInput(transaction.username)}</td>
+                            <td class="total-amount">$${formattedAmount}</td>
+                            <td><pre>${sanitizeInput(transaction.description)}</pre></td>
+                            <td class="created-at">${new Date(transaction.created_at).toLocaleString()}</td>
+                        </tr>
+                    `;
+                })
+                .join('');
         } else {
             console.error('Failed to fetch transactions: Invalid response format');
         }
@@ -39,6 +36,7 @@ async function fetch_products(sorted_items = null) {
         console.error('Error fetching transactions:', error);
     }
 }
+
 
 function search_users() {
     const query = document.getElementById('search-bar').value.trim().toLowerCase();

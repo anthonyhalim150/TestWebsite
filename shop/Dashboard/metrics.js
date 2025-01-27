@@ -1,5 +1,3 @@
-const API_URL = 'https://users-723848267249.us-central1.run.app/shop-metrics';
-
 document.getElementById('filter-button').addEventListener('click', fetchFilteredMetrics);
 
 let salesChart, productMetricsChart, productComparisonChart; // Chart instances
@@ -7,20 +5,19 @@ let salesChart, productMetricsChart, productComparisonChart; // Chart instances
 async function fetchFilteredMetrics() {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
-    const userID = localStorage.getItem('userID'); // Assuming userID is stored in localStorage
+    const userID = await getCookie(); // Securely retrieve userID using await getCookie()
 
-    // Check if userID exists
-    if (!userID) {
-        alert('User ID is required');
-        return;
-    }
+ 
 
     const params = new URLSearchParams({ startDate, endDate, userID }).toString();
-
-    const url = `${API_URL}?${params}`;
+    const url = `${API_URL + '-user'}?${params}`;
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'include', // Include cookies for authentication
+        });
+
         const data = await response.json();
 
         if (data.success) {
@@ -70,6 +67,11 @@ function displaySalesOverTimeChart(salesData) {
 }
 
 function displayProductMetricsChart(productMetrics) {
+    if (!productMetrics || !productMetrics.timeLabels) {
+        console.error("Missing product metrics data");
+        return;
+    }
+
     const ctx = document.getElementById('product-metrics-chart').getContext('2d');
 
     if (productMetricsChart) {
@@ -83,13 +85,13 @@ function displayProductMetricsChart(productMetrics) {
             datasets: [
                 {
                     label: 'Total Items Sold',
-                    data: productMetrics.itemsSold,
+                    data: productMetrics.itemsSold || [],
                     borderColor: '#3357FF',
                     fill: false,
                 },
                 {
                     label: 'Stock Remaining',
-                    data: productMetrics.stockRemaining,
+                    data: productMetrics.stockRemaining || [],
                     borderColor: '#FF33FF',
                     fill: false,
                 },
@@ -105,6 +107,11 @@ function displayProductMetricsChart(productMetrics) {
 }
 
 function displayProductComparisonChart(productComparison) {
+    if (!productComparison || !productComparison.productNames) {
+        console.error("Missing product comparison data");
+        return;
+    }
+
     const ctx = document.getElementById('product-comparison-chart').getContext('2d');
 
     if (productComparisonChart) {
@@ -118,7 +125,7 @@ function displayProductComparisonChart(productComparison) {
             datasets: [
                 {
                     label: 'Total Items Sold',
-                    data: productComparison.itemsSold,
+                    data: productComparison.itemsSold || [],
                     backgroundColor: '#FF5733',
                 },
             ],

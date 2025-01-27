@@ -7,11 +7,6 @@ const fetchAuctionItems = async () => {
   try {
       const userID = await getCookie(); // Securely fetch userID using await getCookie()
 
-      if (!userID) {
-          console.error("User not authenticated.");
-          return;
-      }
-
       const encodedUserID = encodeURIComponent(sanitizeInput(userID)); // Sanitize and encode userID
       const response = await fetch(`${API_URL}/auction?userID=${encodedUserID}`, {
           method: 'GET',

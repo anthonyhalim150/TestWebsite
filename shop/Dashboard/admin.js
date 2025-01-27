@@ -1,22 +1,10 @@
-function crawler_check(){
-    const userRole = get_user_role(); 
+async function crawler_check(){
+    const userRole = await get_user_role(); 
     if (window.location.pathname.includes('/shop/Dashboard') && (userRole !== 'user' || get_user_role()!== 'user')) {
-        window.location.href = '../index.html';  // Redirect to non-users to homepage
+        window.location.href = sanitizeURL('/shop/login.html');  // Redirect to non-admins to homepage
     }
 }
 
-function get_user_role() {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
-        return payload.role;
-    } catch (error) {
-        console.error('Error decoding token:', error);
-        return null;
-    }
-}
 
 
 
