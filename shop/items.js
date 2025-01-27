@@ -197,7 +197,7 @@ async function fetchCartItems(userID) {
 
 // Add item to cart
 async function addToCart(itemID) {
-    const userID = getCookie(); // Get userID from cookies
+    const userID = await getCookie(); // Get userID from cookies
     const quantityInput = document.getElementById(`quantity-${itemID}`);
     const quantity = parseInt(quantityInput.value, 10);
     const item = items.find(i => i.id === itemID);
