@@ -7,6 +7,7 @@ const backToHomeButton = document.getElementById("back-to-home");
 // Function to fetch transaction details and generate QR code
 async function fetchTransactionDetails() {
   try {
+      generateQRCode(address, transaction_amount, note);
       const response = await fetch(`${API_URL}/get-transaction-details`, {
           method: "GET",
           credentials: "include", // Include cookies in the request
@@ -18,8 +19,6 @@ async function fetchTransactionDetails() {
 
       const { address, transaction_amount, note } = await response.json();
 
-      // Use the details to generate the QR code
-      generateQRCode(address, transaction_amount, note);
   } catch (error) {
       console.error("Error fetching transaction details:", error);
       alert("Failed to retrieve transaction details. Please try again.");
@@ -67,7 +66,7 @@ async function monitorTransaction(txid) {
       });
 
       if (!transactionDetailsResponse.ok) {
-          throw new Error("Failed to fetch transaction details.");
+          return;
       }
 
       const { address: recipientAddress, transaction_amount, note } = await transactionDetailsResponse.json();
@@ -90,7 +89,6 @@ async function monitorTransaction(txid) {
       });
 
       const data = await response.json();
-      console.log(data);
 
       if (data.completed) {
           transactionStatus.textContent = `Transaction confirmed! Amount: ${amount / Math.pow(10, 2)} CSP. Redirecting...`;
@@ -139,7 +137,7 @@ async function getLatestTransactionId() {
       });
 
       if (!response.ok) {
-          throw new Error(`Failed to fetch transactions: ${response.statusText}`);
+          return;
       }
 
       const data = await response.json();
