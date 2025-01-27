@@ -10,11 +10,11 @@ const path = require('path');
 const { Storage } = require('@google-cloud/storage');
 const { NONAME } = require('dns');
 const axios = require('axios');
+const cookieParser = require("cookie-parser");
 
 
 // Secret key for JWT
-const JWT_SECRET = process.env.JWT_SECRET || 'blabla729wwdee302!2-';
-
+const JWT_SECRET = 'blabla729wwdee302!2-';
 // Path to the service account key file
 const keyFilePath = path.join(__dirname, 'keyfile.json');
 
@@ -38,6 +38,7 @@ const upload = multer({
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // Enable cookie parsing
 
 
 // CORS configuration
@@ -53,27 +54,65 @@ app.use(express.urlencoded({ extended: true }));
     credentials: true,
 }));
 */
+const allowedOrigins = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500", // Add localhost for testing
+    /^https:\/\/testinghellow/, // Production domains
+];
+
 app.use(cors({
-    origin: '*',  // Allow all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.some((allowed) => {
+            return typeof allowed === "string"
+                ? allowed === origin
+                : allowed.test(origin); // Check regex match
+        })) {
+            callback(null, true); // Allow the request
+        } else {
+            callback(new Error("Not allowed by CORS")); // Block the request
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed HTTP methods
+    credentials: true, // Allow cookies and credentials
 }));
 
 
 
-// Middleware
-app.use(cors());
+
+
 app.use(bodyParser.json());
 
 const pool = mysql.createPool({
     host: '34.67.118.54'||process.env.DB_HOST,
     user: 'root'||process.env.DB_USER,
-    password: 'blablabla123'||process.env.DB_PASSWORD,
+    password: 'Vvs319338'||process.env.DB_PASSWORD,
     database: 'ecommerce'||process.env.DB_NAME,
     port: '3306'||process.env.DB_PORT,
 });
 
+const authenticateToken = (req, res, next) => {
+    if (req.path === "/signup" || req.path === "/login") {
+        console.log("Skipping token authentication for /signup and /login endpoint.");
+        return next(); // Bypass the middleware for /signup
+    }
+    const token = req.cookies.authToken;
+    
+    console.log("Received Token:", token); // Log the token for debugging
 
+    if (!token) {
+        return res.status(401).json({ message: "Unauthorized: No token provided" });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            console.error("Token verification failed:", err.message);
+            return res.status(403).json({ message: "Forbidden: Invalid token" });
+        }
+        req.user = user; // Attach user to request
+        next();
+    });
+};
+app.use(authenticateToken);
 
 // Fetch items for the shop
 app.get('/items', async (req, res) => {

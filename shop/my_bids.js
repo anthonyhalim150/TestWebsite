@@ -303,7 +303,7 @@ async function get_balance() {
 
 
       // Fetch wallet balance
-      const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(userID)}`, {
+      const response = await fetch(`${API_URL_USER}/get-wallet-user?userID=${encodeURIComponent(userID)}`, {
           method: 'GET',
           credentials: 'include', // Ensure cookies are included in the request
       });

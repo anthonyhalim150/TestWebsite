@@ -331,7 +331,7 @@ async function get_balance() {
   }
 
   try {
-      const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(sanitizeInput(userID))}`, {
+      const response = await fetch(`${API_URL_USER}/get-wallet-user?userID=${encodeURIComponent(sanitizeInput(userID))}`, {
           method: 'GET',
           credentials: 'include', // Ensure cookies are included in the request
       });

@@ -89,4 +89,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (saveSettingsButton) {
         saveSettingsButton.addEventListener('click', saveSettings); // Save settings on button click
     }
+    const back_btn = document.getElementById("back-btn");
+    if (back_btn){
+    back_btn.addEventListener("click", () => {
+        window.location.href = sanitizeURL("/shop/index.html");
+    });
+}
 });
