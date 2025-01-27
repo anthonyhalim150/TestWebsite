@@ -1,25 +1,37 @@
-function crawler_check(){
-    const userRole = localStorage.getItem('role'); 
-    if (window.location.pathname.includes('/shop/admin') && (userRole !== 'admin' || get_user_role()!== 'admin')) {
-        console.log('tes');
-        window.location.href = '../index.html';  // Redirect to non-admins to homepage
+async function crawler_check(){
+    const userRole = getUserRole(); 
+    if (window.location.pathname.includes('/shop/admin') && (userRole !== 'admin')) {
+        window.location.href = '../login.html';  // Redirect to non-admins to homepage
     }
 }
 
-function get_user_role() {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
+async function getUserRole() {
+    // Return cached role if available
+    if (cachedUserRole) {
+        return cachedUserRole;
+    }
 
     try {
-        const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
-        return payload.role;
+        // Fetch user details from the server
+        const response = await fetch("https://anthonyhalim-150-723848267249.us-central1.run.app/me", {
+            method: "GET",
+            credentials: "include", // Include cookies for authentication
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const userRole = sanitizeInput(data.user.role); // Sanitize the role from the response
+            cachedUserRole = userRole; // Cache the role
+            return cachedUserRole;
+        } else {
+            console.error("Failed to fetch user role: User not authenticated");
+            return null;
+        }
     } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error("Error fetching user role:", error);
         return null;
     }
 }
-
-
 
 // Function to create the sidebar
 function createSidebar() {

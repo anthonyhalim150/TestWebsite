@@ -4,7 +4,7 @@ async function applyInitialSettings() {
     const userID = await getCookie(); // Use the shared getCookie function
     if (!userID) {
         alert('User not logged in.');
-        window.location.href = './login.html';
+        window.location.href = sanitizeURL("/shop/login.html");
         return;
     }
 

@@ -10,10 +10,11 @@ const path = require('path');
 const { Storage } = require('@google-cloud/storage');
 const { NONAME } = require('dns');
 const axios = require('axios');
+const cookieParser = require("cookie-parser");
 
 
 // Secret key for JWT
-const JWT_SECRET = process.env.JWT_SECRET || 'blabla729wwdee302!2-';
+const JWT_SECRET = 'blabla729wwdee302!2-';
 
 // Path to the service account key file
 const keyFilePath = path.join(__dirname, 'keyfile.json');
@@ -38,6 +39,7 @@ const upload = multer({
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // Enable cookie parsing
 
 
 // CORS configuration
@@ -53,27 +55,67 @@ app.use(express.urlencoded({ extended: true }));
     credentials: true,
 }));
 */
+
+
+
+
+const allowedOrigins = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500", // Add localhost for testing
+    /^https:\/\/testinghellow/, // Production domains
+];
+
+
 app.use(cors({
-    origin: '*',  // Allow all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.some((allowed) => {
+            return typeof allowed === "string"
+                ? allowed === origin
+                : allowed.test(origin); // Check regex match
+        })) {
+            callback(null, true); // Allow the request
+        } else {
+            callback(new Error("Not allowed by CORS")); // Block the request
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed HTTP methods
+    credentials: true, // Allow cookies and credentials
 }));
 
-
-
-// Middleware
-app.use(cors());
 app.use(bodyParser.json());
 
 const pool = mysql.createPool({
     host: '34.67.118.54'||process.env.DB_HOST,
     user: 'root'||process.env.DB_USER,
-    password: 'blablabla123'||process.env.DB_PASSWORD,
+    password: 'Vvs319338'||process.env.DB_PASSWORD,
     database: 'ecommerce'||process.env.DB_NAME,
     port: '3306'||process.env.DB_PORT,
 });
 
+// Middleware to Authenticate Token from Cookies
+const authenticateToken = (req, res, next) => {
+    if (req.path === "/signup") {
+        console.log("Skipping token authentication for /signup endpoint.");
+        return next(); // Bypass the middleware for /signup
+    }
+    const token = req.cookies.authToken;
+    
+    console.log("Received Token:", token); // Log the token for debugging
 
+    if (!token) {
+        return res.status(401).json({ message: "Unauthorized: No token provided" });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            console.error("Token verification failed:", err.message);
+            return res.status(403).json({ message: "Forbidden: Invalid token" });
+        }
+        req.user = user; // Attach user to request
+        next();
+    });
+};
+app.use(authenticateToken);
 
 // Sign-up route
 app.post('/signup', async (req, res) => {
@@ -119,7 +161,24 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-app.post('/login', async (req, res) => {
+
+
+
+// Backend endpoint to clear the authToken cookie
+app.post('/logout', (req, res) => {
+    res.clearCookie('authToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+        path: "/", // Ensure the path matches where the cookie was set
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
+});
+
+
+
+// Login Endpoint
+app.post("/login", async (req, res) => {
     const { username, password } = req.body;
 
     try {
@@ -131,7 +190,7 @@ app.post('/login', async (req, res) => {
 
             // Check if the user exists
             if (results.length === 0) {
-                return res.status(401).json({ success: false, error: 'Invalid username or password.' });
+                return res.status(401).json({ success: false, error: "Invalid username or password." });
             }
 
             const user = results[0];
@@ -139,21 +198,31 @@ app.post('/login', async (req, res) => {
             // Verify the password
             const passwordMatch = await bcrypt.compare(password, user.password);
             if (!passwordMatch) {
-                return res.status(401).json({ success: false, error: 'Invalid username or password.' });
+                return res.status(401).json({ success: false, error: "Invalid username or password." });
             }
 
             // Generate a JWT with the user's ID, username, and role
             const token = jwt.sign(
                 { id: user.id, username: user.username, role: user.role },
                 JWT_SECRET,
-                { expiresIn: '2h' } // Token expires in 2 hours
+                { expiresIn: "2h" } // Token expires in 2 hours
             );
+            console.log(token);
 
-            // Send the token and role to the client
-            res.json({
+            // Send the token in an HTTP-only cookie
+            res.clearCookie("authToken", { path: "/" }); // Ensure the path matches the original cookie
+            res.cookie("authToken", token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "None",
+                maxAge: 2 * 60 * 60 * 1000,
+                path: "/",
+            });
+
+            // Optionally return additional information (not the token)
+            res.status(200).json({
                 success: true,
-                token,
-                userID : user.id,
+                userID: user.id,
                 role: user.role,
                 username: user.username,
             });
@@ -161,10 +230,25 @@ app.post('/login', async (req, res) => {
             connection.release();
         }
     } catch (error) {
-        console.error('Error during login:', error);
-        res.status(500).json({ success: false, error: 'Internal server error.' });
+        console.error("Error during login:", error);
+        res.status(500).json({ success: false, error: "Internal server error." });
     }
 });
+
+
+
+
+// Example Protected Route
+app.get("/protected", authenticateToken, (req, res) => {
+    res.json({ message: "This is a protected route", user: req.user });
+});
+app.get("/me", authenticateToken, (req, res) => {
+    // `req.user` is set by the authenticateToken middleware
+    res.status(200).json({ success: true, user: req.user });
+});
+
+
+
 app.get('/all-items', async (req, res) => {
     try {
         const connection = await pool.getConnection();
@@ -280,7 +364,7 @@ app.post('/cart', async (req, res) => {
     if (!userID || !itemID || !quantity || quantity <= 0) {
         return res.status(400).json({ success: false, error: 'Invalid request data' });
     }
-
+    console.log(userID);
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -320,12 +404,12 @@ app.post('/cart', async (req, res) => {
             const newQuantity = existingCartItem[0].quantity + quantity;
             await connection.query(
                 'UPDATE CARTITEMS SET quantity = ?, price = ? WHERE cart_item_id = ?',
-                [newQuantity, newQuantity * price, existingCartItem[0].cart_item_id]
+                [newQuantity, price, existingCartItem[0].cart_item_id]
             );
         } else {
             await connection.query(
                 'INSERT INTO CARTITEMS (cart_id, item_id, quantity, price) VALUES (?, ?, ?, ?)',
-                [cartID, itemID, quantity, quantity * price]
+                [cartID, itemID, quantity, price]
             );
         }
 

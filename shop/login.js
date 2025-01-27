@@ -34,7 +34,7 @@ async function checkLoginStatus() {
 
         if (response.ok) {
             await response.json();
-            window.location.href = "index.html"; // Redirect to the dashboard
+            window.location.href = sanitizeURL("/shop/index.html");
         }
     } catch (error) {
         console.error("Error checking login status:", error);

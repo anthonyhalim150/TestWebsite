@@ -256,7 +256,7 @@ async function checkout(transactionAmount) {
     sessionStorage.setItem('transaction_amount', transactionAmount);
     sessionStorage.setItem('note', note);
     sessionStorage.setItem('type', 'cart');
-    window.location.href = 'Crypto/index.html';
+    window.location.href = '/shop/Crypto/index.html';
 
 }
 

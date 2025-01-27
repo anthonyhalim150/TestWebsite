@@ -7,11 +7,6 @@ const fetchAuctionItems = async () => {
     try {
         // Retrieve the userID from cookies
         const userID = await getCookie();
-        if (!userID) {
-            alert("You must be logged in to see your bids!");
-            window.location.href = "login.html"; // Redirect to login page
-            return;
-        }
 
         // Fetch the auction items for the logged-in user
         const response = await fetch(`${API_URL}/get-bid-by-user`, {
@@ -306,11 +301,6 @@ async function get_balance() {
   try {
       const userID = await getCookie();
 
-      if (!userID) {
-          console.error('User not authenticated. Redirecting to login.');
-          window.location.href = 'login.html';
-          return;
-      }
 
       // Fetch wallet balance
       const response = await fetch(`${API_URL_USER}/get-wallet?userID=${encodeURIComponent(userID)}`, {

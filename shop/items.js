@@ -10,11 +10,11 @@ async function update_login() {
     
     // Fetch userID and role using the functions from auth.js
     const userID = await getCookie();  // Use auth.js to get the user ID securely
-    const role = get_user_role();  // Get the user role using the provided function from auth.js
+    const role = await get_user_role();  // Get the user role using the provided function from auth.js
 
     if (userID) {
         if (role === 'admin') {
-            window.location.href = './admin/index.html'; // Redirect to admin dashboard
+            window.location.href = sanitizeURL("/shop/admin/index.html");
             return;
         }
         
@@ -52,7 +52,7 @@ async function update_login() {
             likesNav.addEventListener('click', (event) => {
                 event.preventDefault(); 
                 show_likes(userID);  // Show liked items
-                window.location.href = 'like.html';
+                window.location.href = sanitizeURL("/shop/like.html");
             });
         }
 
@@ -140,7 +140,7 @@ async function clear_login() {
 
             if (response.ok) {
                 alert('You have logged out.');
-                window.location.href = 'login.html'; // Redirect to login page
+                window.location.href = sanitizeURL("/shop/login.html");
             } else {
                 const data = await response.json();
                 console.error('Logout failed:', data.message);
