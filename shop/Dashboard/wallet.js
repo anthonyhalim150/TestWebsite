@@ -160,6 +160,8 @@ async function confirm_deposit() {
         const calculatedAmount = parseFloat(amount) * Math.pow(10, asset_decimal);
         console.log(sanitizeInput(note));
         console.log(note);
+        console.log(calculatedAmount);
+        console.log(amount);
 
         // Validate the transaction server-side
         const response = await fetch(`${API_URL}/check-transaction`, {
