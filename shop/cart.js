@@ -290,7 +290,7 @@ async function confirm_payment_status() {
 
         
         if (!transactionDetailsResponse.ok) {
-            throw new Error('Failed to fetch transaction details from the server.');
+            return;
         }
 
         // Parse response to extract all required variables
@@ -313,7 +313,7 @@ async function confirm_payment_status() {
             amount:calculatedAmount,
             assetId,
             recipientAddress,
-            orderId: `order_${sanitizeInput(note)} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
+            orderId: sanitizeInput(note),
         };
 
         // Perform server-side transaction verification
@@ -329,8 +329,7 @@ async function confirm_payment_status() {
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('Error during payment confirmation:', error);
-        alert('An error occurred while confirming the payment. Please try again.');
+        return;
     }
 }
 

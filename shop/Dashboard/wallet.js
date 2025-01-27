@@ -143,7 +143,7 @@ async function confirm_deposit() {
         });
 
         if (!transactionDetailsResponse.ok) {
-            throw new Error('Failed to fetch transaction details from the server.');
+            return;
         }
 
         // Parse response to extract all required variables
@@ -170,7 +170,7 @@ async function confirm_deposit() {
                 amount: calculatedAmount,
                 assetId,
                 recipientAddress,
-                orderId: `order_${sanitizeInput(note)} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
+                orderId: sanitizeInput(note),
             }),
             credentials: 'include', // Include cookies for authentication
         });
@@ -201,8 +201,7 @@ async function confirm_deposit() {
             alert('Transaction validation failed. Please try again.');
         }
     } catch (error) {
-        console.error('Error during deposit confirmation:', error);
-        alert('An error occurred while confirming the deposit. Please try again.');
+        return;
     }
 }
 
