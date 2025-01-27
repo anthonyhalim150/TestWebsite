@@ -135,11 +135,6 @@ function check_withdraw_form() {
 }
 
 
-function monitorPaymentStatus() {
-    const interval = setInterval(() => {
-        confirm_deposit();
-    }, 500);
-}
 
 async function confirm_deposit() {
     try {
@@ -207,8 +202,6 @@ async function confirm_deposit() {
             alert("Server error/Data did not match expected values!");
         }
     } catch (error) {
-        console.error("Error during deposit confirmation:", error);
-        alert("An error occurred while confirming the deposit. Please try again.");
     }
 }
 
@@ -329,5 +322,5 @@ document.addEventListener('DOMContentLoaded', () => {
     check_deposit_form();
     check_withdraw_form();
     format_amount();
-    monitorPaymentStatus();
+    confirm_deposit();
 });
