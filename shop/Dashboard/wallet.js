@@ -4,7 +4,7 @@ function check_address_form() {
         address_form.addEventListener('submit', async function (event) {
             event.preventDefault(); // Prevent the default form submission
 
-            const walletAddress = document.getElementById('crypto-wallet').value.trim();
+            const walletAddress = sanitizeInput(document.getElementById('crypto-wallet').value.trim());
             const userID = await getCookie(); // Securely retrieve userID
 
             // Validate the input
@@ -12,7 +12,6 @@ function check_address_form() {
                 alert('Please enter your wallet address.');
                 return;
             }
-
 
             try {
                 const response = await fetch(`${API_URL_USER}/update-address-user`, {
@@ -28,9 +27,9 @@ function check_address_form() {
 
                 if (result.success) {
                     alert('Wallet address updated successfully!');
-                    get_address();
+                    get_address(); // Update wallet address on the frontend
                 } else {
-                    alert('Failed to update wallet address: ' + result.error);
+                    alert(`Failed to update wallet address: ${sanitizeInput(result.error)}`);
                 }
             } catch (error) {
                 console.error('Error updating wallet address:', error);
@@ -47,7 +46,7 @@ function check_deposit_form() {
             event.preventDefault();
 
             const deposit_amount = parseFloat(
-                document.getElementById('deposit-amount').value.replace(/,/g, '').trim()
+                sanitizeInput(document.getElementById('deposit-amount').value.replace(/,/g, '').trim())
             );
             const userID = await getCookie(); // Securely retrieve userID
 
@@ -62,7 +61,7 @@ function check_deposit_form() {
             const owner_address = "AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU";
 
             try {
-                // Send data to the server to store in cookies
+                // Store the deposit transaction securely in cookies
                 const response = await fetch(`${API_URL}/start-transaction`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -77,10 +76,10 @@ function check_deposit_form() {
                 const result = await response.json();
 
                 if (result.success) {
-                    sessionStorage.setItem('type', 'deposit');
+                    document.cookie = `type=deposit; path=/; secure`;
                     window.location.href = sanitizeURL("/shop/Crypto/crypto_pay.html"); // Redirect safely
                 } else {
-                    alert('Failed to initiate transaction: ' + result.error);
+                    alert(`Failed to initiate transaction: ${sanitizeInput(result.error)}`);
                 }
             } catch (error) {
                 console.error('Error initiating transaction:', error);
@@ -96,15 +95,16 @@ function check_withdraw_form() {
         withdraw_form.addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            const withdraw_amount = parseFloat(document.getElementById('withdraw-amount').value.replace(/,/g, '').trim());
+            const withdraw_amount = parseFloat(
+                sanitizeInput(document.getElementById('withdraw-amount').value.replace(/,/g, '').trim())
+            );
 
-            if (!withdraw_amount) {
+            if (!withdraw_amount || withdraw_amount <= 0) {
                 alert('Please enter a valid amount!');
                 return;
             }
 
             const userID = await getCookie(); // Securely retrieve userID
-
 
             try {
                 const response = await fetch(`${API_URL_USER}/withdraw-user`, {
@@ -120,37 +120,35 @@ function check_withdraw_form() {
                 });
 
                 const result = await response.json();
-                if (response.ok) {
-                    alert(`Withdrawal Successful!`);
-                    get_balance();
+                if (response.ok && result.success) {
+                    alert('Withdrawal Successful!');
+                    get_balance(); // Update wallet balance
                 } else {
-                    alert(`Withdrawal failed: ${result.error || result.message}`);
+                    alert(`Withdrawal failed: ${sanitizeInput(result.error || result.message)}`);
                 }
             } catch (error) {
-                console.error("Error during withdrawal:", error);
-                alert("An error occurred. Please try again.");
+                console.error('Error during withdrawal:', error);
+                alert('An error occurred. Please try again.');
             }
         });
     }
 }
 
-
-
 async function confirm_deposit() {
     try {
-        // Fetch transaction details from the server
         const transactionDetailsResponse = await fetch(`${API_URL}/get-transaction-details`, {
-            method: "GET",
-            credentials: "include", // Include HttpOnly cookies
+            method: 'GET',
+            credentials: 'include', // Include cookies for authentication
         });
 
         if (!transactionDetailsResponse.ok) {
-            throw new Error("Failed to fetch transaction details from the server.");
+            throw new Error('Failed to fetch transaction details from the server.');
         }
 
         const { txid, transaction_amount, note, recipient_address } = await transactionDetailsResponse.json();
 
         if (!txid || !transaction_amount || !note || !recipient_address) {
+            alert('Invalid transaction details. Please try again.');
             return;
         }
 
@@ -158,49 +156,48 @@ async function confirm_deposit() {
         const asset_decimal = 2;
         const amount = parseFloat(transaction_amount) * Math.pow(10, asset_decimal);
 
-        // Validate the transaction using the details
         const response = await fetch(`${API_URL}/check-transaction`, {
-            method: "POST",
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 txid,
                 amount,
                 assetId,
                 recipientAddress: recipient_address,
-                orderId: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
+                orderId: `order_${sanitizeInput(note)} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
             }),
-            credentials: "include", // Include HttpOnly cookies
+            credentials: 'include', // Include cookies for authentication
         });
 
         const data = await response.json();
 
         if (data.completed) {
-            const userID = await getCookie(); // Securely retrieve userID using await getCookie()
-
+            const userID = await getCookie(); // Securely retrieve userID
             const converted_amount = parseFloat(amount) / Math.pow(10, asset_decimal);
 
-            // Update the user's wallet balance
             const walletResponse = await fetch(`${API_URL_USER}/update-wallet-user`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userID, amount: converted_amount }),
-                credentials: "include", // Include HttpOnly cookies
+                credentials: 'include', // Include cookies for authentication
             });
 
             const result = await walletResponse.json();
 
-            if (result.success) {
-                alert("Deposit Successful!");
+            if (walletResponse.ok && result.success) {
+                alert('Deposit Successful!');
                 get_balance(); // Update user balance
             } else {
-                alert("Deposit failed: " + result.error);
+                alert(`Deposit failed: ${sanitizeInput(result.error)}`);
             }
         } else {
-            alert("Server error/Data did not match expected values!");
+            alert('Transaction validation failed. Please try again.');
         }
     } catch (error) {
+        console.error('Error during deposit confirmation:', error);
+        alert('An error occurred while confirming the deposit. Please try again.');
     }
 }
 
@@ -214,10 +211,12 @@ async function get_balance() {
             method: 'GET',
             credentials: 'include', // Include cookies for authentication
         });
+
         if (response.ok) {
             const data = await response.json();
             if (data.success) {
-                document.getElementById('current-balance').textContent = `${parseFloat(data.wallet).toLocaleString('en-US') || 0} CSP`;
+                const sanitizedBalance = parseFloat(data.wallet).toLocaleString('en-US') || '0';
+                document.getElementById('current-balance').textContent = `${sanitizedBalance} CSP`;
                 return parseFloat(data.wallet);
             } else {
                 console.error('Error fetching wallet:', data.error);
@@ -242,11 +241,13 @@ async function get_address() {
             method: 'GET',
             credentials: 'include', // Include cookies for authentication
         });
+
         if (response.ok) {
             const data = await response.json();
             if (data.success) {
-                document.getElementById('current-address').textContent = data.address || 'Not available';
-                return data.address || 'Not available';
+                const sanitizedAddress = sanitizeInput(data.address || 'Not available');
+                document.getElementById('current-address').textContent = sanitizedAddress;
+                return sanitizedAddress;
             } else {
                 console.error('Error fetching address:', data.error);
                 document.getElementById('current-address').textContent = 'Error loading address';
@@ -263,55 +264,41 @@ async function get_address() {
 
 // Function to format deposit and withdrawal amounts with commas and decimals
 function format_amount() {
-    const depositInput = document.getElementById("deposit-amount");
-    const withdrawInput = document.getElementById("withdraw-amount");
+    const depositInput = document.getElementById('deposit-amount');
+    const withdrawInput = document.getElementById('withdraw-amount');
 
-    function formatWithCommas(value) {
-        return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
+    const formatWithCommas = (value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    const handleInput = (event) => {
+        let value = event.target.value.replace(/,/g, ''); // Remove commas
+        if (!isNaN(value) && value !== '') {
+            event.target.value = formatWithCommas(value); // Add commas back
+        }
+    };
+
+    const handleBlur = (event) => {
+        let value = event.target.value.replace(/,/g, ''); // Remove commas for processing
+        if (value === '' || isNaN(value)) {
+            event.target.value = ''; // Clear invalid input
+        } else {
+            event.target.value = parseFloat(value).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        }
+    };
 
     if (depositInput) {
-        depositInput.addEventListener("input", (event) => {
-            let value = event.target.value.replace(/,/g, ''); // Remove commas
-            if (!isNaN(value) && value !== "") {
-                event.target.value = formatWithCommas(value); // Add commas back
-            }
-        });
-
-        depositInput.addEventListener("blur", (event) => {
-            let value = event.target.value.replace(/,/g, ''); // Remove commas for processing
-            if (value === "" || isNaN(value)) {
-                event.target.value = ""; // Clear invalid input
-            } else {
-                event.target.value = parseFloat(value).toLocaleString('en-US', { 
-                    minimumFractionDigits: 2, 
-                    maximumFractionDigits: 2 
-                });
-            }
-        });
+        depositInput.addEventListener('input', handleInput);
+        depositInput.addEventListener('blur', handleBlur);
     }
 
     if (withdrawInput) {
-        withdrawInput.addEventListener("input", (event) => {
-            let value = event.target.value.replace(/,/g, ''); // Remove commas
-            if (!isNaN(value) && value !== "") {
-                event.target.value = formatWithCommas(value); // Add commas back
-            }
-        });
-
-        withdrawInput.addEventListener("blur", (event) => {
-            let value = event.target.value.replace(/,/g, ''); // Remove commas for processing
-            if (value === "" || isNaN(value)) {
-                event.target.value = ""; // Clear invalid input
-            } else {
-                event.target.value = parseFloat(value).toLocaleString('en-US', { 
-                    minimumFractionDigits: 2, 
-                    maximumFractionDigits: 2 
-                });
-            }
-        });
+        withdrawInput.addEventListener('input', handleInput);
+        withdrawInput.addEventListener('blur', handleBlur);
     }
 }
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
