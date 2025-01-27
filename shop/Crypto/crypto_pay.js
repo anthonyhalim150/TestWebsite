@@ -16,8 +16,8 @@ async function fetchTransactionDetails() {
           throw new Error("Failed to fetch transaction details.");
       }
 
-      const { address, transaction_amount, note } = await response.json();
-      generateQRCode(address, transaction_amount, note);
+      const { recipientAddress, transaction_amount, note } = await response.json();
+      generateQRCode(recipientAddress, transaction_amount, note);
 
   } catch (error) {
       console.error("Error fetching transaction details:", error);
@@ -126,7 +126,7 @@ async function getLatestTransactionId() {
           credentials: "include", // Include cookies in the request
       });
 
-      const { address: recipientAddress } = await transactionDetailsResponse.json();
+      const { recipientAddress } = await transactionDetailsResponse.json();
       const sanitizedAddress = sanitizeInput(recipientAddress);
 
       const indexerUrl = "https://testnet-idx.4160.nodely.dev/v2/accounts";
