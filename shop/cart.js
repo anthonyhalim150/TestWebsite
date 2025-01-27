@@ -305,12 +305,11 @@ async function confirm_payment_status() {
 
 
         const asset_decimal = 2;
-        const calculatedAmount = parseFloat(amount) * Math.pow(10, asset_decimal);
 
         // Prepare the payload for transaction verification
         const verificationPayload = {
             txid,
-            amount:calculatedAmount,
+            amount:amount,
             assetId,
             recipientAddress,
             orderId: sanitizeInput(note),

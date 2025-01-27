@@ -157,11 +157,6 @@ async function confirm_deposit() {
         }
 
         const asset_decimal = 2; // Assuming CSP uses 2 decimals
-        const calculatedAmount = parseFloat(amount) * Math.pow(10, asset_decimal);
-        console.log(sanitizeInput(note));
-        console.log(note);
-        console.log(calculatedAmount);
-        console.log(amount);
 
         // Validate the transaction server-side
         const response = await fetch(`${API_URL}/check-transaction`, {
@@ -171,7 +166,7 @@ async function confirm_deposit() {
             },
             body: JSON.stringify({
                 txid,
-                amount: calculatedAmount,
+                amount: amount,
                 assetId,
                 recipientAddress,
                 orderId: sanitizeInput(note),
@@ -183,7 +178,7 @@ async function confirm_deposit() {
 
         if (data.completed) {
             const userID = await getCookie(); // Securely retrieve userID
-            const convertedAmount = parseFloat(amount);
+            const convertedAmount = parseFloat(amount) / Math.pow(10, asset_decimal);
 
             // Update the user's wallet on success
             const walletResponse = await fetch(`${API_URL_USER}/update-wallet-user`, {
