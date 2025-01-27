@@ -46,7 +46,9 @@ function check_deposit_form() {
         deposit_form.addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            const deposit_amount = parseFloat(document.getElementById('deposit-amount').value.replace(/,/g, '').trim());
+            const deposit_amount = parseFloat(
+                document.getElementById('deposit-amount').value.replace(/,/g, '').trim()
+            );
             const userID = await getCookie(); // Securely retrieve userID
 
             if (!deposit_amount) {
@@ -54,17 +56,36 @@ function check_deposit_form() {
                 return;
             }
 
-            sessionStorage.clear();
             const serverSecret = "OneTwoThreeOneTwoThrees";
             const currentTime = new Date().toISOString();
-            const note = btoa(`${userID}:${serverSecret}:${currentTime}`); // Simple Base64 encoding (replace with a secure hash if needed)
+            const note = btoa(`${userID}:${serverSecret}:${currentTime}`);
             const owner_address = "AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU";
 
-            sessionStorage.setItem('address', owner_address);
-            sessionStorage.setItem('transaction_amount', deposit_amount);
-            sessionStorage.setItem('note', note);
-            sessionStorage.setItem('type', 'deposit');
-            window.location.href = '../Crypto/crypto_pay.html';
+            try {
+                // Send data to the server to store in cookies
+                const response = await fetch(`${API_URL}/start-transaction`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: owner_address,
+                        transaction_amount: deposit_amount,
+                        note,
+                        type: 'deposit',
+                    }),
+                    credentials: 'include', // Include cookies
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = sanitizeURL("/shop/Crypto/crypto_payment.html"); // Redirect safely
+                } else {
+                    alert('Failed to initiate transaction: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error initiating transaction:', error);
+                alert('An error occurred. Please try again.');
+            }
         });
     }
 }
@@ -100,7 +121,7 @@ function check_withdraw_form() {
 
                 const result = await response.json();
                 if (response.ok) {
-                    alert(`Withdrawal Successful! Transaction ID: ${result.blockchainTransaction.transaction_id}`);
+                    alert(`Withdrawal Successful!`);
                     get_balance();
                 } else {
                     alert(`Withdrawal failed: ${result.error || result.message}`);
@@ -116,46 +137,47 @@ function check_withdraw_form() {
 
 function monitorPaymentStatus() {
     const interval = setInterval(() => {
-        const paymentStatus = sessionStorage.getItem("payment_status");
-        
-        if (paymentStatus === "success") {
-            clearInterval(interval);
-            confirm_deposit();
-        } else if (paymentStatus === "failed") {
-            alert("Payment failed. Please try again.");
-            sessionStorage.clear();
-            clearInterval(interval);
-        }
+        confirm_deposit();
     }, 500);
 }
 
 async function confirm_deposit() {
-    const recipientAddress = "AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU";
-    const note = sessionStorage.getItem('note');
-    const assetId = 732664447; // Your CSP asset ID
-    const asset_decimal = 2;
-    const amount = parseFloat(sessionStorage.getItem('transaction_amount')) * Math.pow(10, asset_decimal);
-    const txid = sessionStorage.getItem('txid'); // Ensure transaction ID is fetched from session storage
-
-    if (!txid || !amount || !note || !recipientAddress) {
-        alert("Missing required transaction details. Please try again.");
-        return;
-    }
-
     try {
+        // Fetch transaction details from the server
+        const transactionDetailsResponse = await fetch(`${API_URL}/get-transaction-details`, {
+            method: "GET",
+            credentials: "include", // Include HttpOnly cookies
+        });
+
+        if (!transactionDetailsResponse.ok) {
+            throw new Error("Failed to fetch transaction details from the server.");
+        }
+
+        const { txid, transaction_amount, note, recipient_address } = await transactionDetailsResponse.json();
+
+        if (!txid || !transaction_amount || !note || !recipient_address) {
+            alert("Missing required transaction details. Please try again.");
+            return;
+        }
+
+        const assetId = 732664447; // Your CSP asset ID
+        const asset_decimal = 2;
+        const amount = parseFloat(transaction_amount) * Math.pow(10, asset_decimal);
+
+        // Validate the transaction using the details
         const response = await fetch(`${API_URL}/check-transaction`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                txid, // Transaction ID
-                amount, // Amount in CSP
-                assetId, // Asset ID
-                recipientAddress, // Recipient address
-                orderId: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`, // Include the note
+                txid,
+                amount,
+                assetId,
+                recipientAddress: recipient_address,
+                orderId: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
             }),
-            credentials:'include',
+            credentials: "include", // Include HttpOnly cookies
         });
 
         const data = await response.json();
@@ -163,39 +185,30 @@ async function confirm_deposit() {
         if (data.completed) {
             const userID = await getCookie(); // Securely retrieve userID using await getCookie()
 
-
             const converted_amount = parseFloat(amount) / Math.pow(10, asset_decimal);
-            try {
-                const walletResponse = await fetch(`${API_URL_USER}/update-wallet-user`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userID, amount: converted_amount }),
-                    credentials: 'include', // Include cookies for authentication
-                });
 
-                const result = await walletResponse.json();
+            // Update the user's wallet balance
+            const walletResponse = await fetch(`${API_URL_USER}/update-wallet-user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userID, amount: converted_amount }),
+                credentials: "include", // Include HttpOnly cookies
+            });
 
-                if (result.success) {
-                    alert('Deposit Successful!');
-                    get_balance(); // Update user balance
-                    sessionStorage.clear();
-                } else {
-                    alert('Deposit failed: ' + result.error);
-                    sessionStorage.clear();
-                }
-            } catch (error) {
-                console.error('Error during deposit:', error);
-                alert('An error occurred during deposit. Please try again.');
-                sessionStorage.clear();
+            const result = await walletResponse.json();
+
+            if (result.success) {
+                alert("Deposit Successful!");
+                get_balance(); // Update user balance
+            } else {
+                alert("Deposit failed: " + result.error);
             }
         } else {
             alert("Server error/Data did not match expected values!");
-            sessionStorage.clear();
         }
     } catch (error) {
-        console.error("Error during transaction verification:", error);
-        alert("An error occurred while verifying the transaction. Please try again.");
-        sessionStorage.clear();
+        console.error("Error during deposit confirmation:", error);
+        alert("An error occurred while confirming the deposit. Please try again.");
     }
 }
 
@@ -317,5 +330,4 @@ document.addEventListener('DOMContentLoaded', () => {
     check_withdraw_form();
     format_amount();
     monitorPaymentStatus();
-
 });

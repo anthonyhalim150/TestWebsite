@@ -94,8 +94,8 @@ const pool = mysql.createPool({
 
 // Middleware to Authenticate Token from Cookies
 const authenticateToken = (req, res, next) => {
-    if (req.path === "/signup") {
-        console.log("Skipping token authentication for /signup endpoint.");
+    if (req.path === "/signup" || req.path === "/login") {
+        console.log("Skipping token authentication for /signup and /login endpoint.");
         return next(); // Bypass the middleware for /signup
     }
     const token = req.cookies.authToken;
@@ -210,7 +210,12 @@ app.post("/login", async (req, res) => {
             console.log(token);
 
             // Send the token in an HTTP-only cookie
-            res.clearCookie("authToken", { path: "/" }); // Ensure the path matches the original cookie
+            res.clearCookie('authToken', {
+                httpOnly: true,
+                secure: true,
+                sameSite: "None",
+                path: "/", // Ensure the path matches where the cookie was set
+            });
             res.cookie("authToken", token, {
                 httpOnly: true,
                 secure: true,
@@ -1752,7 +1757,547 @@ app.post('/check-transaction', async (req, res) => {
     }
 });
 
+app.get('/items-user', async (req, res) => {
+    const userID = req.query.userID; // Get userID from query parameter
 
+    // Validate userID if required (optional)
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'UserID is required.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                SELECT * FROM ITEMS
+                WHERE created_by = ?`; 
+  
+            const [results] = await connection.query(query, [userID]);
+            res.json({ success: true, items: results });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        res.json({ success: false, error: 'Error fetching items.' });
+    }
+});
+
+
+
+app.get('/shop-metrics-user', async (req, res) => {
+    const { startDate, endDate, userID } = req.query;
+    
+    // Ensure userID is provided
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'UserID is required.' });
+    }
+
+    const connection = await pool.getConnection();
+
+    try {
+        const conditions = [];
+        const values = [];
+
+        // Add conditions based on query parameters
+        if (startDate) {
+            conditions.push('TRANSACTIONS.created_at >= ?');
+            values.push(startDate);
+        }
+        if (endDate) {
+            conditions.push('TRANSACTIONS.created_at <= ?');
+            values.push(endDate);
+        }
+
+        // Filter by userID (products created by the user)
+        conditions.push('ITEMS.created_by = ?');
+        values.push(userID);
+
+        // Build WHERE clause dynamically
+        const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+        // Query for sales over time
+        const [salesOverTime] = await connection.query(`
+            SELECT DATE(TRANSACTIONS.created_at) AS timeLabel, 
+                   COUNT(TRANSACTIONS.transaction_id) AS totalTransactions,
+                   SUM(TRANSACTIONS.total_amount) AS totalAmounts
+            FROM TRANSACTIONS
+            JOIN SALE_ITEMS ON SALE_ITEMS.transaction_id = TRANSACTIONS.transaction_id
+            JOIN ITEMS ON SALE_ITEMS.item_id = ITEMS.id
+            ${whereClause}
+            GROUP BY DATE(TRANSACTIONS.created_at)
+            ORDER BY DATE(TRANSACTIONS.created_at)
+        `, values);
+
+        // Query for product metrics over time
+        const [productMetricsOverTime] = await connection.query(`
+            SELECT DATE(TRANSACTIONS.created_at) AS timeLabel,
+                   SUM(SALE_ITEMS.quantity) AS itemsSold,
+                   IFNULL(SUM(ITEMS.stock), 0) AS stockRemaining
+            FROM SALE_ITEMS
+            JOIN ITEMS ON SALE_ITEMS.item_id = ITEMS.id
+            JOIN TRANSACTIONS ON SALE_ITEMS.transaction_id = TRANSACTIONS.transaction_id
+            ${whereClause}
+            GROUP BY DATE(TRANSACTIONS.created_at)
+            ORDER BY DATE(TRANSACTIONS.created_at)
+        `, values);
+
+        // Query for product comparison
+        const [productComparison] = await connection.query(`
+            SELECT ITEMS.name AS productName,
+                   SUM(SALE_ITEMS.quantity) AS itemsSold
+            FROM SALE_ITEMS
+            JOIN ITEMS ON SALE_ITEMS.item_id = ITEMS.id
+            ${whereClause}
+            GROUP BY ITEMS.name
+            ORDER BY ITEMS.name
+        `, values);
+
+        // Construct and send the response
+        res.json({
+            success: true,
+            salesOverTime: {
+                timeLabels: salesOverTime.map(row => row.timeLabel),
+                totalAmounts: salesOverTime.map(row => row.totalAmounts),
+            },
+            productMetricsOverTime: {
+                timeLabels: productMetricsOverTime.map(row => row.timeLabel),
+                itemsSold: productMetricsOverTime.map(row => row.itemsSold),
+                stockRemaining: productMetricsOverTime.map(row => row.stockRemaining),
+            },
+            productComparison: {
+                productNames: productComparison.map(row => row.productName),
+                itemsSold: productComparison.map(row => row.itemsSold),
+            },
+        });        
+    } catch (error) {
+        console.error('Error fetching shop metrics:', error);
+        res.status(500).json({ success: false, error: 'No data found.' });
+    } finally {
+        connection.release();
+    }
+});
+
+
+
+
+
+
+app.put('/items-user/:id', upload.single('product-image'), async (req, res) => {
+    const productId = req.params.id;
+    const { name, price, stock, description, category } = req.body;
+
+    try {
+        const connection = await pool.getConnection();
+
+        try {
+            // Fetch the existing image URL
+            const [rows] = await connection.query('SELECT image FROM ITEMS WHERE id = ?', [productId]);
+
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Product not found.' });
+            }
+
+            const oldImageUrl = rows[0].image;
+            const oldImageName = oldImageUrl ? oldImageUrl.split('/').slice(-2).join('/') : null; // Extract the file name from the URL
+
+            // Handle new image upload
+            let newImagePath = oldImageUrl;
+            if (req.file) {
+                const uniqueName = `Products/${Date.now()}${path.extname(req.file.originalname)}`;
+                const blob = bucket.file(uniqueName);
+                const blobStream = blob.createWriteStream({
+                    metadata: { contentType: req.file.mimetype },
+                });
+
+                await new Promise((resolve, reject) => {
+                    blobStream.on('error', reject);
+                    blobStream.on('finish', resolve);
+                    blobStream.end(req.file.buffer);
+                });
+
+                newImagePath = `https://storage.googleapis.com/${bucketName}/${uniqueName}`;
+
+                // Remove the old image from Google Cloud Storage
+                if (oldImageName) {
+                    await bucket.file(oldImageName).delete().catch((err) => {
+                        console.error('Error deleting old image:', err.message);
+                    });
+                }
+            }
+
+            // Update product details in the database
+            const updateQuery = `
+                UPDATE ITEMS
+                SET name = ?, price = ?, stock = ?, description = ?, category = ?, image = ?
+                WHERE id = ?
+            `;
+            const [result] = await connection.query(updateQuery, [
+                name,
+                price,
+                stock,
+                description,
+                category,
+                newImagePath,
+                productId,
+            ]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, error: 'Product not found.' });
+            }
+
+            res.status(200).json({ success: true, message: 'Product updated successfully!' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error updating product:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to update product.', details: error.message });
+    }
+});
+
+
+app.get('/transactions-user', async (req, res) => {
+    const userID = req.query.userID;  // Get userID from query parameter
+
+    // Validate userID
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'UserID is required.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                SELECT 
+                    t.transaction_id, 
+                    u.username, 
+                    t.total_amount, 
+                    t.created_at,
+                    GROUP_CONCAT(CONCAT('Item: ', i.name, ', Quantity: ', s.quantity, ', Price: $', FORMAT(s.price, 2)) SEPARATOR '\n') AS description
+                FROM TRANSACTIONS t
+                JOIN USERS u ON t.user_id = u.id
+                JOIN SALE_ITEMS s ON t.transaction_id = s.transaction_id
+                JOIN ITEMS i ON s.item_id = i.id
+                WHERE i.created_by = ?  -- Only include items created by the given user
+                GROUP BY t.transaction_id
+                ORDER BY t.created_at DESC;
+            `;
+            const [results] = await connection.query(query, [userID]);
+            res.json(results);
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch transactions.' });
+    }
+});
+
+
+app.get('/comments-user', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                SELECT 
+                    u.username, 
+                    c.comments_id,
+                    c.comment, 
+                    c.created_at
+                FROM COMMENTS c
+                JOIN USERS u ON c.user_id = u.id
+                ORDER BY c.created_at DESC;
+            `;
+            const [results] = await connection.query(query);
+            res.json({success: true, items:results}); //Biar organized, sends the results in key-value pair jdi ada clear structure for response, not just send the value, also tells the system whether it is successful or not.
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch comments.' });
+    }
+});
+
+
+
+
+app.get("/expired-auction-user", async (req, res) => {
+    const userID = req.query.userID; // Get the userID from the query string
+
+    // If userID is required for this route, validate it
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'UserID is required.' });
+    }
+    const query = `
+    SELECT * 
+    FROM AUCTION_ITEMS 
+    WHERE is_expired = TRUE
+    AND created_by = ?`;//NOW() is guranteed to be the server date and cannot be manipulated
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        const [results] = await connection.query(query, [userID]);
+        res.json({ success: true, items: results });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error("Error fetching auction items:", err);
+      res.status(500).json({ error: "Database query failed" });
+    }
+});
+//TBA auctions
+app.get("/upcoming-auction-user", async (req, res) => {
+    const userID = req.query.userID; // Get userID from query parameter
+
+    // Validate userID
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'UserID is required.' });
+    }
+
+    const query = `
+    SELECT * 
+    FROM AUCTION_ITEMS 
+    WHERE (starting_time > NOW() OR starting_time IS NULL) 
+    AND created_by = ?`; // Use ? placeholder for userID
+  
+    try {
+        const connection = await pool.getConnection();
+        try {
+            // Pass userID as the value for the placeholder
+            const [results] = await connection.query(query, [userID]);
+            res.json({ success: true, items: results });
+        } finally {
+            connection.release();
+        }
+    } catch (err) {
+        console.error("Error fetching upcoming auction items:", err);
+        res.status(500).json({ error: "Database query failed" });
+    }
+});
+
+
+
+app.post('/update-address-user', async (req, res) => {
+    const { userID, walletAddress } = req.body;
+
+    if (!userID || !walletAddress) {
+        return res.status(400).json({ success: false, error: 'User ID and wallet address are required.' });
+    }
+
+    const connection = await pool.getConnection();
+
+    try {
+        const [result] = await connection.query(
+            'UPDATE USERS SET address = ? WHERE id = ?',
+            [walletAddress, userID]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, error: 'User not found.' });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error updating wallet address:', error);
+        res.status(500).json({ success: false, error: 'Database error.' });
+    } finally {
+        connection.release();
+    }
+});
+
+app.post('/update-wallet-user', async (req, res) => {
+    let { userID, amount } = req.body;
+
+    if (!userID || !amount) {
+        return res.status(400).json({ success: false, error: 'User ID and amount are required.' });
+    }
+    amount = parseFloat(amount);
+
+    if (isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ success: false, error: 'Invalid amount.' });
+    }
+
+    const connection = await pool.getConnection();
+
+    try {
+        const [result] = await connection.query(
+            'UPDATE USERS SET wallet = wallet + ? WHERE id = ?',
+            [amount, userID]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, error: 'User not found.' });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error depositing:', error);
+        res.status(500).json({ success: false, error: 'Database error.' });
+    } finally {
+        connection.release();
+    }
+});
+
+// Endpoint to get the wallet balance
+app.get('/get-wallet-user', async (req, res) => {
+    const userID = req.query.userID; // Get userID from query parameter
+
+    // Validate userID
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'UserID is required.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                SELECT wallet FROM USERS
+                WHERE id = ?`; // Replace `id` with your user identifier column name if different
+  
+            const [results] = await connection.query(query, [userID]);
+
+            if (results.length > 0) {
+                res.json({ success: true, wallet: results[0].wallet });
+            } else {
+                res.status(404).json({ success: false, error: 'User not found.' });
+            }
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        res.status(500).json({ success: false, error: 'Error fetching wallet.' });
+    }
+});
+
+// Endpoint to get the wallet address
+app.get('/get-address-user', async (req, res) => {
+    const userID = req.query.userID; // Get userID from query parameter
+
+    // Validate userID
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'UserID is required.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                SELECT address FROM USERS
+                WHERE id = ?`; // Replace `id` with your user identifier column name if different
+  
+            const [results] = await connection.query(query, [userID]);
+
+            if (results.length > 0) {
+                res.json({ success: true, address: results[0].address });
+            } else {
+                res.status(404).json({ success: false, error: 'User not found.' });
+            }
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching address:', error);
+        res.status(500).json({ success: false, error: 'Error fetching address.' });
+    }
+});
+
+app.post('/wallet-checkout-user', async(req, res)=> {
+    const { userID, amount } = req.body;
+    if (!userID || !amount){
+        return res.status(400).json({ success: false, error: 'UserID and amount is required.' });
+    }
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = 
+                `UPDATE USERS
+                 SET wallet = wallet - ?
+                 WHERE id = ?`; // Replace `id` with your user identifier column name if different
+  
+            const [results] = await connection.query(query, [amount,userID]);
+
+            if (results.affectedRows > 0) {
+                res.json({ success: true});
+            } else {
+                res.status(404).json({ success: false, error: 'User not found.' });
+            }
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        res.status(500).json({ success: false, error: 'Error fetching wallet.' });
+    }
+
+});
+app.post('/withdraw-user', async (req, res) => {
+    const { userID, amount } = req.body;
+
+    if (!userID || !amount) {
+        return res.status(400).json({ message: "User ID and amount are required." });
+    }
+
+    const connection = await pool.getConnection();
+
+    try {
+        // Start database transaction
+        await connection.beginTransaction();
+
+        // Check the user's current wallet balance and address
+        const [rows] = await connection.query('SELECT wallet, address FROM USERS WHERE id = ?', [userID]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const currentBalance = parseFloat(rows[0].wallet);
+        const userAddress = rows[0].address;
+
+        if (currentBalance < amount) {
+            return res.status(400).json({ message: "Insufficient balance." });
+        }
+
+        // Call Flask endpoint for blockchain withdrawal
+        try {
+            const flaskResponse = await axios.post(`https://crypto-723848267249.us-central1.run.app/withdraw`, {
+                address: userAddress,
+                amount: amount,
+            });
+
+            // Check if the Flask API succeeded
+            if (flaskResponse.data.status !== 'success') {
+                throw new Error("Blockchain withdrawal failed.");
+            }
+
+            // Deduct the amount from the wallet only after Flask withdrawal succeeds
+            const newBalance = currentBalance - amount;
+            await connection.query('UPDATE USERS SET wallet = ? WHERE id = ?', [newBalance, userID]);
+
+            // Commit the database transaction
+            await connection.commit();
+
+            // Return success response
+            return res.json({
+                message: "Withdrawal successful.",
+                newBalance,
+                blockchainTransaction: flaskResponse.data,
+            });
+        } catch (flaskError) {
+            console.error("Error in Flask withdraw API:", flaskError.response?.data || flaskError.message);
+            throw new Error("Blockchain withdrawal failed.");
+        }
+    } catch (error) {
+        // Rollback transaction on any failure
+        await connection.rollback();
+        console.error("Error processing withdrawal:", error.message);
+        return res.status(500).json({ error: error.message });
+    } finally {
+        connection.release(); // Ensure connection is always released
+    }
+});
 
 
 
