@@ -74,6 +74,7 @@ async function monitorTransaction(txid) {
               recipientAddress,
               orderId: `order_${note} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`, // Include the note
           }),
+          credentials: "include"
       });
       const data = await response.json();
 

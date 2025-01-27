@@ -70,7 +70,6 @@ function check_deposit_form() {
                         address: owner_address,
                         transaction_amount: deposit_amount,
                         note,
-                        type: 'deposit',
                     }),
                     credentials: 'include', // Include cookies
                 });
@@ -78,6 +77,7 @@ function check_deposit_form() {
                 const result = await response.json();
 
                 if (result.success) {
+                    sessionStorage.setItem('type', 'deposit');
                     window.location.href = sanitizeURL("/shop/Crypto/crypto_pay.html"); // Redirect safely
                 } else {
                     alert('Failed to initiate transaction: ' + result.error);
