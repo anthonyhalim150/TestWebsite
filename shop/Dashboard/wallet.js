@@ -158,6 +158,8 @@ async function confirm_deposit() {
 
         const asset_decimal = 2; // Assuming CSP uses 2 decimals
         const calculatedAmount = parseFloat(amount) * Math.pow(10, asset_decimal);
+        console.log(sanitizeInput(note));
+        console.log(note);
 
         // Validate the transaction server-side
         const response = await fetch(`${API_URL}/check-transaction`, {
