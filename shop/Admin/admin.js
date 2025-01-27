@@ -1,35 +1,7 @@
 async function crawler_check(){
-    const userRole = getUserRole(); 
+    const userRole = get_user_role(); 
     if (window.location.pathname.includes('/shop/admin') && (userRole !== 'admin')) {
-        window.location.href = '../login.html';  // Redirect to non-admins to homepage
-    }
-}
-
-async function getUserRole() {
-    // Return cached role if available
-    if (cachedUserRole) {
-        return cachedUserRole;
-    }
-
-    try {
-        // Fetch user details from the server
-        const response = await fetch("https://anthonyhalim-150-723848267249.us-central1.run.app/me", {
-            method: "GET",
-            credentials: "include", // Include cookies for authentication
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            const userRole = sanitizeInput(data.user.role); // Sanitize the role from the response
-            cachedUserRole = userRole; // Cache the role
-            return cachedUserRole;
-        } else {
-            console.error("Failed to fetch user role: User not authenticated");
-            return null;
-        }
-    } catch (error) {
-        console.error("Error fetching user role:", error);
-        return null;
+        window.location.href = sanitizeURL('/shop/login.html');  // Redirect to non-admins to homepage
     }
 }
 

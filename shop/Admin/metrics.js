@@ -1,18 +1,27 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app/shop-metrics';
-
-document.getElementById('filter-button').addEventListener('click', fetchFilteredMetrics);
+const filter_button = document.getElementById('filter-button')
+if (filter_button){
+    filter_button.addEventListener('click', fetchFilteredMetrics);
+}
 
 let salesChart, productMetricsChart, productComparisonChart, userRegistrationChart; // Chart instances
 
 async function fetchFilteredMetrics() {
-    const startDate = document.getElementById('start-date').value;
-    const endDate = document.getElementById('end-date').value;
+    const startDate = sanitizeInput(document.getElementById('start-date').value);
+    const endDate = sanitizeInput(document.getElementById('end-date').value);
+
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates.');
+        return;
+    }
 
     const params = new URLSearchParams({ startDate, endDate }).toString();
     const url = `${API_URL}?${params}`;
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'include', // Include cookies for authentication
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -21,7 +30,7 @@ async function fetchFilteredMetrics() {
             displayProductComparisonChart(data.productComparison);
             displayUserRegistrationChart(data.userRegistrations);
         } else {
-            console.error('Failed to fetch shop metrics:', data.error);
+            console.error('Failed to fetch shop metrics:', sanitizeInput(data.error));
         }
     } catch (error) {
         console.error('Error fetching shop metrics:', error);
@@ -30,7 +39,7 @@ async function fetchFilteredMetrics() {
 
 function displaySalesOverTimeChart(salesData) {
     if (!salesData || !salesData.timeLabels) {
-        console.error("Missing sales data");
+        console.error('Missing or invalid sales data.');
         return;
     }
 
@@ -43,11 +52,11 @@ function displaySalesOverTimeChart(salesData) {
     salesChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: salesData.timeLabels,
+            labels: sanitizeInputArray(salesData.timeLabels),
             datasets: [
                 {
                     label: 'Total Amount',
-                    data: salesData.totalAmounts || [],
+                    data: sanitizeInputArray(salesData.totalAmounts) || [],
                     borderColor: '#33FF57',
                     fill: false,
                 },
@@ -63,6 +72,11 @@ function displaySalesOverTimeChart(salesData) {
 }
 
 function displayProductMetricsChart(productMetrics) {
+    if (!productMetrics || !productMetrics.timeLabels) {
+        console.error('Missing or invalid product metrics data.');
+        return;
+    }
+
     const ctx = document.getElementById('product-metrics-chart').getContext('2d');
 
     if (productMetricsChart) {
@@ -72,17 +86,17 @@ function displayProductMetricsChart(productMetrics) {
     productMetricsChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: productMetrics.timeLabels,
+            labels: sanitizeInputArray(productMetrics.timeLabels),
             datasets: [
                 {
                     label: 'Total Items Sold',
-                    data: productMetrics.itemsSold,
+                    data: sanitizeInputArray(productMetrics.itemsSold) || [],
                     borderColor: '#3357FF',
                     fill: false,
                 },
                 {
                     label: 'Stock Remaining',
-                    data: productMetrics.stockRemaining,
+                    data: sanitizeInputArray(productMetrics.stockRemaining) || [],
                     borderColor: '#FF33FF',
                     fill: false,
                 },
@@ -97,9 +111,29 @@ function displayProductMetricsChart(productMetrics) {
     });
 }
 
-function displayProductComparisonChart(productComparison) {
-    const ctx = document.getElementById('product-comparison-chart').getContext('2d');
+// Helper function to sanitize an array of strings or numbers
+function sanitizeInputArray(inputArray) {
+    if (!Array.isArray(inputArray)) {
+        console.error('Invalid data format.');
+        return [];
+    }
 
+    return inputArray.map(item => sanitizeInput(item));
+}
+
+function displayProductComparisonChart(productComparison) {
+    if (!productComparison || !productComparison.productNames || !productComparison.itemsSold) {
+        console.error("Missing or invalid product comparison data.");
+        return;
+    }
+
+    const ctx = document.getElementById('product-comparison-chart').getContext('2d');
+    if (!ctx) {
+        console.error("Product comparison chart canvas element not found.");
+        return;
+    }
+
+    // Destroy existing chart instance if present
     if (productComparisonChart) {
         productComparisonChart.destroy();
     }
@@ -107,11 +141,11 @@ function displayProductComparisonChart(productComparison) {
     productComparisonChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: productComparison.productNames,
+            labels: productComparison.productNames.map(name => sanitizeInput(name)),
             datasets: [
                 {
                     label: 'Total Items Sold',
-                    data: productComparison.itemsSold,
+                    data: productComparison.itemsSold.map(sold => sanitizeInput(sold)),
                     backgroundColor: '#FF5733',
                 },
             ],
@@ -126,13 +160,18 @@ function displayProductComparisonChart(productComparison) {
 }
 
 function displayUserRegistrationChart(userRegistrations) {
-    if (!userRegistrations || !userRegistrations.timeLabels) {
-        console.error("Missing user registration data");
+    if (!userRegistrations || !userRegistrations.timeLabels || !userRegistrations.newUsers) {
+        console.error("Missing or invalid user registration data.");
         return;
     }
 
     const ctx = document.getElementById('user-registration-chart').getContext('2d');
+    if (!ctx) {
+        console.error("User registration chart canvas element not found.");
+        return;
+    }
 
+    // Destroy existing chart instance if present
     if (userRegistrationChart) {
         userRegistrationChart.destroy();
     }
@@ -140,11 +179,11 @@ function displayUserRegistrationChart(userRegistrations) {
     userRegistrationChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: userRegistrations.timeLabels,
+            labels: userRegistrations.timeLabels.map(label => sanitizeInput(label)),
             datasets: [
                 {
                     label: 'New Users',
-                    data: userRegistrations.newUsers || [],
+                    data: userRegistrations.newUsers.map(user => sanitizeInput(user)),
                     borderColor: '#FF5733',
                     fill: false,
                 },

@@ -1,30 +1,42 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 let items = []; // Stores the transactions fetched from the server
 
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(`${API_URL}/transactions`);
+        const response = await fetch(`${API_URL}/transactions`, {
+            method: "GET",
+            credentials: "include", // Include cookies for authentication
+        });
         const data = await response.json();
 
         if (Array.isArray(data)) { // Check if data is an array of transactions
-            items = sorted_items || data; // Use sorted items if provided, otherwise use fetched data
+            items = sorted_items || data.map(transaction => ({
+                transaction_id: sanitizeInput(transaction.transaction_id),
+                username: sanitizeInput(transaction.username),
+                total_amount: parseFloat(transaction.total_amount || 0),
+                description: sanitizeInput(transaction.description || ""),
+                created_at: sanitizeInput(transaction.created_at),
+            }));
 
-            const productContainer = document.getElementById('product-container tbody');
+            const productContainer = document.getElementById('product-container-tbody');
+            if (!productContainer) {
+                console.error("Product container element not found.");
+                return;
+            }
+
             productContainer.innerHTML = items
-            .map(transaction => {
-                const formattedAmount = parseFloat(transaction.total_amount).toLocaleString('en-US'); // Turn 7000 to 7,000
-                return `
-                    <tr>
-                        <td>${transaction.transaction_id}</td>
-                        <td>${transaction.username}</td>
-                        <td class="total-amount">$${formattedAmount}</td>
-                        <td><pre>${transaction.description}</pre></td>
-                        <td class="created-at">${new Date(transaction.created_at).toLocaleString()}</td>
-                    </tr>
-                `;
-            })
-    .join('');
-
+                .map(transaction => {
+                    const formattedAmount = transaction.total_amount.toLocaleString('en-US'); // Format total amount
+                    return `
+                        <tr>
+                            <td>${transaction.transaction_id}</td>
+                            <td>${transaction.username}</td>
+                            <td class="total-amount">$${formattedAmount}</td>
+                            <td><pre>${transaction.description}</pre></td>
+                            <td class="created-at">${new Date(transaction.created_at).toLocaleString()}</td>
+                        </tr>
+                    `;
+                })
+                .join('');
         } else {
             console.error('Failed to fetch transactions: Invalid response format');
         }
@@ -34,7 +46,13 @@ async function fetch_products(sorted_items = null) {
 }
 
 function search_users() {
-    const query = document.getElementById('search-bar').value.trim().toLowerCase();
+    const searchBar = document.getElementById('search-bar');
+    if (!searchBar) {
+        console.error("Search bar element not found.");
+        return;
+    }
+
+    const query = sanitizeInput(searchBar.value.trim().toLowerCase());
     if (query === '') { // If the search bar is empty, reload the original list
         fetch_products();
         return;
@@ -66,7 +84,6 @@ function search_users() {
     fetch_products(filteredItems);
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products(); // Fetch and display transactions on page load
 });
@@ -74,13 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
 const searchBar = document.getElementById('search-bar');
 if (searchBar) {
     searchBar.addEventListener('input', () => {
-        search_users(); 
+        search_users();
     });
 }
-
-
-let importanceSortOrder = 'desc'; // Default order for Importance Rating
-let qualitySortOrder = 'desc'; // Default order for Quality Rating
 
 function sort_transactions(criteria, sortOrder) {
     const sortedItems = [...items]; // Create a shallow copy of the items array to avoid modifying the original
@@ -108,6 +121,7 @@ function sort_transactions(criteria, sortOrder) {
     // After sorting, render the updated list
     fetch_products(sortedItems);
 }
+
 
 // Event listeners for sorting when column headers are clicked
 let dateSortOrder = 'desc';

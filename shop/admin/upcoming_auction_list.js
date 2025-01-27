@@ -1,20 +1,36 @@
-// Existing API URL and items array remain unchanged
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 let items = [];
 
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(`${API_URL}/upcoming-auction`);
+        const response = await fetch(`${API_URL}/upcoming-auction`, {
+            method: "GET",
+            credentials: "include", // Include cookies for authentication
+        });
         const data = await response.json();
-        if (data.success && data.items) {
-            items = data.items;
-            if (sorted_items !== null) {
-                items = sorted_items;
-            }
+
+        if (data.success && Array.isArray(data.items)) {
+            items = sorted_items || data.items.map(product => ({
+                id: sanitizeInput(product.id),
+                item_name: sanitizeInput(product.item_name),
+                starting_price: parseFloat(product.starting_price || 0),
+                stock: sanitizeInput(product.stock),
+                description: sanitizeInput(product.description || "N/A"),
+                category: sanitizeInput(product.category || "N/A"),
+                duration: sanitizeInput(product.duration || "N/A"),
+                starting_time: sanitizeInput(product.starting_time),
+                image: sanitizeInput(product.image || "placeholder.jpg"),
+            }));
+
             const productContainer = document.getElementById('product-container-tbody');
+            if (!productContainer) {
+                console.error("Product container element not found.");
+                return;
+            }
+
             productContainer.innerHTML = items.map(product => {
-                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : 'N/A';//Used to access product ID
-                const formattedPrice = parseFloat(product.starting_price).toLocaleString('en-US');
+                const formattedStartingTime = product.starting_time ? formatDateTime(product.starting_time) : "N/A";
+                const formattedPrice = product.starting_price.toLocaleString("en-US");
+
                 return `
                 <tr data-id="${product.id}" class="pointer-row">
                     <td>
@@ -24,53 +40,56 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.item_name}</td>
                     <td>$${formattedPrice}</td>
                     <td>${product.stock}</td>
-                    <td>${product.description || 'N/A'}</td>
-                    <td>${product.category || 'N/A'}</td>
-                    <td>${product.duration || 'N/A'}</td>
-                    <td>${formattedStartingTime|| 'N/A'}</td>
+                    <td>${product.description}</td>
+                    <td>${product.category}</td>
+                    <td>${product.duration}</td>
+                    <td>${formattedStartingTime}</td>
                 </tr>`;
             }).join('');
 
             // Add click event listeners to rows
             document.querySelectorAll('#product-container tbody tr').forEach(row => {
                 row.addEventListener('click', () => {
-                    const productId = row.getAttribute('data-id');
+                    const productId = sanitizeInput(row.getAttribute('data-id'));
                     const product = items.find(item => item.id == productId);
-                    displayProductOverview(product);
-                }); 
-            })
+                    if (product) {
+                        displayProductOverview(product);
+                    } else {
+                        console.error(`Product with ID ${productId} not found.`);
+                    }
+                });
+            });
+        } else {
+            console.error("Failed to fetch products: Invalid response format.");
         }
+    } catch (error) {
+        console.error("Error fetching products:", error);
     }
-    catch (error) {
-        console.error('Error fetching products:', error);
-    }
-}  
-            
+}
 
 function searchItems() {
-    const query = document.getElementById('search-bar').value.trim().toLowerCase();
-    let desc_match = 0;
-    let category_match = 0;
+    const searchBar = document.getElementById('search-bar');
+    if (!searchBar) {
+        console.error("Search bar element not found.");
+        return;
+    }
 
-    if (query === '') {
-        fetch_products();
+    const query = sanitizeInput(searchBar.value.trim().toLowerCase());
+    if (query === "") {
+        fetch_products(); // Reset to full product list if query is empty
         return;
     }
 
     const filteredItems = items
         .map(item => {
-            const nameMatch = (item.item_name.toLowerCase().includes(query) ? 1 : 0);
-            if (item.description !== null) {
-                desc_match = (item.description.toLowerCase().includes(query) ? 1 : 0);
-            }
-            if (item.category !== null) {
-                category_match = (item.category.toLowerCase().includes(query) ? 1 : 0);
-            }
+            const nameMatch = item.item_name.toLowerCase().includes(query) ? 1 : 0;
+            const descMatch = item.description.toLowerCase().includes(query) ? 1 : 0;
+            const categoryMatch = item.category.toLowerCase().includes(query) ? 1 : 0;
 
-            const matchScore = nameMatch + desc_match + category_match;
+            const matchScore = nameMatch + descMatch + categoryMatch;
             return { ...item, matchScore };
         })
-        .filter(item => item.matchScore > 0)
+        .filter(item => item.matchScore > 0) // Keep items with positive match scores
         .sort((a, b) => {
             if (b.matchScore !== a.matchScore) {
                 return b.matchScore - a.matchScore;
@@ -78,49 +97,64 @@ function searchItems() {
             return a.item_name.localeCompare(b.item_name);
         });
 
-    fetch_products(filteredItems);
+    fetch_products(filteredItems); // Render filtered items
 }
-
 async function saveProductChanges(productId) {
     const formData = new FormData();
-    if (parseFloat(document.getElementById('product-price').value) > 499999999999.99){
+
+    // Validate inputs
+    const price = parseFloat(document.getElementById('product-price').value.replace(/,/g, ''));
+    const stock = parseInt(document.getElementById('product-stock').value, 10);
+    const duration = parseInt(document.getElementById('product-duration').value, 10);
+
+    if (price > 499999999999.99) {
         alert('Starting price too high, please enter a number below 500 billion!');
         return;
     }
-    if ('stock', parseInt(document.getElementById('product-stock').value, 10) > 99999999.99 ||  document.getElementById('product-duration').value >  99999999.99){
+
+    if (stock > 99999999 || duration > 99999999) {
         alert('Stock/duration too high, please enter a number below 99.99 million.');
         return;
     }
-    formData.append('id', productId);
-    formData.append('name', document.getElementById('product-name').value);
-    formData.append('price', parseFloat(document.getElementById('product-price').value.replace(/,/g, '')));
-    formData.append('stock', parseInt(document.getElementById('product-stock').value, 10));
-    formData.append('description', document.getElementById('product-description').value);
-    formData.append('category', document.getElementById('product-category').value);
-    formData.append('duration', document.getElementById('product-duration').value);
+
+    // Append sanitized inputs to formData
+    formData.append('id', sanitizeInput(productId));
+    formData.append('name', sanitizeInput(document.getElementById('product-name').value));
+    formData.append('price', price);
+    formData.append('stock', stock);
+    formData.append('description', sanitizeInput(document.getElementById('product-description').value));
+    formData.append('category', sanitizeInput(document.getElementById('product-category').value));
+    formData.append('duration', duration);
+
     let time = document.getElementById('product-start').value;
-    if (time){
-        time = new Date(time).toISOString(); // Convert to UTC ISO form
+    if (time) {
+        time = new Date(time).toISOString(); // Convert to UTC ISO format
     }
     formData.append('time', time);
 
     const imageFile = document.getElementById('image-form').files[0];
     if (imageFile) {
-        formData.append('product-image', imageFile); // Add the image file if it exists, avoids overwriting
+        formData.append('product-image', imageFile); // Add the image file if it exists
+    } else {
+        // Retrieve the original image from the `data-original-image` attribute
+        const productRow = document.querySelector(`tr[data-id="${sanitizeInput(productId)}"]`);
+        if (productRow) {
+            const originalImage = sanitizeInput(productRow.querySelector('img').getAttribute('original-image'));
+            formData.append('product-image', originalImage);
+        } else {
+            alert('Original image not found.');
+            return;
+        }
     }
-    else {
-         // Retrieve the original image from the `data-original-image` attribute
-         const productRow = document.querySelector(`tr[data-id="${productId}"]`);
-         const originalImage = productRow.querySelector('img').getAttribute('original-image');
-         formData.append('product-image', originalImage);
-    }
+
     const confirmed = confirm('Are you sure you want to save these changes?');
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`${API_URL}/auction-items/${productId}`, {
-            method: 'PUT',//Do not put headers: application/JSON as it conflicts with the formData body
-            body: formData, //Form data object is specifically designed to handle form submissions. It encodes data as multipart/form-data, which is the correct format for sending files along with other data to the server.
+        const response = await fetch(`${API_URL}/auction-items/${sanitizeInput(productId)}`, {
+            method: 'PUT', // Do not include `Content-Type` header with FormData
+            body: formData, // FormData handles encoding
+            credentials: 'include', // Include cookies for authentication
         });
 
         if (response.ok) {
@@ -135,7 +169,6 @@ async function saveProductChanges(productId) {
     }
 }
 
-
 async function delete_product(productId) {
     const confirmed = confirm('Are you sure you want to delete the product?');
     if (!confirmed) return;
@@ -146,7 +179,8 @@ async function delete_product(productId) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ itemID: parseInt(productId) }),
+            body: JSON.stringify({ itemID: sanitizeInput(parseInt(productId, 10)) }),
+            credentials: 'include', // Include cookies for authentication
         });
 
         const result = await response.json();
@@ -154,17 +188,20 @@ async function delete_product(productId) {
         if (result.success) {
             alert("Product deleted successfully!");
             const overviewSection = document.getElementById('product-overview');
-            overviewSection.style.display = 'none'; //Harus dipisah, klo digabung gabisa
+            if (overviewSection) {
+                overviewSection.style.display = 'none'; // Hide the overview section
+            }
             fetch_products(); // Refresh the list
-            
         } else {
-            alert(`Error: ${result.error}`);
+            alert(`Error: ${sanitizeInput(result.error)}`);
         }
     } catch (error) {
         console.error('Error deleting product:', error);
         alert('An error occurred while trying to delete the product.');
     }
-};
+}
+
+
 
 function formatDateTime(dateTime) {
     const date = new Date(dateTime);
@@ -180,40 +217,39 @@ function formatDateTime(dateTime) {
 
     return date.toLocaleString('en-US', options).replace(',', '');
 }
-
 function displayProductOverview(product) {
     const overviewSection = document.getElementById('product-overview');
+    if (!overviewSection) {
+        console.error("Product overview section not found.");
+        return;
+    }
     overviewSection.style.display = 'block';
 
     // Populate the overview card with product details
-    document.getElementById('product-image').src = product.image;
-    document.getElementById('product-name').value = product.item_name;
-    document.getElementById('product-price').value = parseFloat(product.starting_price).toLocaleString('en-US');
-    document.getElementById('product-stock').value = product.stock;
-    document.getElementById('product-description').value = product.description;
-    document.getElementById('product-category').value = product.category;
-    document.getElementById('product-duration').value = product.duration;
-    const startingTime = new Date(product.starting_time);
+    document.getElementById('product-image').src = sanitizeInput(product.image);
+    document.getElementById('product-name').value = sanitizeInput(product.item_name);
+    document.getElementById('product-price').value = parseFloat(sanitizeInput(product.starting_price)).toLocaleString('en-US');
+    document.getElementById('product-stock').value = sanitizeInput(product.stock);
+    document.getElementById('product-description').value = sanitizeInput(product.description);
+    document.getElementById('product-category').value = sanitizeInput(product.category);
+    document.getElementById('product-duration').value = sanitizeInput(product.duration);
 
-    // Use toLocaleString() to get the formatted local time, hour12: is false, since datetime-local input ga support AM/PM, but it will automatically convert things like 13:00 to 1:00 PM
+    const startingTime = new Date(sanitizeInput(product.starting_time));
     const formattedTime = startingTime.toLocaleString('en-CA', { hour12: false }).replace(',', '').slice(0, 16);
-
-    // Set the formatted value to the datetime-local input
     document.getElementById('product-start').value = formattedTime;
 
-
     // Add a save button listener
-    document.getElementById('save-button').onclick = () => saveProductChanges(product.id);
-    document.getElementById('delete-button').onclick = () => delete_product(product.id);
+    document.getElementById('save-button').onclick = () => saveProductChanges(sanitizeInput(product.id));
+    document.getElementById('delete-button').onclick = () => delete_product(sanitizeInput(product.id));
 }
 
+// Add input formatting for the product price field
 const productPriceInput = document.getElementById("product-price");
-if (productPriceInput){
+if (productPriceInput) {
     productPriceInput.addEventListener("input", (event) => {
         let rawValue = event.target.value.replace(/,/g, ''); // Remove commas
         if (!isNaN(rawValue) && rawValue !== "") {
             const [whole, decimal] = rawValue.split('.'); // Split into whole and decimal parts
-            // Format whole part with commas and append decimal part if exists
             event.target.value = decimal !== undefined 
                 ? parseFloat(whole).toLocaleString('en-US') + '.' + decimal 
                 : parseFloat(whole).toLocaleString('en-US');
@@ -221,7 +257,7 @@ if (productPriceInput){
             event.target.value = ""; // Clear invalid input
         }
     });
-    
+
     productPriceInput.addEventListener("blur", (event) => {
         let rawValue = event.target.value.replace(/,/g, ''); // Remove commas for raw value
         if (!isNaN(rawValue) && rawValue !== "") {
@@ -233,13 +269,18 @@ if (productPriceInput){
             event.target.value = ""; // Clear invalid input
         }
     });
-    
 }
+
 // Hide product overview when clicking outside
 document.addEventListener('click', (event) => {
     const overviewSection = document.getElementById('product-overview');
+    if (!overviewSection) {
+        console.error("Product overview section not found.");
+        return;
+    }
+
     const closeBtn = event.target.closest('.close-btn');
-    if (!overviewSection.contains(event.target) && !event.target.closest('tr') || closeBtn) {
+    if ((!overviewSection.contains(event.target) && !event.target.closest('tr')) || closeBtn) {
         overviewSection.style.display = 'none';
     }
 });
@@ -247,8 +288,13 @@ document.addEventListener('click', (event) => {
 // Add row click events dynamically
 document.querySelectorAll('#product-container tbody tr').forEach(row => {
     row.addEventListener('click', () => {
-        const productId = row.getAttribute('data-id');
+        const productId = sanitizeInput(row.getAttribute('data-id'));
         const product = items.find(item => item.id == productId);
+
+        if (!product) {
+            console.error(`Product with ID ${productId} not found.`);
+            return;
+        }
 
         // Highlight the selected row
         document.querySelectorAll('#product-container tbody tr').forEach(r => r.classList.remove('highlight-row'));
@@ -257,6 +303,7 @@ document.querySelectorAll('#product-container tbody tr').forEach(row => {
         displayProductOverview(product);
     });
 });
+
 
 // Existing event listeners remain unchanged
 document.addEventListener('DOMContentLoaded', () => {

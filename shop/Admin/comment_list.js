@@ -1,15 +1,23 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
 let items = [];
 
-// Add flag button functionality
-// Modify fetch_products to include red triangle warning
+
 async function fetch_products(sorted_items = null) {
     try {
-        const response = await fetch(`${API_URL}/comments`);
+        const response = await fetch(`${API_URL}/comments`, {
+            method: "GET",
+            credentials: "include", // Include cookies for authentication
+        });
         const data = await response.json();
 
         if (data.success && data.items) {
-            items = data.items;
+            let items = data.items.map(item => ({
+                ...item,
+                username: sanitizeInput(item.username),
+                comment: sanitizeInput(item.comment),
+                created_at: sanitizeInput(item.created_at),
+                comments_id: sanitizeInput(item.comments_id),
+            }));
+
             if (sorted_items !== null) {
                 items = sorted_items;
             }
@@ -18,40 +26,42 @@ async function fetch_products(sorted_items = null) {
             const analysisResults = await fetchAnalysisResults();
             items.forEach(item => {
                 const analysis = analysisResults.find(result => result.comment === item.comment);
-                item.predicted_importance = analysis ? analysis.predicted_importance : 0;
-                item.predicted_quality = analysis ? analysis.predicted_quality : 0;
+                item.predicted_importance = analysis ? sanitizeInput(analysis.predicted_importance) : 0;
+                item.predicted_quality = analysis ? sanitizeInput(analysis.predicted_quality) : 0;
             });
 
             // Render items with a red triangle warning
-            const productContainer = document.getElementById('product-container-tbody');
-            productContainer.innerHTML = items.map(item => {
-                return `
-                    <tr>
-                        <td class="importance-rating">${renderExclamationMarks(item.predicted_importance)}</td>
-                        <td>${item.username}</td>
-                        <td>
-                        ${item.comment}
-                        </td>
-                        <td class="comment-rating">${renderStars(item.predicted_quality)}</td>
-                        <td>${new Date(item.created_at).toLocaleString()}</td>
-                        <td>
-                            <span class="red-triangle" data-id="${item.comments_id}" title="Flag this comment">⚠️</span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            const productContainer = document.getElementById("product-container-tbody");
+            if (productContainer) {
+                productContainer.innerHTML = items.map(item => {
+                    return `
+                        <tr>
+                            <td class="importance-rating">${renderExclamationMarks(item.predicted_importance)}</td>
+                            <td>${item.username}</td>
+                            <td>${item.comment}</td>
+                            <td class="comment-rating">${renderStars(item.predicted_quality)}</td>
+                            <td>${new Date(item.created_at).toLocaleString()}</td>
+                            <td>
+                                <span class="red-triangle" data-id="${item.comments_id}" title="Flag this comment">⚠️</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join("");
 
-            // Add event listeners for the red triangle warning
-            document.querySelectorAll('.red-triangle').forEach(triangle => {
-                triangle.addEventListener('click', () => {
-                    const commentId = triangle.getAttribute('data-id');
-                    const comment = items.find(item => item.comments_id == commentId);
-                    open_feedback_page(comment);
+                // Add event listeners for the red triangle warning
+                document.querySelectorAll(".red-triangle").forEach(triangle => {
+                    triangle.addEventListener("click", () => {
+                        const commentId = sanitizeInput(triangle.getAttribute("data-id"));
+                        const comment = items.find(item => item.comments_id == commentId);
+                        open_feedback_page(comment);
+                    });
                 });
-            });
+            }
+        } else {
+            console.error("No products or comments found.");
         }
     } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
     }
 }
 
@@ -59,11 +69,16 @@ async function fetch_products(sorted_items = null) {
 function open_feedback_page(comment) {
     const feedbackPage = document.getElementById('feedback-page');
 
+    if (!feedbackPage || !comment) {
+        console.error("Feedback page or comment data is missing.");
+        return;
+    }
+
     // Display the comment text in a readonly <textarea>
     const commentText = document.createElement('div');
     commentText.innerHTML = `
         <label>Comment:</label>
-        <textarea readonly class="feedback-comment">${comment.comment}</textarea>
+        <textarea readonly class="feedback-comment">${sanitizeInput(comment.comment)}</textarea>
     `;
 
     // Render stars for quality and exclamation marks for importance
@@ -75,18 +90,24 @@ function open_feedback_page(comment) {
     qualityContainer.innerHTML = `
         <label>Website Rating:</label>
         <div class="comment-rating">${qualityStars}</div>
-        <input type="number" id="website-rating" min="1" max="5" step="0.01" value="${comment.predicted_quality || 0}" required>
+        <input type="number" id="website-rating" min="1" max="5" step="0.01" 
+            value="${sanitizeInput(comment.predicted_quality || 0)}" required>
     `;
 
     const importanceContainer = document.createElement('div');
     importanceContainer.innerHTML = `
         <label>Importance Rating:</label>
         <div class="importance-rating">${importanceMarks}</div>
-        <input type="number" id="importance-rating" min="1" max="5" step="0.01" value="${comment.predicted_importance || 0}" required>
+        <input type="number" id="importance-rating" min="1" max="5" step="0.01" 
+            value="${sanitizeInput(comment.predicted_importance || 0)}" required>
     `;
 
     // Clear previous content and append the updated content
     const form = document.getElementById('feedback-form');
+    if (!form) {
+        console.error("Feedback form is missing.");
+        return;
+    }
     form.innerHTML = ''; // Clear previous content
     form.appendChild(commentText);  // Add the comment above ratings
     form.appendChild(document.createElement('br')); // Add spacing
@@ -103,11 +124,21 @@ function open_feedback_page(comment) {
     // Handle form submission
     form.onsubmit = async function (e) {
         e.preventDefault();
+
         const importance = parseFloat(document.getElementById('importance-rating').value);
         const quality = parseFloat(document.getElementById('website-rating').value);
 
-        if (importance === 0 || quality === 0 || !comment.comment) { // Validate inputs
-            alert('Contact Developer of this error!');
+        // Validate inputs
+        if (
+            isNaN(importance) || importance <= 0 || importance > 5 ||
+            isNaN(quality) || quality <= 0 || quality > 5
+        ) {
+            alert('Please provide valid ratings between 1 and 5.');
+            return;
+        }
+
+        if (!comment.comment) {
+            alert('Comment is missing. Contact developer!');
             return;
         }
 
@@ -115,8 +146,9 @@ function open_feedback_page(comment) {
             const response = await fetch(`${API_URL}/feedback`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // Include cookies for authentication
                 body: JSON.stringify({
-                    comments_id: comment.comments_id,
+                    comments_id: sanitizeInput(comment.comments_id),
                     true_importance: importance,
                     true_quality: quality,
                 }),
@@ -128,10 +160,11 @@ function open_feedback_page(comment) {
                 feedbackPage.classList.add('hidden');
                 fetch_products(); // Refresh list
             } else {
-                alert(`Error: ${data.error}`);
+                alert(`Error: ${data.error || 'Failed to update feedback.'}`);
             }
         } catch (error) {
             console.error('Error updating feedback:', error);
+            alert('An error occurred while updating feedback. Please try again later.');
         }
     };
 
@@ -194,6 +227,7 @@ async function fetchAnalysisResults() {
         const response = await fetch(`${API_URL}/analyze-comments`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials:'include',
         });
 
         if (!response.ok) {
@@ -215,9 +249,15 @@ async function fetchAnalysisResults() {
 
 // Search functionality
 function search_users() {
-    const query = document.getElementById('search-bar').value.trim().toLowerCase();
+    const searchBar = document.getElementById('search-bar');
+    if (!searchBar) {
+        console.error("Search bar element is missing.");
+        return;
+    }
+
+    const query = sanitizeInput(searchBar.value.trim().toLowerCase());
     if (query === '') {
-        fetch_products();
+        fetch_products(); // Reset to the original product list if query is empty
         return;
     }
 
@@ -237,13 +277,14 @@ function search_users() {
             return a.username.localeCompare(b.username);
         });
 
-    fetch_products(filteredItems);
+    fetch_products(filteredItems); // Render filtered items
 }
 
 const searchBar = document.getElementById('search-bar');
 if (searchBar) {
     searchBar.addEventListener('input', search_users);
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products();
@@ -259,8 +300,8 @@ function sortTableByCriteria(criteria, sortOrder) {
 
     // Sort the items array
     items.sort((a, b) => {
-        const aValue = a[`predicted_${criteria}`] || 0;
-        const bValue = b[`predicted_${criteria}`] || 0;
+        const aValue = sanitizeInput(a[`predicted_${criteria}`] || 0);
+        const bValue = sanitizeInput(b[`predicted_${criteria}`] || 0);
         console.log(`Comparing a=${aValue} to b=${bValue}`);
 
         return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;

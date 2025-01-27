@@ -1,24 +1,25 @@
-const API_URL = 'https://anthonyhalim-150-723848267249.us-central1.run.app';
-async function addProduct(){
-    event.preventDefault(); // Prevent form reload??
+async function addProduct(event) {
+    event.preventDefault(); // Prevent form reload
 
     // Get form data
-    const username = document.getElementById('product-name').value;
-    const password = document.getElementById('product-price').value;
-    const role = document.getElementById('product-stock').value.toLowerCase();
-    const email = document.getElementById('product-category').value;
+    const username = sanitizeInput(document.getElementById('product-name').value);
+    const password = sanitizeInput(document.getElementById('product-price').value);
+    const role = sanitizeInput(document.getElementById('product-stock').value.toLowerCase());
+    const email = sanitizeInput(document.getElementById('product-category').value);
 
     // Validate form inputs
     if (!username || !password || !role || !email) {
         alert('All fields are required!');
         return;
     }
-    if (role != 'admin' && role != 'user'){
-        alert('Role must be either admin or user');
+
+    if (role !== 'admin' && role !== 'user') {
+        alert('Role must be either "admin" or "user".');
         return;
     }
 
-    const new_user = {username, password, role, email};
+    // Create a new user object
+    const newUser = { username, password, role, email };
 
     try {
         const response = await fetch(`${API_URL}/add-new-user`, {
@@ -26,14 +27,16 @@ async function addProduct(){
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(new_user),
+            body: JSON.stringify(newUser),
+            credentials: 'include',
         });
 
         const result = await response.json();
         if (result.success) {
             alert('User added successfully!');
         } else {
-            alert('Failed to add user. Please try again.');
+            console.error('Error adding user:', result.message);
+            alert(result.message || 'Failed to add user. Please try again.');
         }
     } catch (error) {
         console.error('Error adding user:', error);
@@ -42,8 +45,8 @@ async function addProduct(){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const product_form = document.getElementById('product-form');
-    if (product_form) {
-        product_form.addEventListener('submit', addProduct);
+    const productForm = document.getElementById('product-form');
+    if (productForm) {
+        productForm.addEventListener('submit', addProduct);
     }
 });
