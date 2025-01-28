@@ -323,22 +323,29 @@ async function confirm_payment_status() {
         return;
     }
 }
-async function monitorWalletPayment(){
-    fetch('/validate-transaction', {
-        method: 'POST',
-        credentials: 'include', // Include cookies in the request
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                confirm_checkout();
-                renderCart();
-            } else {
-                console.error('Validation failed:', data.error);
-            }
-        })
-        .catch((error) => console.error('Error:', error));
+async function monitorWalletPayment() {
+    try {
+        const response = await fetch('/validate-transaction', {
+            method: 'POST',
+            credentials: 'include', // Include cookies in the request
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            confirm_checkout();
+            renderCart();
+        } else {
+            console.error('Validation failed:', data.error);
+        }
+    } catch (error) {
+        console.error('Error during validation:', error.message || error);
+    }
 }
+
 
 async function monitorPaymentStatus() {
     const payment_method = localStorage.getItem('Payment');
