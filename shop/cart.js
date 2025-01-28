@@ -325,7 +325,7 @@ async function confirm_payment_status() {
 }
 async function monitorWalletPayment() {
     try {
-        const response = await fetch('/validate-transaction', {
+        const response = await fetch(`${API_URL}/validate-transaction`, {
             method: 'POST',
             credentials: 'include', // Include cookies in the request
         });
