@@ -66,9 +66,9 @@ function check_deposit_form() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        address: owner_address,
+                        address: sanitizeInput(owner_address),
                         transaction_amount: deposit_amount,
-                        note,
+                        note: sanitizeInput(note),
                     }),
                     credentials: 'include', // Include cookies
                 });
