@@ -84,6 +84,7 @@ async function monitorTransaction(txid) {
 
         const { recipientAddress, transaction_amount, note } = await transactionDetailsResponse.json();
         const amount = parseFloat(transaction_amount) * Math.pow(10, 2);
+        const base64Note = toBase64UrlSafe(sanitizeInput(note));
 
 
         // Check transaction status
@@ -97,7 +98,7 @@ async function monitorTransaction(txid) {
                 amount,
                 assetId: 732664447,
                 recipientAddress: sanitizeInput(recipientAddress),
-                orderId: `order_${note}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
+                orderId: `order_${base64Note}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
             }),
             credentials: "include",
         });
