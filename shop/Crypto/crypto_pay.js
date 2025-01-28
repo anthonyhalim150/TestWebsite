@@ -27,93 +27,98 @@ async function fetchTransactionDetails() {
 
 // Function to generate a QR code with payment details
 function generateQRCode(address, amount, note) {
-  try {
-      const sanitizedAddress = sanitizeInput(address);
-      const sanitizedNote = sanitizeInput(note);
-      const paymentDetails = {
-          recipient: sanitizedAddress,
-          assetID: 732664447,
-          amount_in: parseFloat(amount) * Math.pow(10, 2),
-          note: `order_${sanitizedNote}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
-      };
+    try {
+        const sanitizedAddress = sanitizeInput(address);
+        const sanitizedNote = sanitizeInput(note);
 
-      const qrCodeData = `algorand://${paymentDetails.recipient}?amount=${paymentDetails.amount_in}&asset=${paymentDetails.assetID}&note=${encodeURIComponent(paymentDetails.note)}`;
+        // Generate consistent Base64 encoding for the note
+        const base64Note = btoa(sanitizedNote); // Ensure note is Base64 encoded
+        const paymentDetails = {
+            recipient: sanitizedAddress,
+            assetID: 732664447,
+            amount_in: parseFloat(amount) * Math.pow(10, 2),
+            note: `order_${base64Note}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
+        };
 
-      const qr = new QRious({
-          element: qrCodeCanvas,
-          size: 200,
-          value: qrCodeData,
-      });
+        const qrCodeData = `algorand://${paymentDetails.recipient}?amount=${paymentDetails.amount_in}&asset=${paymentDetails.assetID}&note=${encodeURIComponent(paymentDetails.note)}`;
 
-      if (qr) {
-          transactionStatus.textContent = "Scan the QR code to pay.";
-      } else {
-          transactionStatus.textContent = "Failed to generate QR code. Please try again.";
-      }
-  } catch (error) {
-      console.error("Error generating QR code:", error);
-      transactionStatus.textContent = "Error generating QR code. Please try again.";
-  }
+        const qr = new QRious({
+            element: qrCodeCanvas,
+            size: 200,
+            value: qrCodeData,
+        });
+
+        if (qr) {
+            transactionStatus.textContent = "Scan the QR code to pay.";
+        } else {
+            transactionStatus.textContent = "Failed to generate QR code. Please try again.";
+        }
+    } catch (error) {
+        console.error("Error generating QR code:", error);
+        transactionStatus.textContent = "Error generating QR code. Please try again.";
+    }
 }
 
 // Function to monitor the transaction status
 async function monitorTransaction(txid) {
-  try {
-      // Fetch transaction details
-      const transactionDetailsResponse = await fetch(`${API_URL}/get-transaction-details`, {
-          method: "GET",
-          credentials: "include", // Include cookies in the request
-      });
+    try {
+        // Fetch transaction details
+        const transactionDetailsResponse = await fetch(`${API_URL}/get-transaction-details`, {
+            method: "GET",
+            credentials: "include", // Include cookies in the request
+        });
 
-      if (!transactionDetailsResponse.ok) {
-          return;
-      }
+        if (!transactionDetailsResponse.ok) {
+            return;
+        }
 
-      const { recipientAddress, transaction_amount, note } = await transactionDetailsResponse.json();
-      const amount = parseFloat(transaction_amount) * Math.pow(10, 2);
+        const { recipientAddress, transaction_amount, note } = await transactionDetailsResponse.json();
+        const amount = parseFloat(transaction_amount) * Math.pow(10, 2);
 
-      // Check transaction status
-      const response = await fetch(`${API_URL}/check-transaction`, {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-              txid,
-              amount,
-              assetId: 732664447,
-              recipientAddress: sanitizeInput(recipientAddress),
-              orderId: `order_${sanitizeInput(note)}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
-          }),
-          credentials: "include",
-      });
 
-      const data = await response.json();
+        // Check transaction status
+        const response = await fetch(`${API_URL}/check-transaction`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                txid,
+                amount,
+                assetId: 732664447,
+                recipientAddress: sanitizeInput(recipientAddress),
+                orderId: `order_${note}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
+            }),
+            credentials: "include",
+        });
 
-      if (data.completed) {
-          transactionStatus.textContent = `Transaction confirmed! Amount: ${amount / Math.pow(10, 2)} CSP. Redirecting...`;
-          transactionStatus.classList.add("success");
-          const homeButton = document.getElementById("back-to-home");
+        const data = await response.json();
 
-          const type = sanitizeInput(sessionStorage.getItem('type')); 
+        if (data.completed) {
+            transactionStatus.textContent = `Transaction confirmed! Amount: ${amount / Math.pow(10, 2)} CSP. Redirecting...`;
+            transactionStatus.classList.add("success");
+            const homeButton = document.getElementById("back-to-home");
 
-          if (type === "cart") {
-              if (homeButton) homeButton.style.display = "none";
-              window.location.href = sanitizeURL("/shop/cart.html");
-          } else if (type === "deposit") {
-              if (homeButton) homeButton.style.display = "none";
-              window.location.href = sanitizeURL("/shop/Dashboard/wallet.html");
-          }
-      } else if (data.error === "Transaction details do not match the expected values.") {
-          transactionStatus.textContent = "Waiting for payment...";
-      } else {
-          transactionStatus.textContent = "Waiting for payment...";
-      }
-  } catch (error) {
-      console.error("Error checking transaction status:", error);
-      transactionStatus.textContent = "Error verifying transaction. Please try again.";
-  }
+            const type = sanitizeInput(sessionStorage.getItem('type')); 
+
+            if (type === "cart") {
+                if (homeButton) homeButton.style.display = "none";
+                window.location.href = sanitizeURL("/shop/cart.html");
+            } else if (type === "deposit") {
+                if (homeButton) homeButton.style.display = "none";
+                window.location.href = sanitizeURL("/shop/Dashboard/wallet.html");
+            }
+        } else if (data.error === "Transaction details do not match the expected values.") {
+            transactionStatus.textContent = "Waiting for payment...";
+        } else {
+            transactionStatus.textContent = "Waiting for payment...";
+        }
+    } catch (error) {
+        console.error("Error checking transaction status:", error);
+        transactionStatus.textContent = "Error verifying transaction. Please try again.";
+    }
 }
+
 
 
 
