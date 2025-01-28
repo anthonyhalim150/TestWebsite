@@ -26,13 +26,20 @@ async function fetchTransactionDetails() {
 }
 
 // Function to generate a QR code with payment details
+// Helper function for URL-safe Base64 encoding
+function toBase64UrlSafe(input) {
+    return btoa(input).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+// Function to generate a QR code with payment details
 function generateQRCode(address, amount, note) {
     try {
         const sanitizedAddress = sanitizeInput(address);
         const sanitizedNote = sanitizeInput(note);
 
-        // Generate consistent Base64 encoding for the note
-        const base64Note = btoa(sanitizedNote); // Ensure note is Base64 encoded
+        // Generate URL-safe Base64 encoding for the note
+        const base64Note = toBase64UrlSafe(sanitizedNote);
+
         const paymentDetails = {
             recipient: sanitizedAddress,
             assetID: 732664447,
@@ -40,8 +47,10 @@ function generateQRCode(address, amount, note) {
             note: `order_${base64Note}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
         };
 
+        // Construct the QR code data
         const qrCodeData = `algorand://${paymentDetails.recipient}?amount=${paymentDetails.amount_in}&asset=${paymentDetails.assetID}&note=${encodeURIComponent(paymentDetails.note)}`;
 
+        // Generate the QR code
         const qr = new QRious({
             element: qrCodeCanvas,
             size: 200,
@@ -58,6 +67,7 @@ function generateQRCode(address, amount, note) {
         transactionStatus.textContent = "Error generating QR code. Please try again.";
     }
 }
+
 
 // Function to monitor the transaction status
 async function monitorTransaction(txid) {
