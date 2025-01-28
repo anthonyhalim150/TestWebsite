@@ -5,6 +5,7 @@ const logger = require("./middleware/loggerMiddleware");
 const { authenticateToken } = require("./middleware/authMiddleware");
 const errorHandler = require("./middleware/errorHandlerMiddleware");
 const userRoutes = require("./routes/userRoutes");
+const upgradeRoutes = require("./routes/upgradeRoutes");
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/api", userRoutes); // Add authentication middleware if needed
 // app.use("/api", authenticateToken, userRoutes);
+app.use("/api", upgradeRoutes);
 
 // Error handling middleware (should come last)
 app.use(errorHandler);

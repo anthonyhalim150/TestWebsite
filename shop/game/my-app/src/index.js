@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client"; // Use the React 18 approach
 import App from "./App";
-import "./App.css";
+import "./styles/global/App.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

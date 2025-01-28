@@ -1,69 +1,62 @@
 import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Miner from "./components/Miner";
-import Upgrade from "./components/Upgrade";
+import Upgradable from "./components/Upgradable";
+import MyUpgrades from "./components/MyUpgrades";
 import { updateWallet, getWalletBalance } from "./api/wallet";
 
 function App() {
-  const [tokens, setTokens] = useState(0); // Initial token balance
+  const [tokens, setTokens] = useState(0);
   const [miningPower, setMiningPower] = useState(1);
   const [tokensToSync, setTokensToSync] = useState(0);
-
+  const [currentSection, setSection] = useState("miner");
   const userId = 1; // Replace with dynamic user ID if applicable
 
-  // Fetch wallet balance on initial load
   useEffect(() => {
     const fetchWalletBalance = async () => {
       try {
         const balance = await getWalletBalance(userId);
-        setTokens(balance); // Set tokens to fetched balance
-        console.log("Wallet balance fetched:", balance);
+        setTokens(balance);
       } catch (error) {
         console.error("Failed to fetch wallet balance:", error);
       }
     };
 
     fetchWalletBalance();
-  }, []); // Empty dependency array ensures this runs only once
+  }, [userId]);
 
   const mineTokens = () => {
     setTokens((prev) => prev + miningPower);
     setTokensToSync((prev) => prev + miningPower);
   };
 
-  const handleWalletUpdate = async () => {
-    if (tokensToSync === 0) return; // Skip if no tokens to sync
-    try {
-      await updateWallet(userId, tokensToSync); // Ensure userId and tokensToSync are sent
-      console.log("Wallet updated!");
-      setTokensToSync(0); // Reset after syncing
-    } catch (error) {
-      console.error("Failed to update wallet:", error);
-    }
-  };
-
-  // Sync tokens with the server every 5 seconds
   useEffect(() => {
-    const interval = setInterval(handleWalletUpdate, 5000);
-    return () => clearInterval(interval); // Clean up on unmount
-  }, [tokensToSync]);
+    const interval = setInterval(() => {
+      if (tokensToSync > 0) {
+        updateWallet(userId, tokensToSync);
+        setTokensToSync(0);
+      }
+    }, 5000);
 
-  const upgradeMiningPower = () => {
-    const upgradeCost = 10 * miningPower;
-    if (tokens >= upgradeCost) {
-      setTokens((prev) => prev - upgradeCost);
-      setTokensToSync((prev) => prev - upgradeCost); // Sync the spent tokens
-      setMiningPower((prev) => prev + 1);
-    } else {
-      alert("Not enough tokens!");
-    }
-  };
+    return () => clearInterval(interval);
+  }, [tokensToSync, userId]);
 
   return (
     <div className="app">
-      <Header tokens={tokens} />
-      <Miner mineTokens={mineTokens} />
-      <Upgrade miningPower={miningPower} upgradeMiningPower={upgradeMiningPower} />
+      <Header tokens={tokens} setSection={setSection} />
+
+      {currentSection === "miner" && <Miner mineTokens={mineTokens} />}
+      {currentSection === "upgradable" && (
+        <Upgradable tokens={tokens} setTokens={setTokens} userId={userId} />
+      )}
+      {currentSection === "my-upgrades" && <MyUpgrades userId={userId} />}
+      {currentSection === "stats" && (
+        <div className="stats">
+          <h2>Stats</h2>
+          <p>Tokens: {tokens}</p>
+          <p>Mining Power: {miningPower}</p>
+        </div>
+      )}
     </div>
   );
 }

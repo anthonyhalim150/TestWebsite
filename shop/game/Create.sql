@@ -14,6 +14,11 @@ game/my-app
 │   │   ├── Miner.js              # Component for mining tokens
 │   │   ├── Upgrade.js            # Component for upgrading mining power
 │   │   └── ...other components
+|   |── styles/
+|   |    |── components/
+|   |        |── Header.css
+|   |    |── global/
+|   |        |── App.css
 │   ├── App.css              
 │   ├── utils/
 |   |   ├── auth.js               # Sanitization functions
@@ -65,7 +70,7 @@ CREATE TABLE UPGRADES (
 CREATE TABLE USER_UPGRADES (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    upgrade_id INT NOT NULL,
+    upgrade_id INT UNIQUE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
     FOREIGN KEY (upgrade_id) REFERENCES UPGRADES(id) ON DELETE CASCADE
 );
