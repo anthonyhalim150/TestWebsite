@@ -93,6 +93,7 @@ async function confirmPayment() {
         const result = await response.json();
 
         if (result.success) {
+            localStorage.setItem('Payment', 'Wallet');
             alert('Payment successful!');
             window.location.href = sanitizeURL('/shop/cart.html');
         } else {

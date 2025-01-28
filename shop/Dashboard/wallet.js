@@ -135,72 +135,75 @@ function check_withdraw_form() {
 }
 
 async function confirm_deposit() {
-    try {
-        // Fetch all transaction details from the backend
-        const transactionDetailsResponse = await fetch(`${API_URL}/get-all-transactions`, {
-            method: 'GET',
-            credentials: 'include', // Include cookies for authentication
-        });
-
-        if (!transactionDetailsResponse.ok) {
-            return;
-        }
-
-        // Parse response to extract all required variables
-        const { txid, amount, assetId, recipientAddress, note } = await transactionDetailsResponse.json();
-
-
-        // Validate required fields
-        if (!txid || !amount || !assetId || !recipientAddress || !note) {
-            return;
-        }
-
-        const asset_decimal = 2; // Assuming CSP uses 2 decimals
-
-        // Validate the transaction server-side
-        const response = await fetch(`${API_URL}/check-transaction`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                txid,
-                amount: amount,
-                assetId,
-                recipientAddress,
-                orderId: sanitizeInput(note),
-            }),
-            credentials: 'include', // Include cookies for authentication
-        });
-
-        const data = await response.json();
-
-        if (data.completed) {
-            const userID = await getCookie(); // Securely retrieve userID
-            const convertedAmount = parseFloat(amount) / Math.pow(10, asset_decimal);
-
-            // Update the user's wallet on success
-            const walletResponse = await fetch(`${API_URL_USER}/update-wallet-user`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userID, amount: convertedAmount }),
+    const status = localStorage.getItem('Payment');
+    if (status === 'CSP'){
+        try {
+            // Fetch all transaction details from the backend
+            const transactionDetailsResponse = await fetch(`${API_URL}/get-all-transactions`, {
+                method: 'GET',
                 credentials: 'include', // Include cookies for authentication
             });
 
-            const result = await walletResponse.json();
-
-            if (walletResponse.ok && result.success) {
-                alert('Deposit Successful!');
-                sessionStorage.clear();
-                get_balance(); // Update the user's balance
-            } else {
-                alert(`Deposit failed: ${sanitizeInput(result.error)}`);
+            if (!transactionDetailsResponse.ok) {
+                return;
             }
-        } else {
-           return;
+
+            // Parse response to extract all required variables
+            const { txid, amount, assetId, recipientAddress, note } = await transactionDetailsResponse.json();
+
+
+            // Validate required fields
+            if (!txid || !amount || !assetId || !recipientAddress || !note) {
+                return;
+            }
+
+            const asset_decimal = 2; // Assuming CSP uses 2 decimals
+
+            // Validate the transaction server-side
+            const response = await fetch(`${API_URL}/check-transaction`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    txid,
+                    amount: amount,
+                    assetId,
+                    recipientAddress,
+                    orderId: sanitizeInput(note),
+                }),
+                credentials: 'include', // Include cookies for authentication
+            });
+
+            const data = await response.json();
+
+            if (data.completed) {
+                const userID = await getCookie(); // Securely retrieve userID
+                const convertedAmount = parseFloat(amount) / Math.pow(10, asset_decimal);
+
+                // Update the user's wallet on success
+                const walletResponse = await fetch(`${API_URL_USER}/update-wallet-user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userID, amount: convertedAmount }),
+                    credentials: 'include', // Include cookies for authentication
+                });
+
+                const result = await walletResponse.json();
+
+                if (walletResponse.ok && result.success) {
+                    localStorage.clear();
+                    alert('Deposit Successful!');
+                    get_balance(); // Update the user's balance
+                } else {
+                    alert(`Deposit failed: ${sanitizeInput(result.error)}`);
+                }
+            } else {
+            return;
+            }
+        } catch (error) {
+            return;
         }
-    } catch (error) {
-        return;
     }
 }
 

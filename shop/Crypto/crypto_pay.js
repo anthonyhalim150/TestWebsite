@@ -106,12 +106,13 @@ async function monitorTransaction(txid) {
         const data = await response.json();
 
         if (data.completed) {
+            localStorage.setItem('Payment', 'CSP');
             transactionStatus.textContent = `Transaction confirmed! Amount: ${amount / Math.pow(10, 2)} CSP. Redirecting...`;
             transactionStatus.classList.add("success");
             const homeButton = document.getElementById("back-to-home");
 
             const type = sanitizeInput(sessionStorage.getItem('type')); 
-
+            sessionStorage.clear();
             if (type === "cart") {
                 if (homeButton) homeButton.style.display = "none";
                 window.location.href = sanitizeURL("/shop/cart.html");

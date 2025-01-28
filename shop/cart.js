@@ -97,7 +97,7 @@ function handleClick(event ,itemId, change, stock) {
     timeoutID = setTimeout(() => {
         changeQuantity(itemId, change, stock);
         button.disabled = false;  // Re-enable the button after the delay
-    }, 500);  // Delay of 1000 milliseconds (1 second)
+    }, 1000);  // Delay of 1000 milliseconds (1 second)
 }
 
 
@@ -220,9 +220,6 @@ async function removeItem(itemID) {
 
 async function clearCart() {
     const userID = await getCookie();
-
-
-
     try {
         const response = await fetch(`${API_URL}/clear-cart`, {
             method: 'POST',
@@ -326,25 +323,41 @@ async function confirm_payment_status() {
         return;
     }
 }
+async function monitorWalletPayment(){
+    fetch('/validate-transaction', {
+        method: 'POST',
+        credentials: 'include', // Include cookies in the request
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                confirm_checkout();
+                renderCart();
+            } else {
+                console.error('Validation failed:', data.error);
+            }
+        })
+        .catch((error) => console.error('Error:', error));
+}
 
 async function monitorPaymentStatus() {
-    try {
-        const result = await confirm_payment_status();
-        if (!result){
-            sessionStorage.clear();
-            renderCart();
-            return;
+    const payment_method = localStorage.getItem('Payment');
+    if (payment_method === 'CSP'){
+        try {//put if
+            const result = await confirm_payment_status();
+            if (!result){
+                return;
+            }
+            if (result.completed) {
+                confirm_checkout();
+                renderCart();
+            }
+        } catch (error) {
+            console.error("Error monitoring payment status:", error);
         }
-        if (result.completed) {
-            sessionStorage.clear();
-            confirm_checkout();
-        } else {
-            sessionStorage.clear();
-            renderCart();
-        }
-    } catch (error) {
-        sessionStorage.clear();
-        console.error("Error monitoring payment status:", error);
+    }
+    else if (payment_method === 'wallet'){
+        await monitorWalletPayment();
     }
 }
 
@@ -359,6 +372,7 @@ async function confirm_checkout() {
         });
         const result = await response.json();
         if (result.success) {
+            localStorage.clear();
             alert("Checkout Successful!");
             renderCart(); // Update cart UI
         } else {
@@ -422,4 +436,5 @@ function closeItemOverview() {
 
 document.addEventListener('DOMContentLoaded', () => {
     monitorPaymentStatus();
+    renderCart();
 });
