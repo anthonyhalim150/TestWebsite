@@ -21,14 +21,14 @@ function createSidebar() {
         </div>
         <nav class="sidebar-nav">
             <ul>
-                <li><a href="wallet.html" class="nav-item">Wallet</a></li>
+                <li><a href="/shop/Dashboard/wallet.html" class="nav-item">Wallet</a></li>
                 <li class="dropdown">
                     <a href="#" class="nav-item dropdown-toggle">
                         Products <span class="arrow">▼</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="add_new_product.html" class="nav-item">Add Product</a></li>
-                        <li><a href="product_list.html" class="nav-item">Product List</a></li>
+                        <li><a href="/shop/Dashboard/add_new_product.html" class="nav-item">Add Product</a></li>
+                        <li><a href="/shop/Dashboard/product_list.html" class="nav-item">Product List</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
@@ -36,15 +36,15 @@ function createSidebar() {
                         Auctions <span class="arrow">▼</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="add_new_auction.html" class="nav-item">Add Auction</a></li>
-                        <li><a href="expired_auction_list.html" class="nav-item">Expired Auction List</a></li>
-                        <li><a href="ongoing_auction_list.html" class="nav-item">Ongoing Auction List</a></li>
-                        <li><a href="upcoming_auction_list.html" class="nav-item">Upcoming Auction List</a></li>
+                        <li><a href="/shop/Dashboard/add_new_auction.html" class="nav-item">Add Auction</a></li>
+                        <li><a href="/shop/Dashboard/expired_auction_list.html" class="nav-item">Expired Auction List</a></li>
+                        <li><a href="/shop/Dashboard/ongoing_auction_list.html" class="nav-item">Ongoing Auction List</a></li>
+                        <li><a href="/shop/Dashboard/upcoming_auction_list.html" class="nav-item">Upcoming Auction List</a></li>
                     </ul>
                 </li>
-                <li><a href="transaction_list.html" class="nav-item">Transaction List</a></li>
-                <li><a href="metrics.html" class="nav-item">Metrics</a></li>
-                <li><a href="../index.html" class="nav-item">Home</a></li>
+                <li><a href="/shop/Dashboard/transaction_list.html" class="nav-item">Transaction List</a></li>
+                <li><a href="/shop/Dashboard/metrics.html" class="nav-item">Metrics</a></li>
+                <li><a href="/shop/index.html" class="nav-item">Home</a></li>
             </ul>
         </nav>
     `;

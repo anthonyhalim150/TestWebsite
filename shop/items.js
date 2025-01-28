@@ -22,7 +22,7 @@ async function update_login() {
         navbarLinks.innerHTML = `
         <ul class="navbar-icons">
             <li class="nav-item">
-                <a class="cart-btn" href="cart.html" id="cart_nav">
+                <a class="cart-btn" href="/shop/cart.html" id="cart_nav">
                     <img src="Icons/cart.png" title="Cart" alt="Transparent Cart Icon">
                 </a>
             </li>
@@ -31,9 +31,9 @@ async function update_login() {
                     <img src="Icons/profile.png" title="Profile" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" href="Dashboard/index.html">Dashboard</a></li>
-                    <li><a class="dropdown-item" href="auction.html">Auctions</a></li>
-                    <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                    <li><a class="dropdown-item" href="/shop/Dashboard/index.html">Dashboard</a></li>
+                    <li><a class="dropdown-item" href="/shop/auction.html">Auctions</a></li>
+                    <li><a class="dropdown-item" href="/shop/settings.html">Settings</a></li>
                     <li><a class="dropdown-item" id="likes_nav"  href="#">Likes</a></li>
                     <li><a class="dropdown-item" id="logout_nav" href="#">Logout</a></li>
                 </ul>
@@ -72,8 +72,8 @@ async function update_login() {
                     <img src="Icons/profile.png" title="Profile" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" href="signup.html">Sign Up</a></li>
-                    <li><a class="dropdown-item" href="login.html">Login</a></li>
+                    <li><a class="dropdown-item" href="/shop/signup.html">Sign Up</a></li>
+                    <li><a class="dropdown-item" href="/shop/login.html">Login</a></li>
                 </ul>
             </li>
             <li class="nav-item">

@@ -6,8 +6,6 @@ async function submitComment(event) {
     // Ensure user is authenticated
     const userID = await getCookie();
     if (!userID) { // This should not happen if ensureAuthenticated is working correctly
-        alert('You must be logged in to give a comment!');
-        window.location.href = 'login.html';
         return;
     }
 
@@ -74,11 +72,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const userID = await getCookie();
     if (!userID) { // This should not happen if ensureAuthenticated is working correctly
-        alert('You must be logged in to give a comment!');
-        window.location.href = 'login.html';
         return;
     }
-
     const commentForm = document.getElementById('comment-form');
     if (commentForm) {
         commentForm.addEventListener('submit', submitComment);
