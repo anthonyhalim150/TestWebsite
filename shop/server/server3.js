@@ -84,9 +84,9 @@ app.use(bodyParser.json());
 
 const pool = mysql.createPool({
     host: ''||process.env.DB_HOST,
-    user: ''||process.env.DB_USER,
+    user: 'root'||process.env.DB_USER,
     password: ''||process.env.DB_PASSWORD,
-    database: ''||process.env.DB_NAME,
+    database: 'ecommerce'||process.env.DB_NAME,
     port: '3306'||process.env.DB_PORT,
 });
 
@@ -210,6 +210,19 @@ app.post('/logout', (req, res) => {
         secure: true,
         sameSite: 'None',
     });
+    res.clearCookie('transaction_id', {
+        httpOnly: true,
+        secure: true, // Ensures the cookie is only sent over HTTPS
+        sameSite: 'None', // Allows cross-site cookie sharing
+        path: '/', // Matches the path where the cookie was set
+    });   
+    res.clearCookie('type', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+        path: '/', // Matches the path where the cookie was set
+    });
+     
     res.status(200).json({ message: 'Logged out successfully' });
 });
 
@@ -258,7 +271,7 @@ app.post("/login", async (req, res) => {
                 httpOnly: true,
                 secure: true,
                 sameSite: "None",
-                maxAge: 24 * 60 * 60 * 1000,
+                maxAge: 48 * 60 * 60 * 1000,
                 path: "/",
             });
 
@@ -324,9 +337,6 @@ app.get('/get-transaction-details', (req, res) => {
     if (!recipientAddress || !transaction_amount || !note) {
         return res.status(400).json({ error: 'Required transaction details are missing.' });
     }
-
-
-
     res.json({
         recipientAddress,
         transaction_amount,
@@ -466,7 +476,7 @@ app.get('/cart-items', async (req, res) => {
 
             const cartID = cart[0].cart_id;
             const [cartItems] = await connection.query(
-                `SELECT i.id, ci.cart_item_id, ci.item_id, i.name, ci.quantity, ci.price, i.stock, i.image
+                `SELECT i.id, ci.cart_item_id, ci.item_id, i.name, ci.quantity, ci.price, i.stock, i.image, i.description, i.category
                  FROM CARTITEMS ci
                  JOIN ITEMS i ON ci.item_id = i.id
                  WHERE ci.cart_id = ?`,
@@ -697,15 +707,43 @@ app.post('/update-cart-item', async (req, res) => {
 // Checkout route
 app.post('/checkout', async (req, res) => {
     const { userID } = req.body;
+    const { transaction_id, type} = req.cookies;
 
     if (!userID) {
         return res.status(400).json({ success: false, error: 'User ID is required for checkout.' });
     }
-
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
+        if (type === 'wallet'){
+            let decodedTransaction;
+            try {
+                // Decode and verify the JWT
+                decodedTransaction = jwt.verify(transaction_id, JWT_SECRET);
+            } catch (error) {
+                return res.status(403).json({ success: false, error: 'Invalid or expired transaction token.' });
+            }
+            const { transactionID, userID: jwtUserID, amount } = decodedTransaction;
 
+            // Check if the `userID` matches the one in the JWT
+            if (userID !== jwtUserID) {
+                await connection.rollback();
+                return res.status(403).json({ success: false, error: 'User ID mismatch.' });
+            }
+    
+            // Remove the record from PENDING_TRANSACTIONS
+            const deleteQuery = `
+                DELETE FROM PENDING_TRANSACTIONS
+                WHERE transaction_id = ? AND user_id = ? AND amount = ?
+            `;
+            const [deleteResult] = await connection.query(deleteQuery, [transactionID, userID, amount]);
+    
+            if (deleteResult.affectedRows === 0) {
+                await connection.rollback();
+                return res.status(404).json({ success: false, error: 'Pending transaction not found.' });
+            }
+    
+        }
         // 1. Retrieve the user's cart
         const [cart] = await connection.query(
             'SELECT cart_id FROM CART WHERE user_id = ?',
@@ -809,6 +847,19 @@ app.post('/checkout', async (req, res) => {
                 secure: true,
                 sameSite: 'None',
             });
+            res.clearCookie('transaction_id', {
+                httpOnly: true,
+                secure: true, // Ensures the cookie is only sent over HTTPS
+                sameSite: 'None', // Allows cross-site cookie sharing
+                path: '/', // Matches the path where the cookie was set
+            });
+            res.clearCookie('type', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/', // Matches the path where the cookie was set
+            });
+               
     
         } catch (error) {
             console.error('Error clearing cookies:', error);
@@ -2174,6 +2225,40 @@ app.put('/items-user/:id', upload.single('product-image'), async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to update product.', details: error.message });
     }
 });
+app.get('/transaction-history-user', async (req, res) => {
+    const userID = req.query.userID;
+    if (!userID) {
+        return res.status(400).json({ success: false, error: 'UserID is required.' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+        try {
+            const query = `
+                SELECT 
+                    t.transaction_id, 
+                    u.username, 
+                    t.total_amount, 
+                    t.created_at,
+                    GROUP_CONCAT(CONCAT('Item: ', i.name, ', Quantity: ', s.quantity, ', Price: $', FORMAT(s.price, 2)) SEPARATOR '\n') AS description
+                FROM TRANSACTIONS t
+                JOIN USERS u ON t.user_id = u.id
+                JOIN SALE_ITEMS s ON t.transaction_id = s.transaction_id
+                JOIN ITEMS i ON s.item_id = i.id
+                WHERE t.user_id = ?
+                GROUP BY t.transaction_id
+                ORDER BY t.created_at DESC;
+            `;
+            const [results] = await connection.query(query, [userID]);
+            res.json(results);
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch transactions.' });
+    }
+});
 
 
 app.get('/transactions-user', async (req, res) => {
@@ -2479,36 +2564,131 @@ app.get('/get-address-user', async (req, res) => {
         res.status(500).json({ success: false, error: 'Error fetching address.' });
     }
 });
+app.post('/validate-transaction', async (req, res) => {
+    const { transaction_id } = req.cookies; // Get the cookie from the request
 
-app.post('/wallet-checkout-user', async(req, res)=> {
-    const { userID, amount } = req.body;
-    if (!userID || !amount){
-        return res.status(400).json({ success: false, error: 'UserID and amount is required.' });
+    if (!transaction_id) {
+        return res.status(400).json({ success: false, error: 'Transaction cookie is missing.' });
     }
+
     try {
+        // Decode and verify the JWT
+        const payload = jwt.verify(transaction_id, JWT_SECRET);
+
+        // Extract transaction details from the payload
+        const { transactionID, userID, amount } = payload;
+
+        if (!transactionID || !userID || !amount) {
+            return res.status(400).json({ success: false, error: 'Invalid transaction data in cookie.' });
+        }
+
         const connection = await pool.getConnection();
         try {
-            const query = 
-                `UPDATE USERS
-                 SET wallet = wallet - ?
-                 WHERE id = ?`; // Replace `id` with your user identifier column name if different
-  
-            const [results] = await connection.query(query, [amount,userID]);
+            // Check if the transaction exists in the PENDING_TRANSACTIONS table
+            const query = `
+                SELECT * FROM PENDING_TRANSACTIONS
+                WHERE transaction_id = ? AND user_id = ? AND amount = ?
+            `;
+            const [rows] = await connection.query(query, [transactionID, userID, amount]);
 
-            if (results.affectedRows > 0) {
-                res.json({ success: true});
-            } else {
-                res.status(404).json({ success: false, error: 'User not found.' });
+            if (rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Transaction not found or already processed.' });
             }
+
+            // Transaction is valid
+            res.json({ success: true, message: 'Transaction is valid.', transaction: rows[0] });
         } finally {
             connection.release();
         }
     } catch (error) {
-        console.error('Error fetching wallet:', error);
-        res.status(500).json({ success: false, error: 'Error fetching wallet.' });
+        console.error('Error validating transaction:', error);
+
+        // Handle invalid or expired JWT
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+            return res.status(403).json({ success: false, error: 'Invalid or expired transaction token.' });
+        }
+
+        res.status(500).json({ success: false, error: 'Internal server error.' });
+    }
+});
+
+
+app.post('/wallet-checkout-user', async (req, res) => {
+    const { userID, amount } = req.body;
+
+    if (!userID || !amount) {
+        return res.status(400).json({ success: false, error: 'UserID and amount are required.' });
     }
 
+    try {
+        const connection = await pool.getConnection();
+        try {
+            // Begin a transaction
+            await connection.beginTransaction();
+
+            // Deduct the amount from the user's wallet
+            const deductQuery = `
+                UPDATE USERS
+                SET wallet = wallet - ?
+                WHERE id = ?
+            `;
+            const [deductResult] = await connection.query(deductQuery, [amount, userID]);
+
+            if (deductResult.affectedRows === 0) {
+                await connection.rollback();
+                return res.status(404).json({ success: false, error: 'User not found.' });
+            }
+
+            // Generate a transaction ID
+            const transactionID = `${userID}-${Date.now()}`;
+
+            // Insert the transaction ID into the PENDING_TRANSACTIONS table
+            const insertQuery = `
+                INSERT INTO PENDING_TRANSACTIONS (transaction_id, user_id, amount)
+                VALUES (?, ?, ?)
+            `;
+            const [insertResult] = await connection.query(insertQuery, [transactionID, userID, amount]);
+
+            if (insertResult.affectedRows === 0) {
+                await connection.rollback();
+                return res.status(500).json({ success: false, error: 'Failed to create pending transaction.' });
+            }
+
+            // Generate a JWT token with transaction details
+            const payload = { userID, transactionID, amount };
+            const jwtToken = jwt.sign(payload, JWT_SECRET);
+
+            // Set the JWT as a cookie
+            res.cookie('transaction_id', jwtToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/',
+            });
+            res.cookie('type', 'wallet', {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/',
+            });
+
+            // Commit the transaction
+            await connection.commit();
+
+            res.json({ success: true, transactionID });
+        } catch (error) {
+            await connection.rollback(); // Rollback transaction on error
+            console.error('Error processing wallet checkout:', error);
+            res.status(500).json({ success: false, error: 'Internal server error.' });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error connecting to the database:', error);
+        res.status(500).json({ success: false, error: 'Internal server error.' });
+    }
 });
+
 app.post('/withdraw-user', async (req, res) => {
     const { userID, amount } = req.body;
 

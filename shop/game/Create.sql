@@ -15,7 +15,8 @@ game/my-app
 │   │   ├── Upgrade.js            # Component for upgrading mining power
 │   │   └── ...other components
 │   ├── App.css              
-│   │       
+│   ├── utils/
+|   |   ├── auth.js               # Sanitization functions
 │   ├── App.js                    # Main React component
 │   ├── index.js                  # Entry point for React
 │   └── api/                      # API utility functions
@@ -32,7 +33,7 @@ game/my-app
 │   │   ├── userRoutes.js         # User-related API routes
 │   │   └── ...other routes
 │   ├── db/                       # Database connection and configuration
-│   │   └── index.js              #Assume this exists
+│   │   └── index.js              # Assume this exists
 │   ├── app.js                    # Express app setup
 │   ├── server.js                 # Server entry point
 │   └── middleware/               # Middleware (e.g., authentication)
@@ -53,6 +54,21 @@ USE ecommerce;
 -- Since id cannot be reused, 
 -- e.g. If itemID 5 is deleted, database will never go to itemID 5
 -- Hence, I removed itemID as a referential integrity constraint
+
+CREATE TABLE UPGRADES (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    cost DECIMAL(15, 2) NOT NULL,
+    mining_power_increase INT NOT NULL DEFAULT 0
+);
+CREATE TABLE USER_UPGRADES (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    upgrade_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
+    FOREIGN KEY (upgrade_id) REFERENCES UPGRADES(id) ON DELETE CASCADE
+);
 
 
 
