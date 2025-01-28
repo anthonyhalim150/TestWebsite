@@ -34,7 +34,7 @@ function generateQRCode(address, amount, note) {
           recipient: sanitizedAddress,
           assetID: 732664447,
           amount_in: parseFloat(amount) * Math.pow(10, 2),
-          note: `order_${sanitizedNote} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`,
+          note: `order_${sanitizedNote}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
       };
 
       const qrCodeData = `algorand://${paymentDetails.recipient}?amount=${paymentDetails.amount_in}&asset=${paymentDetails.assetID}&note=${encodeURIComponent(paymentDetails.note)}`;
@@ -83,7 +83,7 @@ async function monitorTransaction(txid) {
               amount,
               assetId: 732664447,
               recipientAddress: sanitizeInput(recipientAddress),
-              orderId: sanitizeInput(`order_${sanitizeInput(note)} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`),
+              orderId: sanitizeInput(`order_${sanitizeInput(note)}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`),
           }),
           credentials: "include",
       });

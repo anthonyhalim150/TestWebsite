@@ -169,7 +169,7 @@ async function confirm_deposit() {
                 amount: amount,
                 assetId,
                 recipientAddress,
-                orderId: sanitizeInput(`order_${sanitizeInput(note)} DO NOT CHANGE THIS AS IT CONFIRMS YOUR TRANSACTION!`),
+                orderId: sanitizeInput(`order_${sanitizeInput(note)}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`),
             }),
             credentials: 'include', // Include cookies for authentication
         });
