@@ -1,3 +1,5 @@
+let items = []; // Declare items globally
+
 async function renderCart() {
     const cartContent = document.getElementById('cart-content');
     const userID = await getCookie(); // Securely fetch userID using await getCookie()
@@ -25,20 +27,21 @@ async function renderCart() {
             return;
         }
 
-        const cartItems = result.cartItems;
+        // Store cart items globally
+        items = result.cartItems;
 
         // Calculate total amount
-        const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
         // Render cart items
         cartContent.innerHTML = `
             <ul class="list-group">
-                ${cartItems.map(item => {
+                ${items.map(item => {
                     const formattedPrice = parseFloat(item.price).toLocaleString('en-US');
                     const sanitizedName = sanitizeInput(item.name);
                     const sanitizedImage = sanitizeInput(item.image);
                     return `
-                    <div class="card" onclick="showItemOverview('${sanitizeInput(item.id)}')">
+                    <div class="card" data-item-id="${sanitizeInput(item.id)}" onclick="showItemOverview('${sanitizeInput(item.id)}')">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                                 <img src="${sanitizedImage}" alt="${sanitizedName}" class="img-thumbnail me-3" style="width: 50px; height: 50px;">
@@ -80,6 +83,7 @@ async function renderCart() {
         cartContent.innerHTML = `<p class="text-danger">Failed to load cart. Please try again later.</p>`;
     }
 }
+
 
 let timeoutID = null;
 
@@ -391,13 +395,18 @@ async function confirm_checkout() {
     }
 }
 function showItemOverview(itemId) {
-    // Find the item by ID securely
-    const item = items.find(i => i.id === itemId);
-    if (!item) return;
+    const item = items.find(i => i.id === Number(itemId)); // Ensure numeric comparison
+    if (!item) {
+        console.error('Item not found for ID:', itemId);
+        return;
+    }
 
     const overviewContainer = document.getElementById('item-overview');
-    
-    // Sanitize and format the item details
+    if (!overviewContainer) {
+        console.error('Overview container not found in the DOM.');
+        return;
+    }
+
     const sanitizedName = sanitizeInput(item.name);
     const sanitizedImage = sanitizeInput(item.image);
     const sanitizedDescription = sanitizeInput(item.description);
@@ -405,7 +414,6 @@ function showItemOverview(itemId) {
     const sanitizedStock = sanitizeInput(item.stock);
     const sanitizedCategory = sanitizeInput(item.category || 'N/A');
 
-    // Inject sanitized content into the overview container
     overviewContainer.innerHTML = `
         <h3>${sanitizedName}</h3>
         <img src="${sanitizedImage}" alt="${sanitizedName}" style="width: 180px; height: 180px; margin-bottom: 15px;">
@@ -418,6 +426,7 @@ function showItemOverview(itemId) {
     overviewContainer.style.display = 'block';
 }
 
+
 document.addEventListener('click', (event) => {
     const overviewSection = document.getElementById('item-overview');
     const isInsideOverview = overviewSection && overviewSection.contains(event.target);
@@ -425,12 +434,13 @@ document.addEventListener('click', (event) => {
     const isTriggerElement = event.target.closest('.card'); // Adjust trigger as needed
 
     if (isTriggerElement) {
-        const itemId = parseInt(isTriggerElement.dataset.itemId, 10);
+        const itemId = isTriggerElement.dataset.itemId; // Get the item ID from the attribute
         showItemOverview(itemId);
     } else if (!isInsideOverview || isCloseButton) {
         closeItemOverview();
     }
 });
+
 
 function closeItemOverview() {
     const overviewContainer = document.getElementById('item-overview');

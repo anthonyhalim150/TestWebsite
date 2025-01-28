@@ -5,9 +5,6 @@ async function submitComment(event) {
 
     // Ensure user is authenticated
     const userID = await getCookie();
-    if (!userID) { // This should not happen if ensureAuthenticated is working correctly
-        return;
-    }
 
     if (selectedRating === 0) {
         alert('Please add a rating for the website!');
@@ -68,12 +65,7 @@ function updateStars(rating, stars) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await ensureAuthenticated(); // Ensure the user is authenticated
-
-    const userID = await getCookie();
-    if (!userID) { // This should not happen if ensureAuthenticated is working correctly
-        return;
-    }
+    await getCookie();
     const commentForm = document.getElementById('comment-form');
     if (commentForm) {
         commentForm.addEventListener('submit', submitComment);
