@@ -83,7 +83,7 @@ async function monitorTransaction(txid) {
               amount,
               assetId: 732664447,
               recipientAddress: sanitizeInput(recipientAddress),
-              orderId: `order_${sanitizeInput(note)}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
+              orderId: `order_${note}_DO_NOT_CHANGE_THIS_AS_IT_CONFIRMS_YOUR_TRANSACTION!`,
           }),
           credentials: "include",
       });
