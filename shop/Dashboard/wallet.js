@@ -152,7 +152,6 @@ async function confirm_deposit() {
 
         // Validate required fields
         if (!txid || !amount || !assetId || !recipientAddress || !note) {
-            alert('Missing required transaction details.');
             return;
         }
 

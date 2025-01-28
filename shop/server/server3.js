@@ -94,8 +94,8 @@ const pool = mysql.createPool({
 
 // Middleware to Authenticate Token from Cookies
 const authenticateToken = (req, res, next) => {
-    if (req.path === "/signup" || req.path === "/login") {
-        console.log("Skipping token authentication for /signup and /login endpoint.");
+    if (req.path === "/signup" || req.path === "/login" || req.path === '/clear-transaction-cookies') {
+        console.log("Skipping token authentication for /signup, /clear-transaction-cookie, /login endpoint.");
         return next(); // Bypass the middleware for /signup
     }
     const token = req.cookies.authToken;
@@ -220,7 +220,7 @@ app.post("/login", async (req, res) => {
                 httpOnly: true,
                 secure: true,
                 sameSite: "None",
-                maxAge: 2 * 60 * 60 * 1000,
+                maxAge: 24 * 60 * 60 * 1000,
                 path: "/",
             });
 
@@ -260,7 +260,7 @@ app.post('/start-transaction', (req, res) => {
     }
 
     // Set cookies for transaction details
-    res.cookie('address', address, {
+    res.cookie('recipientAddress', address, {
         httpOnly: true,
         secure: true,
         sameSite: "None",
@@ -278,19 +278,38 @@ app.post('/start-transaction', (req, res) => {
     res.json({ success: true, message: 'Transaction initiated' });
 });
 app.get('/get-transaction-details', (req, res) => {
-    const { address, transaction_amount, note} = req.cookies;
-
+    const { recipientAddress, transaction_amount, note} = req.cookies;
     // Ensure all required cookies are present
-    if (!address || !transaction_amount || !note) {
+    if (!recipientAddress || !transaction_amount || !note) {
         return res.status(400).json({ error: 'Required transaction details are missing.' });
     }
 
+
+
     res.json({
-        address,
+        recipientAddress,
         transaction_amount,
         note,
     });
 });
+app.get('/get-all-transactions', (req, res) => {
+    const { txid, amount, assetId, recipientAddress, note } = req.cookies;
+
+    // Ensure all required cookies are present
+    if (!txid || !amount || !assetId || !recipientAddress || !note) {
+        return res.status(400).json({ error: 'Some required cookies are missing.' });
+    }
+
+    res.json({
+        success: true,
+        txid,
+        amount,
+        assetId,
+        recipientAddress,
+        note,
+    });
+});
+
 
 
 
@@ -307,6 +326,27 @@ app.get('/all-items', async (req, res) => {
     } catch (error) {
         console.error('Error fetching items:', error);
         res.json({ success: false, error: 'Error fetching items.' });
+    }
+});
+app.get("/ongoing-auction-user", async (req, res) => {
+    const userID = req.query.userID; 
+    const query = `
+    SELECT * 
+    FROM AUCTION_ITEMS 
+    WHERE (starting_time + INTERVAL duration SECOND) > NOW() AND starting_time < NOW() AND created_by = ?
+    `;//NOW() is guranteed to be the server date and cannot be manipulated
+  
+    try {
+      const connection = await pool.getConnection();
+      try {
+        const [results] = await connection.query(query, [userID]);
+        res.json({ success: true, items: results });
+      } finally {
+        connection.release();
+      }
+    } catch (err) {
+      console.error("Error fetching auction items:", err);
+      res.status(500).json({ error: "Database query failed" });
     }
 });
 app.get("/auction", async (req, res) => {
@@ -686,12 +726,21 @@ app.post('/checkout', async (req, res) => {
         // 5. Clear the cart
         await connection.query('DELETE FROM CARTITEMS WHERE cart_id = ?', [cartID]);
         await connection.query('DELETE FROM CART WHERE cart_id = ?', [cartID]);
+        const clearCookiesResponse = await fetch(`https://anthonyhalim-150-723848267249.us-central1.run.app/clear-transaction-cookies`, {
+            method: 'POST',
+            credentials: 'include',
+        });
 
-        // Commit the transaction
+        const clearCookiesResult = await clearCookiesResponse.json();
+
+        if (!clearCookiesResult.success) {
+            throw new Error('Failed to clear cookies.');
+        }
+        // Commit the transaction only after cookies are cleared
         await connection.commit();
         res.json({ success: true, message: 'Checkout completed successfully.' });
     } catch (error) {
-        // Rollback the transaction in case of error
+        // Rollback the transaction in case of any error
         await connection.rollback();
         console.error('Error during checkout:', error);
         res.status(500).json({ success: false, error: 'Checkout failed.' });
@@ -1746,38 +1795,117 @@ app.get("/highest-bid", async (req, res) => {
       res.status(500).json({ error: "Database query failed" });
     }
 });
+app.post('/clear-transaction-cookies', (req, res) => {
+    try {
+        // Clear all transaction-related cookies
+        res.clearCookie('txid', {
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+        });
+
+        res.clearCookie('amount', {
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+        });
+
+        res.clearCookie('assetId', {
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+        });
+
+        res.clearCookie('recipientAddress', {
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+        });
+
+        res.clearCookie('note', {
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+        });
+
+        // Respond with success
+        res.status(200).json({ success: true, message: 'Transaction cookies cleared successfully.' });
+    } catch (error) {
+        console.error('Error clearing cookies:', error);
+        res.status(500).json({ success: false, message: 'Failed to clear cookies.' });
+    }
+});
+
 app.post('/check-transaction', async (req, res) => {
     const { txid, amount, assetId, recipientAddress, orderId } = req.body; // Receive details from the frontend
-  
+
     if (!txid || !amount || !assetId || !recipientAddress || !orderId) {
         return res.status(400).json({ error: "Transaction ID, amount, asset ID, and recipient address are required." });
     }
-  
+
     try {
         // Query the Nodely Indexer API for transaction information
         const response = await fetch(`https://testnet-idx.4160.nodely.dev/v2/transactions/${txid}`);
         const txnInfo = await response.json();
-  
+
         if (!txnInfo || txnInfo.error) {
             return res.status(500).json({ error: "Error fetching transaction info." });
         }
-  
+
         if (txnInfo.transaction && txnInfo.transaction['confirmed-round'] > 0) {
-            // Validate transaction details
-            const payment = txnInfo.transaction['asset-transfer-transaction']; // Asset transfer details
-            const transactionNote = Buffer.from(txnInfo.transaction.note, 'base64').toString();
+            const payment = txnInfo.transaction['asset-transfer-transaction'];
+            const transactionNote = Buffer.from(txnInfo.transaction.note, 'base64').toString(); // Decode Base64
+
+            // Normalize and decode the transaction note and order ID
+            const normalizedTransactionNote = decodeURIComponent(transactionNote).trim();
+            const normalizedOrderId = decodeURIComponent(orderId).trim();
+
+
+
+            // Compare the normalized values
             if (
-                payment.receiver === recipientAddress &&
-                payment['asset-id'] === assetId &&
+                decodeURIComponent(payment.receiver) === decodeURIComponent(recipientAddress) &&
+                parseInt(payment['asset-id']) === parseInt(assetId) &&
                 parseFloat(payment.amount) === parseFloat(amount) &&
-                transactionNote === orderId // Compare with the encoded note
+                normalizedTransactionNote === normalizedOrderId
             ) {
-                // Set a server-side cookie with payment_status
-                res.cookie('payment_status', 'true', {
+                res.cookie('txid', txid, {
                     httpOnly: true,
                     secure: true,
-                    sameSite: 'Strict',
-                    maxAge: 15 * 60 * 1000, // Cookie expires in 15 minutes
+                    sameSite: 'None', // Allows cross-site requests
+                    maxAge: 15 * 60 * 1000, // 15 minutes
+                });
+
+                res.cookie('amount', amount, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None',
+                    maxAge: 15 * 60 * 1000, // 15 minutes
+                });
+
+                res.cookie('assetId', assetId, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None',
+                    maxAge: 15 * 60 * 1000, // 15 minutes
+                });
+
+                res.cookie('recipientAddress', recipientAddress, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None',
+                    maxAge: 15 * 60 * 1000, // 15 minutes
+                });
+                res.cookie('note', orderId, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'None',
+                    maxAge: 15 * 60 * 1000, // 15 minutes
                 });
 
                 return res.json({
@@ -1789,6 +1917,12 @@ app.post('/check-transaction', async (req, res) => {
                     note: orderId,
                 });
             } else {
+                console.log("Comparison failed:");
+                console.log("Receiver Match:", decodeURIComponent(payment.receiver) === decodeURIComponent(recipientAddress));
+                console.log("Asset ID Match:", payment['asset-id'] === assetId);
+                console.log("Amount Match:", parseFloat(payment.amount) === parseFloat(amount));
+                console.log("Note Match:", normalizedTransactionNote === normalizedOrderId);
+
                 return res.json({
                     completed: false,
                     error: "Transaction details do not match the expected values.",
@@ -1797,13 +1931,11 @@ app.post('/check-transaction', async (req, res) => {
         } else {
             return res.json({ completed: false });
         }
-      
     } catch (error) {
         console.error("Error checking transaction:", error);
         return res.status(500).json({ error: "Error verifying transaction. Please try again." });
     }
 });
-
 
 app.get('/items-user', async (req, res) => {
     const userID = req.query.userID; // Get userID from query parameter
@@ -2172,22 +2304,42 @@ app.post('/update-wallet-user', async (req, res) => {
     const connection = await pool.getConnection();
 
     try {
+        await connection.beginTransaction(); // Begin transaction
+
+        // Update wallet
         const [result] = await connection.query(
             'UPDATE USERS SET wallet = wallet + ? WHERE id = ?',
             [amount, userID]
         );
 
         if (result.affectedRows === 0) {
+            await connection.rollback(); // Rollback if user not found
             return res.status(404).json({ success: false, error: 'User not found.' });
         }
+
+        // Call the clear-cookie endpoint
+        const clearCookiesResponse = await fetch(`https://anthonyhalim-150-723848267249.us-central1.run.app/clear-transaction-cookies`, {
+            method: 'POST',
+            credentials: 'include', // Include cookies in the request
+        });
+
+        const clearCookiesResult = await clearCookiesResponse.json();
+
+        if (!clearCookiesResult.success) {
+            throw new Error('Failed to clear cookies.'); // Trigger rollback
+        }
+
+        await connection.commit(); // Commit transaction after clearing cookies
         res.json({ success: true });
     } catch (error) {
-        console.error('Error depositing:', error);
-        res.status(500).json({ success: false, error: 'Database error.' });
+        await connection.rollback(); // Rollback transaction on error
+        console.error('Error updating wallet:', error);
+        res.status(500).json({ success: false, error: 'Database error or cookie clearing failed.' });
     } finally {
-        connection.release();
+        connection.release(); // Release connection back to the pool
     }
 });
+
 
 // Endpoint to get the wallet balance
 app.get('/get-wallet-user', async (req, res) => {

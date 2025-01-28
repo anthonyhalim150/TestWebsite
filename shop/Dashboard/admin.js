@@ -1,6 +1,6 @@
 async function crawler_check(){
     const userRole = await get_user_role(); 
-    if (window.location.pathname.includes('/shop/Dashboard') && (userRole !== 'user' || get_user_role()!== 'user')) {
+    if (window.location.pathname.includes('/shop/Dashboard') && userRole !== 'user') {
         window.location.href = sanitizeURL('/shop/login.html');  // Redirect to non-admins to homepage
     }
 }
