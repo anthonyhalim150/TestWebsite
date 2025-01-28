@@ -63,6 +63,8 @@ async function fetch_products(sorted_items = null) {
                             </a>
                         </td>
                     </tr>`;
+                    sanitizeAllLinks();
+
             }
         } else {
             console.error("No products found or data retrieval failed.");

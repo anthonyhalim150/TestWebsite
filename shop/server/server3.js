@@ -58,10 +58,8 @@ app.use(cookieParser()); // Enable cookie parsing
 
 
 
-
 const allowedOrigins = [
     "http://127.0.0.1:5500",
-    "http://localhost:5500", // Add localhost for testing
     /^https:\/\/testinghellow/, // Production domains
 ];
 
@@ -85,17 +83,17 @@ app.use(cors({
 app.use(bodyParser.json());
 
 const pool = mysql.createPool({
-    host: '34.67.118.54'||process.env.DB_HOST,
-    user: 'root'||process.env.DB_USER,
-    password: 'Vvs319338'||process.env.DB_PASSWORD,
-    database: 'ecommerce'||process.env.DB_NAME,
+    host: ''||process.env.DB_HOST,
+    user: ''||process.env.DB_USER,
+    password: ''||process.env.DB_PASSWORD,
+    database: ''||process.env.DB_NAME,
     port: '3306'||process.env.DB_PORT,
 });
 
 // Middleware to Authenticate Token from Cookies
 const authenticateToken = (req, res, next) => {
-    if (req.path === "/signup" || req.path === "/login" || req.path === '/clear-transaction-cookies') {
-        console.log("Skipping token authentication for /signup, /clear-transaction-cookie, /login endpoint.");
+    if (req.path === "/signup" || req.path === "/login") {
+        console.log("Skipping token authentication for /signup, /login endpoint.");
         return next(); // Bypass the middleware for /signup
     }
     const token = req.cookies.authToken;
@@ -171,6 +169,46 @@ app.post('/logout', (req, res) => {
         secure: true,
         sameSite: "None",
         path: "/", // Ensure the path matches where the cookie was set
+    });
+    res.clearCookie('txid', {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+    });
+
+    res.clearCookie('amount', {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+    });
+    res.clearCookie('transaction_amount', {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+    });
+
+    res.clearCookie('assetId', {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+    });
+
+    res.clearCookie('recipientAddress', {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+    });
+
+    res.clearCookie('note', {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
     });
     res.status(200).json({ message: 'Logged out successfully' });
 });
@@ -261,16 +299,19 @@ app.post('/start-transaction', (req, res) => {
 
     // Set cookies for transaction details
     res.cookie('recipientAddress', address, {
+        path: '/',
         httpOnly: true,
         secure: true,
         sameSite: "None",
     });
     res.cookie('transaction_amount', transaction_amount, {
+        path: '/',
         httpOnly: true,
         secure: true,
         sameSite: "None",
     });
     res.cookie('note', note, {
+        path: '/',
         httpOnly: true,
         secure: true,
         sameSite: "None",
@@ -726,16 +767,54 @@ app.post('/checkout', async (req, res) => {
         // 5. Clear the cart
         await connection.query('DELETE FROM CARTITEMS WHERE cart_id = ?', [cartID]);
         await connection.query('DELETE FROM CART WHERE cart_id = ?', [cartID]);
-        const clearCookiesResponse = await fetch(`https://anthonyhalim-150-723848267249.us-central1.run.app/clear-transaction-cookies`, {
-            method: 'POST',
-            credentials: 'include',
-        });
-
-        const clearCookiesResult = await clearCookiesResponse.json();
-
-        if (!clearCookiesResult.success) {
-            throw new Error('Failed to clear cookies.');
+        try {
+            // Clear all transaction-related cookies
+            res.clearCookie('txid', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+            res.clearCookie('transaction_amount', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+            res.clearCookie('amount', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+            res.clearCookie('assetId', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+            res.clearCookie('recipientAddress', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+            res.clearCookie('note', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+        } catch (error) {
+            console.error('Error clearing cookies:', error);
+            res.status(500).json({ success: false, message: 'Failed to clear cookies.' });
         }
+        
         // Commit the transaction only after cookies are cleared
         await connection.commit();
         res.json({ success: true, message: 'Checkout completed successfully.' });
@@ -1795,51 +1874,6 @@ app.get("/highest-bid", async (req, res) => {
       res.status(500).json({ error: "Database query failed" });
     }
 });
-app.post('/clear-transaction-cookies', (req, res) => {
-    try {
-        // Clear all transaction-related cookies
-        res.clearCookie('txid', {
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-        });
-
-        res.clearCookie('amount', {
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-        });
-
-        res.clearCookie('assetId', {
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-        });
-
-        res.clearCookie('recipientAddress', {
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-        });
-
-        res.clearCookie('note', {
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-        });
-
-        // Respond with success
-        res.status(200).json({ success: true, message: 'Transaction cookies cleared successfully.' });
-    } catch (error) {
-        console.error('Error clearing cookies:', error);
-        res.status(500).json({ success: false, message: 'Failed to clear cookies.' });
-    }
-});
 
 app.post('/check-transaction', async (req, res) => {
     const { txid, amount, assetId, recipientAddress, orderId } = req.body; // Receive details from the frontend
@@ -1875,6 +1909,7 @@ app.post('/check-transaction', async (req, res) => {
                 normalizedTransactionNote === normalizedOrderId
             ) {
                 res.cookie('txid', txid, {
+                    path: '/', 
                     httpOnly: true,
                     secure: true,
                     sameSite: 'None', // Allows cross-site requests
@@ -1882,6 +1917,7 @@ app.post('/check-transaction', async (req, res) => {
                 });
 
                 res.cookie('amount', amount, {
+                    path: '/', 
                     httpOnly: true,
                     secure: true,
                     sameSite: 'None',
@@ -1889,6 +1925,7 @@ app.post('/check-transaction', async (req, res) => {
                 });
 
                 res.cookie('assetId', assetId, {
+                    path: '/', 
                     httpOnly: true,
                     secure: true,
                     sameSite: 'None',
@@ -1896,12 +1933,14 @@ app.post('/check-transaction', async (req, res) => {
                 });
 
                 res.cookie('recipientAddress', recipientAddress, {
+                    path: '/', 
                     httpOnly: true,
                     secure: true,
                     sameSite: 'None',
                     maxAge: 15 * 60 * 1000, // 15 minutes
                 });
                 res.cookie('note', orderId, {
+                    path: '/', 
                     httpOnly: true,
                     secure: true,
                     sameSite: 'None',
@@ -2317,16 +2356,52 @@ app.post('/update-wallet-user', async (req, res) => {
             return res.status(404).json({ success: false, error: 'User not found.' });
         }
 
-        // Call the clear-cookie endpoint
-        const clearCookiesResponse = await fetch(`https://anthonyhalim-150-723848267249.us-central1.run.app/clear-transaction-cookies`, {
-            method: 'POST',
-            credentials: 'include', // Include cookies in the request
-        });
-
-        const clearCookiesResult = await clearCookiesResponse.json();
-
-        if (!clearCookiesResult.success) {
-            throw new Error('Failed to clear cookies.'); // Trigger rollback
+        try {
+            // Clear all transaction-related cookies
+            res.clearCookie('txid', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+            res.clearCookie('transaction_amount', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+            res.clearCookie('amount', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+            res.clearCookie('assetId', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+            res.clearCookie('recipientAddress', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+            res.clearCookie('note', {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+            });
+    
+        } catch (error) {
+            console.error('Error clearing cookies:', error);
+            res.status(500).json({ success: false, message: 'Failed to clear cookies.' });
         }
 
         await connection.commit(); // Commit transaction after clearing cookies

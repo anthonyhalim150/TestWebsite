@@ -58,6 +58,7 @@ function createSidebar() {
 
     // Append sidebar to the body or a specific container
     document.body.prepend(sidebar);
+    sanitizeAllLinks();
 
     // Add event listeners for dropdown
     open_drop_down();

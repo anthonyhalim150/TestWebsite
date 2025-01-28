@@ -45,6 +45,7 @@ async function update_login() {
             </li>
         </ul>
         `;
+        sanitizeAllLinks();
 
         // Event listener for 'Likes'
         const likesNav = document.getElementById('likes_nav');
@@ -82,7 +83,7 @@ async function update_login() {
             </li>
         </ul>
         `;
-
+        sanitizeAllLinks();
         prevent_cart(userID);  // Prevent access to the cart if not logged in
     }
 

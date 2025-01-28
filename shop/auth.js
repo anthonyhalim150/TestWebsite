@@ -93,3 +93,14 @@ function sanitizeURL(url) {
         return "/";
     }
 }
+function sanitizeAllLinks() {
+    const links = document.querySelectorAll('a[href]');
+    links.forEach(link => {
+        const originalHref = link.getAttribute('href');
+        const sanitizedHref = sanitizeURL(originalHref);
+        link.setAttribute('href', sanitizedHref);
+    });
+}
+
+// Call the function on page load to sanitize all links
+document.addEventListener('DOMContentLoaded', sanitizeAllLinks);

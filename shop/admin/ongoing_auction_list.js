@@ -117,6 +117,7 @@ function formatDateTime(dateTime) {
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     fetch_products(); // Fetch initial list on page load
+    sanitizeAllLinks();
 });
 
 const searchBar = document.getElementById("search-bar");
