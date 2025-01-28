@@ -43,7 +43,7 @@ function createSidebar() {
                         <li><a href="/shop/Dashboard/upcoming_auction_list.html" class="nav-item">Upcoming Auction List</a></li>
                     </ul>
                 </li>
-                <li><a href="/shop/Dashboard/transaction_history.html" class="nav-item">Transaction List</a></li>
+                <li><a href="/shop/Dashboard/transaction_history.html" class="nav-item">Transaction History</a></li>
                 <li><a href="/shop/Dashboard/metrics.html" class="nav-item">Metrics</a></li>
                 <li><a href="/shop/index.html" class="nav-item">Home</a></li>
             </ul>
