@@ -29,6 +29,7 @@ function createSidebar() {
                     <ul class="dropdown-menu">
                         <li><a href="/shop/Dashboard/add_new_product.html" class="nav-item">Add Product</a></li>
                         <li><a href="/shop/Dashboard/product_list.html" class="nav-item">Product List</a></li>
+                        <li><a href="/shop/Dashboard/transaction_list.html" class="nav-item">Sold List</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
@@ -42,7 +43,7 @@ function createSidebar() {
                         <li><a href="/shop/Dashboard/upcoming_auction_list.html" class="nav-item">Upcoming Auction List</a></li>
                     </ul>
                 </li>
-                <li><a href="/shop/Dashboard/transaction_list.html" class="nav-item">Transaction List</a></li>
+                <li><a href="/shop/Dashboard/transaction_history.html" class="nav-item">Transaction List</a></li>
                 <li><a href="/shop/Dashboard/metrics.html" class="nav-item">Metrics</a></li>
                 <li><a href="/shop/index.html" class="nav-item">Home</a></li>
             </ul>

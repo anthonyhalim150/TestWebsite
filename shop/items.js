@@ -35,7 +35,7 @@ async function update_login() {
                     <li><a class="dropdown-item" href="/shop/auction.html">Auctions</a></li>
                     <li><a class="dropdown-item" href="/shop/settings.html">Settings</a></li>
                     <li><a class="dropdown-item" id="likes_nav"  href="#">Likes</a></li>
-                    <li><a class="dropdown-item" id="logout_nav" href="#">Logout</a></li>
+                    <li><a class="dropdown-item" id="logout_nav" href="/shop/index.html">Logout</a></li>
                 </ul>
             </li>
             <li class="nav-item">

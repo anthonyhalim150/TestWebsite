@@ -70,7 +70,7 @@ function clear_login() {
         // Clear user info and refresh the page
         localStorage.clear();
         alert('You have logged out.');
-        window.location.href = '../login.html';
+        window.location.href = sanitizeURL('/shop/index.html');
     });
 }
 
