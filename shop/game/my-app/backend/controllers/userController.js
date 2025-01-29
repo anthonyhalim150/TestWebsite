@@ -30,8 +30,8 @@ exports.getStats = async (req, res) => {
   try {
     userId = sanitizeInput(userId);
 
-    const { wallet, miningPower } = await getUserStats(userId); // Ensure function matches entity layer
-    res.status(200).json({ success: true, wallet, miningPower });
+    const { wallet, miningPower, miningEfficiency } = await getUserStats(userId); // Ensure function matches entity layer
+    res.status(200).json({ success: true, wallet, miningPower, miningEfficiency });
   } catch (error) {
     console.error("Error fetching user stats:", error);
     res.status(500).json({ success: false, message: "Error fetching user stats." });

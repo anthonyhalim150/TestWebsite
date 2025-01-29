@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { fetchUserUpgrades } from "../api/upgrade"; // Import API function
+import {sanitizeInput} from "../utils/auth";
 
 function MyUpgrades({ userId }) {
   const [myUpgrades, setMyUpgrades] = useState([]);
 
   useEffect(() => {
-    const fetchMyUpgrades = async () => {
+    const loadMyUpgrades = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/upgrades-owned?userId=${userId}`);
-        setMyUpgrades(response.data.myUpgrades || []);
+        const upgrades = await fetchUserUpgrades(userId);
+        setMyUpgrades(upgrades);
       } catch (error) {
-        console.error("Error fetching my upgrades:", error);
+        console.error("Failed to load my upgrades:", error);
       }
     };
 
-    fetchMyUpgrades();
+    loadMyUpgrades();
   }, [userId]);
 
   return (
@@ -22,9 +23,11 @@ function MyUpgrades({ userId }) {
       <h2>My Upgrades</h2>
       <div className="upgrade-list">
         {myUpgrades.map((upgrade) => (
-          <div key={`owned-${upgrade.id}`} className="upgrade-item">
-            <h3>{upgrade.name}</h3>
-            <p>{upgrade.description}</p>
+          <div key={`owned-${sanitizeInput(upgrade.id)}`} className="upgrade-item">
+            <h3>{sanitizeInput(upgrade.name)}</h3>
+            <p>{sanitizeInput(upgrade.description)}</p>
+            <p> Mining Power: {sanitizeInput(upgrade.mining_power_increase)}</p>
+            <p> Efficiency: {sanitizeInput(upgrade.mining_efficiency_increase)}</p>
           </div>
         ))}
       </div>

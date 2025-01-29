@@ -66,6 +66,7 @@ CREATE TABLE UPGRADES (
     description TEXT,
     cost DECIMAL(15, 2) NOT NULL,
     mining_power_increase INT NOT NULL DEFAULT 0
+    mining_efficiency_increase DECIMAL(5,2) NOT NULL DEFAULT 0.00;
 );
 CREATE TABLE USER_UPGRADES (
     id INT AUTO_INCREMENT PRIMARY KEY,

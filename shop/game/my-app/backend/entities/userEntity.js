@@ -9,16 +9,19 @@ exports.updateWallet = async (userId, tokensToSync) => {
 exports.getUserStats = async (userId) => {
   const walletQuery = "SELECT wallet FROM USERS WHERE id = ?";
   const upgradesQuery = `
-      SELECT SUM(u.mining_power_increase) AS totalMiningPower
+      SELECT 
+          SUM(u.mining_power_increase) AS totalMiningPower,
+          COALESCE(SUM(u.mining_efficiency_increase), 1.0) AS totalMiningEfficiency
       FROM USER_UPGRADES uu
       JOIN UPGRADES u ON uu.upgrade_id = u.id
-      WHERE uu.user_id = ?
+      WHERE uu.user_id = ?;
   `;
   const [walletRows] = await db.execute(walletQuery, [sanitizeInput(userId)]);
   const [upgradeRows] = await db.execute(upgradesQuery, [sanitizeInput(userId)]);
 
   const wallet = walletRows[0]?.wallet || 0;
   const miningPower = upgradeRows[0]?.totalMiningPower || 1;
+  const miningEfficiency = upgradeRows[0]?.totalMiningEfficiency || 1.0;
 
-  return { wallet, miningPower };
+  return { wallet, miningPower, miningEfficiency };
 };

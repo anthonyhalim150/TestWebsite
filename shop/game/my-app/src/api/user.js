@@ -10,11 +10,11 @@ export const getUserStats = async (userId) => {
         const response = await axios.get(`${BASE_URL}/get-stats-user`, {
             params: { userId: sanitizedUserId },
         });
-
         if (response.data.success) {
             return {
-                wallet: parseFloat(response.data.wallet), // Ensure the result is a number
-                miningPower: parseInt(response.data.miningPower, 10) || 1, // Ensure miningPower is an integer
+                wallet: sanitizeInput(parseFloat(response.data.wallet)), // Ensure the result is a number
+                miningPower: sanitizeInput(parseInt(response.data.miningPower, 10)) || 1, // Ensure miningPower is an integer
+                miningEfficiency: sanitizeInput(parseFloat(response.data.miningEfficiency)) || 1,
             };
         } else {
             throw new Error(response.data.message || "Failed to fetch user stats.");

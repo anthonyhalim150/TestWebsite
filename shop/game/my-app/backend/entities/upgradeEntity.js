@@ -3,7 +3,7 @@ const { sanitizeInput } = require("../utils/auth"); // Import sanitization
 
 exports.getUpgradesNotOwned = async (userId) => {
     const query = `
-      SELECT u.id, u.name, u.description, u.cost, u.mining_power_increase
+      SELECT u.id, u.name, u.description, u.cost, u.mining_power_increase, u.mining_efficiency_increase
       FROM UPGRADES u
       WHERE u.id NOT IN (SELECT upgrade_id FROM USER_UPGRADES WHERE user_id = ?)
     `;
@@ -13,7 +13,7 @@ exports.getUpgradesNotOwned = async (userId) => {
   
   exports.getUserUpgrades = async (userId) => {
     const query = `
-      SELECT u.id, u.name, u.description, u.cost, u.mining_power_increase
+      SELECT u.id, u.name, u.description, u.cost, u.mining_power_increase, u.mining_efficiency_increase
       FROM USER_UPGRADES uu
       JOIN UPGRADES u ON uu.upgrade_id = u.id
       WHERE uu.user_id = ?`;

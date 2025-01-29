@@ -1,22 +1,38 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { getUserStats } from "../api/user";
+import { fetchUpgradesNotOwned, purchaseUpgrade } from "../api/upgrade"; // Import API functions
+import {sanitizeInput} from "../utils/auth";
 
-function Upgradable({ tokens, setTokens, userId }) {
+
+function Upgradable({ tokens, setTokens, userId, setMiningPower, setMiningEfficiency }) {
   const [upgradable, setUpgradable] = useState([]);
-  const [loadingUpgrades, setLoadingUpgrades] = useState({}); // Track loading state for each upgrade
+  const [loadingUpgrades, setLoadingUpgrades] = useState({});
 
   useEffect(() => {
-    const fetchUpgradable = async () => {
+    const loadUpgradable = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/upgrades-not-owned?userId=${userId}`);
-        setUpgradable(response.data.upgradable || []);
+        const upgrades = await fetchUpgradesNotOwned(userId);
+        setUpgradable(upgrades);
       } catch (error) {
-        console.error("Error fetching upgradable:", error);
+        console.error("Failed to load upgradable upgrades:", error);
       }
     };
 
-    fetchUpgradable();
+    loadUpgradable();
   }, [userId]);
+
+  // Function to fetch updated mining stats
+  const fetchUpdatedStats = async () => {
+    try {
+      const { wallet, miningPower, miningEfficiency } = await getUserStats(sanitizeInput(userId));
+      setTokens(wallet);
+      setMiningPower(miningPower);
+      setMiningEfficiency(miningEfficiency);
+    } 
+    catch (error) {
+      console.error("Error fetching updated stats:", error);
+    }
+  };
 
   const handlePurchase = async (upgrade) => {
     if (tokens < upgrade.cost) {
@@ -24,24 +40,18 @@ function Upgradable({ tokens, setTokens, userId }) {
       return;
     }
 
-    // Set loading state for this upgrade
     setLoadingUpgrades((prev) => ({ ...prev, [upgrade.id]: true }));
 
     try {
-      await axios.post("http://localhost:8080/api/purchase-upgrade", {
-        userId,
-        upgradeId: upgrade.id,
-      });
-
+      await purchaseUpgrade(userId, upgrade.id);
       setTokens(tokens - upgrade.cost);
-
-      // Update the list locally by removing the purchased upgrade
       setUpgradable((prev) => prev.filter((u) => u.id !== upgrade.id));
+
+      // Fetch updated stats instantly
+      await fetchUpdatedStats();
     } catch (error) {
-      console.error("Error purchasing upgrade:", error);
       alert("Failed to purchase upgrade. Please try again.");
     } finally {
-      // Reset loading state for this upgrade
       setLoadingUpgrades((prev) => ({ ...prev, [upgrade.id]: false }));
     }
   };
@@ -56,6 +66,7 @@ function Upgradable({ tokens, setTokens, userId }) {
             <p>{upgrade.description}</p>
             <p>Cost: {upgrade.cost} tokens</p>
             <p>Power Increase: {upgrade.mining_power_increase}</p>
+            <p>Efficiency Increase: {upgrade.mining_efficiency_increase}</p>
             <button
               onClick={() => handlePurchase(upgrade)}
               disabled={tokens < upgrade.cost || loadingUpgrades[upgrade.id]}
