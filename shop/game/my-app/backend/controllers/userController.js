@@ -1,4 +1,4 @@
-const { updateWallet, getUserStats } = require("../entities/userEntity");
+const { updateWallet, getUserStats, addXpAndCheckLevel } = require("../entities/userEntity");
 const { sanitizeInput } = require("../utils/auth"); // Import sanitization
 
 exports.updateUserWallet = async (req, res) => {
@@ -20,20 +20,39 @@ exports.updateUserWallet = async (req, res) => {
   }
 };
 
-exports.getStats = async (req, res) => {
-  let { userId } = req.query;
+exports.getUserStats = async (req, res) => {
+    const { userId } = req.query;
 
-  if (!userId) {
-    return res.status(400).json({ success: false, message: "User ID is required." });
+    if (!userId) {
+        return res.status(400).json({ success: false, message: "User ID is required." });
+    }
+
+    try {
+        const sanitizedUserId = sanitizeInput(userId);
+        const userStats = await getUserStats(sanitizedUserId);
+        res.status(200).json({ success: true, ...userStats });
+    } catch (error) {
+        console.error("Error fetching user stats:", error);
+        res.status(500).json({ success: false, message: "Error fetching user stats." });
+    }
+};
+
+exports.gainXp = async (req, res) => {
+  const { userId, xpGained } = req.body;
+
+  if (!userId || xpGained === undefined) {
+      return res.status(400).json({ success: false, message: "User ID and XP amount are required." });
   }
 
   try {
-    userId = sanitizeInput(userId);
+      const sanitizedUserId = sanitizeInput(userId);
+      const sanitizedXp = sanitizeInput(xpGained);
+      const userStats = await addXpAndCheckLevel(sanitizedUserId, sanitizedXp);
 
-    const { wallet, miningPower, miningEfficiency } = await getUserStats(userId); // Ensure function matches entity layer
-    res.status(200).json({ success: true, wallet, miningPower, miningEfficiency });
+      res.status(200).json({ success: true, ...userStats });
   } catch (error) {
-    console.error("Error fetching user stats:", error);
-    res.status(500).json({ success: false, message: "Error fetching user stats." });
+      console.error("Error updating XP:", error);
+      res.status(500).json({ success: false, message: "Error updating XP." });
   }
 };
+

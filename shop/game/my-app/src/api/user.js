@@ -3,18 +3,20 @@ import { sanitizeInput } from "../utils/auth";
 
 const BASE_URL = "http://localhost:8080/api"; // Adjust if necessary
 
-
+// Fetch user stats (wallet, level, XP, mining power, efficiency)
 export const getUserStats = async (userId) => {
     try {
-        const sanitizedUserId = sanitizeInput(userId); // Sanitize user ID
+        const sanitizedUserId = sanitizeInput(userId);
         const response = await axios.get(`${BASE_URL}/get-stats-user`, {
             params: { userId: sanitizedUserId },
         });
         if (response.data.success) {
             return {
-                wallet: sanitizeInput(parseFloat(response.data.wallet)), // Ensure the result is a number
-                miningPower: sanitizeInput(parseInt(response.data.miningPower, 10)) || 1, // Ensure miningPower is an integer
+                wallet: sanitizeInput(parseFloat(response.data.wallet)),
+                miningPower: sanitizeInput(parseInt(response.data.miningPower, 10)) || 1,
                 miningEfficiency: sanitizeInput(parseFloat(response.data.miningEfficiency)) || 1,
+                level: sanitizeInput(parseInt(response.data.level, 10)) || 1,
+                xp: sanitizeInput(parseInt(response.data.xp, 10)) || 0,
             };
         } else {
             throw new Error(response.data.message || "Failed to fetch user stats.");
@@ -25,19 +27,45 @@ export const getUserStats = async (userId) => {
     }
 };
 
+export const gainXp = async (userId, xpGained) => {
+    try {
+        const sanitizedUserId = sanitizeInput(userId);
+        const sanitizedXp = sanitizeInput(xpGained);
+        const response = await axios.post(`${BASE_URL}/gain-xp`, {
+            userId: sanitizedUserId,
+            xpGained: sanitizedXp,
+        });
+
+        if (response.data.success) {
+            return {
+                level: sanitizeInput(parseInt(response.data.level, 10)),
+                xp: sanitizeInput(parseInt(response.data.xp, 10)),
+                wallet: sanitizeInput(parseFloat(response.data.wallet)),
+                leveledUp: response.data.leveledUp,
+            };
+        } else {
+            throw new Error(response.data.message || "Failed to update XP.");
+        }
+    } catch (error) {
+        console.error("Error updating XP:", error);
+        throw error;
+    }
+};
+
+
 
 // Update wallet balance
 export const updateWallet = async (userId, tokensToSync) => {
     try {
-        const sanitizedUserId = sanitizeInput(userId); // Sanitize user ID
-        const sanitizedAmount = sanitizeInput(tokensToSync); // Sanitize amount
+        const sanitizedUserId = sanitizeInput(userId);
+        const sanitizedAmount = sanitizeInput(tokensToSync);
         const response = await axios.post(`${BASE_URL}/update-wallet`, {
             userId: sanitizedUserId,
             tokensToSync: sanitizedAmount,
         });
 
         if (response) {
-            return response.data.message; // Return success message
+            return response.data.message;
         } else {
             throw new Error(response.data.message || "Failed to update wallet.");
         }

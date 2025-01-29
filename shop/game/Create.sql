@@ -60,13 +60,26 @@ USE ecommerce;
 -- e.g. If itemID 5 is deleted, database will never go to itemID 5
 -- Hence, I removed itemID as a referential integrity constraint
 
+CREATE TABLE LEVELS (
+    level INT PRIMARY KEY,
+    xp_required INT NOT NULL
+);
+
+CREATE TABLE LEVEL_PERKS (
+    level INT PRIMARY KEY,
+    tokens_reward INT NOT NULL DEFAULT 0,
+    mining_power_boost INT NOT NULL DEFAULT 0,
+    mining_efficiency_boost DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+    FOREIGN KEY (level) REFERENCES LEVELS(level) ON DELETE CASCADE
+);
+
 CREATE TABLE UPGRADES (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     cost DECIMAL(15, 2) NOT NULL,
-    mining_power_increase INT NOT NULL DEFAULT 0
-    mining_efficiency_increase DECIMAL(5,2) NOT NULL DEFAULT 0.00;
+    mining_power_increase INT NOT NULL DEFAULT 0,
+    mining_efficiency_increase DECIMAL(5,2) NOT NULL DEFAULT 0.00
 );
 CREATE TABLE USER_UPGRADES (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -87,7 +100,7 @@ CREATE TABLE ITEMS (
     stock INT NOT NULL,
     image VARCHAR(255),
     created_by INT NOT NULL DEFAULT 1,
-    FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE;
+    FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE
 );
 CREATE TABLE USERS(
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -97,7 +110,9 @@ CREATE TABLE USERS(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     role ENUM('user', 'admin') DEFAULT 'user',
     address VARCHAR(255) DEFAULT 'AHBYUBQCHEMEFS3FGV57MGLHNXTLN2SAFFYGEDB2ZVEAOT3MA5KFSA7WEU',
-    wallet  DECIMAL(15, 2) DEFAULT 0
+    wallet  DECIMAL(15, 2) DEFAULT 0,
+    level INT NOT NULL DEFAULT 1,
+    xp INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE USER_SETTINGS (
