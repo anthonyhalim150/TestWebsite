@@ -3,7 +3,8 @@ import Header from "./components/Header";
 import Miner from "./components/Miner";
 import Upgradable from "./components/Upgradable";
 import MyUpgrades from "./components/MyUpgrades";
-import { updateWallet, getWalletBalance } from "./api/wallet";
+import { updateWallet, getUserStats } from "./api/wallet";
+import { sanitizeInput } from "./utils/auth"; // Import sanitization
 
 function App() {
   const [tokens, setTokens] = useState(0);
@@ -13,16 +14,17 @@ function App() {
   const userId = 1; // Replace with dynamic user ID if applicable
 
   useEffect(() => {
-    const fetchWalletBalance = async () => {
+    const fetchWalletAndPower = async () => {
       try {
-        const balance = await getWalletBalance(userId);
-        setTokens(balance);
+        const { wallet, miningPower } = await getUserStats(sanitizeInput(userId));
+        setTokens(wallet);
+        setMiningPower(miningPower+1);
       } catch (error) {
-        console.error("Failed to fetch wallet balance:", error);
+        console.error("Failed to fetch wallet and mining power:", error);
       }
     };
 
-    fetchWalletBalance();
+    fetchWalletAndPower();
   }, [userId]);
 
   const mineTokens = () => {
@@ -33,7 +35,7 @@ function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (tokensToSync > 0) {
-        updateWallet(userId, tokensToSync);
+        updateWallet(sanitizeInput(userId), sanitizeInput(tokensToSync));
         setTokensToSync(0);
       }
     }, 5000);
@@ -47,9 +49,9 @@ function App() {
 
       {currentSection === "miner" && <Miner mineTokens={mineTokens} />}
       {currentSection === "upgradable" && (
-        <Upgradable tokens={tokens} setTokens={setTokens} userId={userId} />
+        <Upgradable tokens={tokens} setTokens={setTokens} userId={sanitizeInput(userId)} />
       )}
-      {currentSection === "my-upgrades" && <MyUpgrades userId={userId} />}
+      {currentSection === "my-upgrades" && <MyUpgrades userId={sanitizeInput(userId)} />}
       {currentSection === "stats" && (
         <div className="stats">
           <h2>Stats</h2>

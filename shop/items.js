@@ -150,7 +150,7 @@ async function renderItems(filteredItems = null) {
                     <div class="like-icon" onclick="event.stopPropagation(); toggleLike(${item.id})">
                         <img src="${isLiked ? 'Icons/red-heart.png' : 'Icons/white-heart.png'}" alt="Like" />
                     </div>
-                    <img src="${item.image}" class="card-img-top" alt="${sanitizedItemName}">
+                    <img src="${sanitizeInput(item.image)}" class="card-img-top" alt="${sanitizedItemName}">
                     <div class="card-body text-center">
                         <h5 class="card-title">${sanitizedItemName}</h5>
                         <p class="card-text">$${formattedPrice}</p>
@@ -209,7 +209,7 @@ function showItemOverview(itemId) {
     // Render sanitized content
     overviewContainer.innerHTML = `
         <h3>${sanitizedItemName}</h3>
-        <img src="${item.image}" alt="${sanitizedItemName}" style="width: 180px; height: 180px; margin-bottom: 15px;">
+        <img src="${sanitizeInput(item.image)}" alt="${sanitizedItemName}" style="width: 180px; height: 180px; margin-bottom: 15px;">
         <p class="item-description"><strong>Description:</strong> ${sanitizedItemDescription}</p>
         <p class="item-description"><strong>Price:</strong> $${formattedPrice}</p>
         <p class="item-description"><strong>Stock:</strong> ${item.stock}</p>

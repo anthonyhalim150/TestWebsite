@@ -1,4 +1,5 @@
-const { updateWallet, getWalletBalance } = require("../entities/userEntity"); //Gets the result of the query, basically the function, but split fetch and the function.
+const { updateWallet, getUserStats } = require("../entities/userEntity");
+const { sanitizeInput } = require("../utils/auth"); // Import sanitization
 
 exports.updateUserWallet = async (req, res) => {
   console.log("Controller hit: updateUserWallet");
@@ -11,7 +12,7 @@ exports.updateUserWallet = async (req, res) => {
 
   try {
     console.log(`Updating wallet for userId: ${userId}, tokens: ${tokensToSync}`);
-    await updateWallet(userId, tokensToSync);
+    await updateWallet(sanitizeInput(userId), sanitizeInput(tokensToSync));
     res.status(200).json({ message: "Wallet updated successfully." });
   } catch (error) {
     console.error("Error in updateUserWallet:", error);
@@ -19,19 +20,20 @@ exports.updateUserWallet = async (req, res) => {
   }
 };
 
-exports.getWalletBalance = async (req, res) => {
-  const { userId } = req.query;
+exports.getStats = async (req, res) => {
+  let { userId } = req.query;
 
   if (!userId) {
-      return res.status(400).json({ success: false, message: "User ID is required." });
+    return res.status(400).json({ success: false, message: "User ID is required." });
   }
 
   try {
-      const balance = await getWalletBalance(userId);
-      res.status(200).json({ success: true, wallet: balance });
+    userId = sanitizeInput(userId);
+
+    const { wallet, miningPower } = await getUserStats(userId); // Ensure function matches entity layer
+    res.status(200).json({ success: true, wallet, miningPower });
   } catch (error) {
-      console.error("Error fetching wallet balance:", error);
-      res.status(500).json({ success: false, message: "Error fetching wallet balance." });
+    console.error("Error fetching user stats:", error);
+    res.status(500).json({ success: false, message: "Error fetching user stats." });
   }
 };
-

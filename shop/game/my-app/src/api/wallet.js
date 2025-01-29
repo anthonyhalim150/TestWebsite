@@ -3,24 +3,28 @@ import { sanitizeInput } from "../utils/auth";
 
 const BASE_URL = "http://localhost:8080/api"; // Adjust if necessary
 
-// Get wallet balance
-export const getWalletBalance = async (userId) => {
+
+export const getUserStats = async (userId) => {
     try {
         const sanitizedUserId = sanitizeInput(userId); // Sanitize user ID
-        const response = await axios.get(`${BASE_URL}/get-wallet-user`, {
+        const response = await axios.get(`${BASE_URL}/get-stats-user`, {
             params: { userId: sanitizedUserId },
         });
 
         if (response.data.success) {
-            return parseFloat(response.data.wallet); // Ensure the result is a number
+            return {
+                wallet: parseFloat(response.data.wallet), // Ensure the result is a number
+                miningPower: parseInt(response.data.miningPower, 10) || 1, // Ensure miningPower is an integer
+            };
         } else {
-            throw new Error(response.data.message || "Failed to fetch wallet balance.");
+            throw new Error(response.data.message || "Failed to fetch user stats.");
         }
     } catch (error) {
-        console.error("Error fetching wallet balance:", error);
+        console.error("Error fetching user stats:", error);
         throw error;
     }
 };
+
 
 // Update wallet balance
 export const updateWallet = async (userId, tokensToSync) => {

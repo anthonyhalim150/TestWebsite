@@ -5,7 +5,7 @@ function Header({ tokens, setSection }) {
   return (
     <header className="header">
       <h1>Mining Simulator</h1>
-      <p>Tokens: {tokens}</p>
+      <p>Tokens: {tokens.toFixed(2)}</p>
       <nav className="top-nav">
         <button onClick={() => setSection("miner")} className="nav-button">
           Miner

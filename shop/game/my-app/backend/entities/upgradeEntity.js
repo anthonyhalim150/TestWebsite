@@ -1,4 +1,5 @@
 const db = require("../db");
+const { sanitizeInput } = require("../utils/auth"); // Import sanitization
 
 exports.getUpgradesNotOwned = async (userId) => {
     const query = `
@@ -21,14 +22,19 @@ exports.getUpgradesNotOwned = async (userId) => {
   };
   
 
+  
   exports.purchaseUpgrade = async (userId, upgradeId) => {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
   
+      const sanitizedUserId = sanitizeInput(userId);
+      const sanitizedUpgradeId = sanitizeInput(upgradeId);
+  
       // Fetch the user's wallet balance
       const checkFundsQuery = "SELECT wallet FROM USERS WHERE id = ?";
-      const [user] = await connection.query(checkFundsQuery, [userId]);
+      const [user] = await connection.query(checkFundsQuery, [sanitizedUserId]);
+  
       if (!user[0]) {
         throw new Error("User not found.");
       }
@@ -36,7 +42,8 @@ exports.getUpgradesNotOwned = async (userId) => {
   
       // Fetch the upgrade cost
       const upgradeCostQuery = "SELECT cost FROM UPGRADES WHERE id = ?";
-      const [upgrade] = await connection.query(upgradeCostQuery, [upgradeId]);
+      const [upgrade] = await connection.query(upgradeCostQuery, [sanitizedUpgradeId]);
+  
       if (!upgrade[0]) {
         throw new Error("Upgrade not found.");
       }
@@ -49,11 +56,11 @@ exports.getUpgradesNotOwned = async (userId) => {
   
       // Deduct the upgrade cost from the user's wallet
       const deductFundsQuery = "UPDATE USERS SET wallet = wallet - ? WHERE id = ?";
-      await connection.query(deductFundsQuery, [upgradeCost, userId]);
+      await connection.query(deductFundsQuery, [upgradeCost, sanitizedUserId]);
   
       // Add the upgrade to USER_UPGRADES
       const insertUpgradeQuery = "INSERT INTO USER_UPGRADES (user_id, upgrade_id) VALUES (?, ?)";
-      await connection.query(insertUpgradeQuery, [userId, upgradeId]);
+      await connection.query(insertUpgradeQuery, [sanitizedUserId, sanitizedUpgradeId]);
   
       await connection.commit();
     } catch (error) {
