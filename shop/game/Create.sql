@@ -60,6 +60,60 @@ USE ecommerce;
 -- e.g. If itemID 5 is deleted, database will never go to itemID 5
 -- Hence, I removed itemID as a referential integrity constraint
 
+CREATE TABLE ITEMS (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category ENUM('Helmet', 'Gloves', 'Exosuit', 'Boots', 'Tool', 'Back Attachment', 'Pet', 'Accessory') NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    stock INT NOT NULL DEFAULT 1,
+    image VARCHAR(255),
+    created_by INT NOT NULL DEFAULT 1,
+    mining_power DECIMAL(10,2) NOT NULL DEFAULT 0,
+    mining_efficiency DECIMAL(10,2) NOT NULL DEFAULT 1.0,
+    aesthetics_score DECIMAL(5,2) NOT NULL DEFAULT 0,
+    complexity_score DECIMAL(5,2) NOT NULL DEFAULT 0,
+    uniqueness_score DECIMAL(5,2) NOT NULL DEFAULT 0,
+    game_relevance_score DECIMAL(5,2) NOT NULL DEFAULT 0,
+    similarity_score DECIMAL(5,2) NOT NULL DEFAULT 1.0, 
+    rarity ENUM('Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic', 'Custom') DEFAULT 'Custom';
+    FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE
+);
+
+CREATE TABLE LUCKY_BOX (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL DEFAULT 50, -- Token cost to roll
+    allowed_rarities JSON NOT NULL, -- Rarity options (e.g., ["Rare", "Epic", "Legendary"])
+    allowed_categories JSON NOT NULL, -- Category options (e.g., ["Helmet", "Gloves", "Tool"])
+    rarity_weights JSON NOT NULL -- Drop chances for each rarity (e.g., {"Common": 40, "Epic": 10})
+);
+
+CREATE TABLE EQUIPMENT (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    item_id INT NOT NULL,
+    slot ENUM('Helmet', 'Gloves', 'Exosuit', 'Boots', 'Tool', 'Back Attachment', 'Pet', 'Accessory') NOT NULL,
+    equipped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES ITEMS(id) ON DELETE CASCADE,
+    UNIQUE (user_id, slot) -- Ensures only one item per slot per user
+);
+
+CREATE TABLE PLAYER_INVENTORY (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    item_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1, -- Number of the item owned
+    obtained_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES ITEMS(id) ON DELETE CASCADE,
+    UNIQUE (user_id, item_id) -- Ensures only one entry per user-item combination
+);
+
+
+
 CREATE TABLE LEVELS (
     level INT PRIMARY KEY,
     xp_required INT NOT NULL
@@ -91,19 +145,6 @@ CREATE TABLE USER_UPGRADES (
     FOREIGN KEY (upgrade_id) REFERENCES UPGRADES(id) ON DELETE CASCADE
 );
 
-
-
-CREATE TABLE ITEMS (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    category TEXT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    stock INT NOT NULL,
-    image VARCHAR(255),
-    created_by INT NOT NULL DEFAULT 1,
-    FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE
-);
 CREATE TABLE USERS(
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,

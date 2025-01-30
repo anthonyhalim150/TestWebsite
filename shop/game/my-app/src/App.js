@@ -39,9 +39,9 @@ function App() {
     fetchStats();
   }, [userId]);
 
-  // ✅ Mine Tokens Click
+ 
   const mineTokens = () => {
-    const earnedTokens = miningPower * miningEfficiency;
+    const earnedTokens = miningPower * (1+ parseFloat(miningEfficiency));
 
     if (isNaN(earnedTokens) || isNaN(tokens)) {
       console.error("NaN detected in tokens calculation!", { miningPower, miningEfficiency, earnedTokens });
