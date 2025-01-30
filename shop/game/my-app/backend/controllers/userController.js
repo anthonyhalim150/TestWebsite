@@ -21,21 +21,22 @@ exports.updateUserWallet = async (req, res) => {
 };
 
 exports.getUserStats = async (req, res) => {
-    const { userId } = req.query;
+  const { userId } = req.query;
 
-    if (!userId) {
-        return res.status(400).json({ success: false, message: "User ID is required." });
-    }
+  if (!userId) {
+      return res.status(400).json({ success: false, message: "User ID is required." });
+  }
 
-    try {
-        const sanitizedUserId = sanitizeInput(userId);
-        const userStats = await getUserStats(sanitizedUserId);
-        res.status(200).json({ success: true, ...userStats });
-    } catch (error) {
-        console.error("Error fetching user stats:", error);
-        res.status(500).json({ success: false, message: "Error fetching user stats." });
-    }
+  try {
+      const sanitizedUserId = sanitizeInput(userId);
+      const userStats = await getUserStats(sanitizedUserId);
+      res.status(200).json({ success: true, ...userStats });
+  } catch (error) {
+      console.error("Error fetching user stats:", error);
+      res.status(500).json({ success: false, message: "Error fetching user stats." });
+  }
 };
+
 
 exports.gainXp = async (req, res) => {
   const { userId, xpGained } = req.body;

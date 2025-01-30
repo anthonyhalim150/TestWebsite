@@ -8,33 +8,35 @@ exports.updateWallet = async (userId, tokensToSync) => {
 
 
 exports.getUserStats = async (userId) => {
-  const query = `
-      SELECT u.level, u.xp, u.wallet, 
-             COALESCE(SUM(up.mining_power_increase), 0) AS totalUpgradePower,
-             COALESCE(SUM(up.mining_efficiency_increase), 1.0) AS totalUpgradeEfficiency,
-             COALESCE(lp.mining_power_boost, 0) AS levelPowerBoost,
-             COALESCE(lp.mining_efficiency_boost, 0.0) AS levelEfficiencyBoost
-      FROM USERS u
-      LEFT JOIN USER_UPGRADES uu ON u.id = uu.user_id
-      LEFT JOIN UPGRADES up ON uu.upgrade_id = up.id
-      LEFT JOIN LEVEL_PERKS lp ON u.level = lp.level
-      WHERE u.id = ?
-      GROUP BY u.id;
-  `;
-
-  const [rows] = await db.execute(query, [sanitizeInput(userId)]);
-
-  if (!rows.length) throw new Error("User not found");
-
-  return {
-      level: sanitizeInput(Number(rows[0].level)),
-      xp: sanitizeInput(Number(rows[0].xp)),
-      wallet: sanitizeInput(Number(rows[0].wallet)),
-      miningPower: sanitizeInput(Number(rows[0].totalUpgradePower) + Number(rows[0].levelPowerBoost)),
-      miningEfficiency: sanitizeInput(Number(rows[0].totalUpgradeEfficiency) + Number(rows[0].levelEfficiencyBoost)),
+    const query = `
+        SELECT u.level, u.xp, u.wallet, 
+               COALESCE(SUM(up.mining_power_increase), 0) AS totalUpgradePower,
+               COALESCE(SUM(up.mining_efficiency_increase), 1.0) AS totalUpgradeEfficiency,
+               COALESCE(SUM(up.rateIncrease), 0) AS totalAutoMiningRate, -- Calculate auto-mining dynamically
+               COALESCE(lp.mining_power_boost, 0) AS levelPowerBoost,
+               COALESCE(lp.mining_efficiency_boost, 0.0) AS levelEfficiencyBoost
+        FROM USERS u
+        LEFT JOIN USER_UPGRADES uu ON u.id = uu.user_id
+        LEFT JOIN UPGRADES up ON uu.upgrade_id = up.id
+        LEFT JOIN LEVEL_PERKS lp ON u.level = lp.level
+        WHERE u.id = ?
+        GROUP BY u.id;
+    `;
+  
+    const [rows] = await db.execute(query, [sanitizeInput(userId)]);
+  
+    if (!rows.length) throw new Error("User not found");
+  
+    return {
+        level: sanitizeInput(Number(rows[0].level)),
+        xp: sanitizeInput(Number(rows[0].xp)),
+        wallet: sanitizeInput(Number(rows[0].wallet)),
+        miningPower: sanitizeInput(Number(rows[0].totalUpgradePower) + Number(rows[0].levelPowerBoost)),
+        miningEfficiency: sanitizeInput(Number(rows[0].totalUpgradeEfficiency) + Number(rows[0].levelEfficiencyBoost)),
+        autoMiningRate: sanitizeInput(Number(rows[0].totalAutoMiningRate)), // New calculated field
+    };
   };
-};
-
+  
 
 
 exports.addXpAndCheckLevel = async (userId, xpGained) => {

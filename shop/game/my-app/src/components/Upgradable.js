@@ -4,7 +4,7 @@ import { fetchUpgradesNotOwned, purchaseUpgrade } from "../api/upgrade"; // Impo
 import {sanitizeInput} from "../utils/auth";
 
 
-function Upgradable({ tokens, setTokens, userId, setMiningPower, setMiningEfficiency }) {
+function Upgradable({ tokens, setTokens, userId, setMiningPower, setMiningEfficiency, setAutoMiningRate }) {
   const [upgradable, setUpgradable] = useState([]);
   const [loadingUpgrades, setLoadingUpgrades] = useState({});
 
@@ -24,10 +24,11 @@ function Upgradable({ tokens, setTokens, userId, setMiningPower, setMiningEffici
   // Function to fetch updated mining stats
   const fetchUpdatedStats = async () => {
     try {
-      const { wallet, miningPower, miningEfficiency } = await getUserStats(sanitizeInput(userId));
+      const { wallet, miningPower, miningEfficiency, autoMiningRate } = await getUserStats(sanitizeInput(userId));
       setTokens(wallet);
       setMiningPower(miningPower);
       setMiningEfficiency(miningEfficiency);
+      setAutoMiningRate(autoMiningRate);
     } 
     catch (error) {
       console.error("Error fetching updated stats:", error);
@@ -67,6 +68,7 @@ function Upgradable({ tokens, setTokens, userId, setMiningPower, setMiningEffici
             <p>Cost: {upgrade.cost} tokens</p>
             <p>Power Increase: {upgrade.mining_power_increase}</p>
             <p>Efficiency Increase: {upgrade.mining_efficiency_increase}</p>
+            <p>Auto Mining: {upgrade.rateIncrease} tokens/5 sec</p>
             <button
               onClick={() => handlePurchase(upgrade)}
               disabled={tokens < upgrade.cost || loadingUpgrades[upgrade.id]}

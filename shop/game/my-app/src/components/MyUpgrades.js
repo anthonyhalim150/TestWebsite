@@ -28,6 +28,7 @@ function MyUpgrades({ userId }) {
             <p>{sanitizeInput(upgrade.description)}</p>
             <p> Mining Power: {sanitizeInput(upgrade.mining_power_increase)}</p>
             <p> Efficiency: {sanitizeInput(upgrade.mining_efficiency_increase)}</p>
+            <p>Auto Mining: {sanitizeInput(upgrade.rateIncrease)} tokens/5 sec</p>
           </div>
         ))}
       </div>

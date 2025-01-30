@@ -17,6 +17,7 @@ export const getUserStats = async (userId) => {
                 miningEfficiency: sanitizeInput(parseFloat(response.data.miningEfficiency)) || 1,
                 level: sanitizeInput(parseInt(response.data.level, 10)) || 1,
                 xp: sanitizeInput(parseInt(response.data.xp, 10)) || 0,
+                autoMiningRate: sanitizeInput(parseFloat(response.data.autoMiningRate)) || 0,
             };
         } else {
             throw new Error(response.data.message || "Failed to fetch user stats.");
