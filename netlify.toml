@@ -1,4 +1,8 @@
 [[redirects]]
 from = "/*"
-to = "/shop/index.html"
+to = "/TestWebsite/shop/index.html"
+status = 200
+[[redirects]]
+from = "/game/my-app/*"
+to = "/game/my-app/build/index.html"
 status = 200
