@@ -271,7 +271,7 @@ async function checkout(transactionAmount) {
         if (result.success) {
             // Store the 'cart' type in sessionStorage
             sessionStorage.setItem('type', 'cart');
-            window.location.href = sanitizeURL("/shop/Crypto/index.html"); // Redirect safely
+            window.location.href = sanitizeURL("/Crypto/index.html"); // Redirect safely
         } else {
             alert(`Failed to initiate transaction: ${sanitizeInput(result.error)}`);
         }

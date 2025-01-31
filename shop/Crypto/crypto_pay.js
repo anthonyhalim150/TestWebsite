@@ -115,10 +115,10 @@ async function monitorTransaction(txid) {
             sessionStorage.clear();
             if (type === "cart") {
                 if (homeButton) homeButton.style.display = "none";
-                window.location.href = sanitizeURL("/shop/cart.html");
+                window.location.href = sanitizeURL("/cart.html");
             } else if (type === "deposit") {
                 if (homeButton) homeButton.style.display = "none";
-                window.location.href = sanitizeURL("/shop/Dashboard/wallet.html");
+                window.location.href = sanitizeURL("/Dashboard/wallet.html");
             }
         } else if (data.error === "Transaction details do not match the expected values.") {
             transactionStatus.textContent = "Waiting for payment...";
@@ -196,10 +196,10 @@ backToHomeButton.addEventListener("click", () => {
     const type = sanitizeInput(sessionStorage.getItem('type')); 
     confirm("Are you sure to cancel payment? If you have just paid, do not leave the page and wait to be redirected!");
     if (type === 'cart'){
-        window.location.href = sanitizeURL("/shop/cart.html");;
+        window.location.href = sanitizeURL("/cart.html");;
     }
     else if (type === 'deposit'){
-        window.location.href = sanitizeURL("/shop/Dashboard/wallet.html");
+        window.location.href = sanitizeURL("/Dashboard/wallet.html");
     }
     });
 

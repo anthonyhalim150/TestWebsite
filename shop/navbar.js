@@ -34,7 +34,7 @@ async function update_login() {
 
     if (userID) {
         if (role === 'admin') {
-            window.location.href = sanitizeURL("/shop/admin/index.html");
+            window.location.href = sanitizeURL("/admin/index.html");
             return;
         }
         
@@ -42,7 +42,7 @@ async function update_login() {
         navbarLinks.innerHTML = `
         <ul class="navbar-icons">
             <li class="nav-item">
-                <a class="cart-btn" href="/shop/cart.html" id="cart_nav">
+                <a class="cart-btn" href="/cart.html" id="cart_nav">
                     <img src="Icons/cart.png" title="Cart" alt="Transparent Cart Icon">
                 </a>
             </li>
@@ -51,11 +51,11 @@ async function update_login() {
                     <img src="Icons/profile.png" title="Profile" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" href="/shop/Dashboard/index.html">Dashboard</a></li>
-                    <li><a class="dropdown-item" href="/shop/auction.html">Auctions</a></li>
-                    <li><a class="dropdown-item" href="/shop/settings.html">Settings</a></li>
-                    <li><a class="dropdown-item" id="likes_nav"  href="/shop/like.html">Likes</a></li>
-                    <li><a class="dropdown-item" id="logout_nav" href="/shop/index.html">Logout</a></li>
+                    <li><a class="dropdown-item" href="/Dashboard/index.html">Dashboard</a></li>
+                    <li><a class="dropdown-item" href="/auction.html">Auctions</a></li>
+                    <li><a class="dropdown-item" href="/settings.html">Settings</a></li>
+                    <li><a class="dropdown-item" id="likes_nav"  href="/like.html">Likes</a></li>
+                    <li><a class="dropdown-item" id="logout_nav" href="/index.html">Logout</a></li>
                 </ul>
             </li>
             <li class="nav-item">
@@ -83,8 +83,8 @@ async function update_login() {
                     <img src="Icons/profile.png" title="Profile" alt="Profile Icon" class="profile-btn">
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" href="/shop/signup.html">Sign Up</a></li>
-                    <li><a class="dropdown-item" href="/shop/login.html">Login</a></li>
+                    <li><a class="dropdown-item" href="/signup.html">Sign Up</a></li>
+                    <li><a class="dropdown-item" href="/login.html">Login</a></li>
                 </ul>
             </li>
             <li class="nav-item">
@@ -137,7 +137,7 @@ async function clear_login() {
 
                 if (response.ok) {
                     alert('You have logged out.');
-                    window.location.href = sanitizeURL("/shop/login.html");
+                    window.location.href = sanitizeURL("/login.html");
                 } else {
                     const data = await response.json();
                     console.error('Logout failed:', data.message);

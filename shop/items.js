@@ -274,7 +274,7 @@ function setup_search_like(){
         likesNav.addEventListener('click', (event) => {
             event.preventDefault(); 
             renderItems(likedItems);
-            window.location.href = sanitizeURL("/shop/like.html");
+            window.location.href = sanitizeURL("/like.html");
         });
     }
 }

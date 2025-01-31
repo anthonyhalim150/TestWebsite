@@ -59,6 +59,17 @@ USE ecommerce;
 -- Since id cannot be reused, 
 -- e.g. If itemID 5 is deleted, database will never go to itemID 5
 -- Hence, I removed itemID as a referential integrity constraint
+CREATE TABLE ITEMS (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category TEXT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
+    image VARCHAR(255),
+    created_by INT NOT NULL DEFAULT 1,
+    FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE
+);
 
 CREATE TABLE ITEMS (
     id INT AUTO_INCREMENT PRIMARY KEY,

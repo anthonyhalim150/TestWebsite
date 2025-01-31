@@ -1,7 +1,7 @@
 async function crawler_check(){
     const userRole = await get_user_role(); 
-    if (window.location.pathname.includes('/shop/admin') && (userRole !== 'admin')) {
-       window.location.href = sanitizeURL('/shop/login.html');  // Redirect to non-admins to homepage
+    if (window.location.pathname.includes('/admin') && (userRole !== 'admin')) {
+       window.location.href = sanitizeURL('/login.html');  // Redirect to non-admins to homepage
     }
 }
 
@@ -23,8 +23,8 @@ function createSidebar() {
                         Products <span class="arrow">▼</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="/shop/admin/add_new_product.html" class="nav-item">Add Product</a></li>
-                        <li><a href="/shop/admin/product_list.html" class="nav-item">Product List</a></li>
+                        <li><a href="/admin/add_new_product.html" class="nav-item">Add Product</a></li>
+                        <li><a href="/admin/product_list.html" class="nav-item">Product List</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
@@ -32,10 +32,10 @@ function createSidebar() {
                         Auctions <span class="arrow">▼</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="/shop/admin/add_new_auction.html" class="nav-item">Add Auction</a></li>
-                        <li><a href="/shop/admin/expired_auction_list.html" class="nav-item">Expired Auction List</a></li>
-                        <li><a href="/shop/admin/ongoing_auction_list.html" class="nav-item">Ongoing Auction List</a></li>
-                        <li><a href="shop/admin/upcoming_auction_list.html" class="nav-item">Upcoming Auction List</a></li>
+                        <li><a href="/admin/add_new_auction.html" class="nav-item">Add Auction</a></li>
+                        <li><a href="/admin/expired_auction_list.html" class="nav-item">Expired Auction List</a></li>
+                        <li><a href="/admin/ongoing_auction_list.html" class="nav-item">Ongoing Auction List</a></li>
+                        <li><a href="admin/upcoming_auction_list.html" class="nav-item">Upcoming Auction List</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
@@ -43,14 +43,14 @@ function createSidebar() {
                         Users <span class="arrow">▼</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="/shop/admin/add_new_user.html" class="nav-user">Add Users</a></li>               
-                        <li><a href="/shop/admin/user_list.html" class="nav-user">User List</a></li>
+                        <li><a href="/admin/add_new_user.html" class="nav-user">Add Users</a></li>               
+                        <li><a href="/admin/user_list.html" class="nav-user">User List</a></li>
                     </ul>
                 </li>
-                <li><a href="/shop/admin/transaction_list.html" class="nav-item">Transaction List</a></li>
-                <li><a href="/shop/admin/metrics.html" class="nav-item">Metrics</a></li>
-                <li><a href="/shop/admin/comment_list.html" class="nav-item">Comments</a></li>
-                <li><a href="/shop/admin/AI/templates/AI_comment.html" class="nav-item">AI Page</a></li>
+                <li><a href="/admin/transaction_list.html" class="nav-item">Transaction List</a></li>
+                <li><a href="/admin/metrics.html" class="nav-item">Metrics</a></li>
+                <li><a href="/admin/comment_list.html" class="nav-item">Comments</a></li>
+                <li><a href="/admin/AI/templates/AI_comment.html" class="nav-item">AI Page</a></li>
                 <li><a id="logout_nav" class="nav-item">Logout</a></li>
             </ul>
         </nav>
@@ -70,7 +70,7 @@ function clear_login() {
         // Clear user info and refresh the page
         localStorage.clear();
         alert('You have logged out.');
-        window.location.href = sanitizeURL('/shop/index.html');
+        window.location.href = sanitizeURL('/index.html');
     });
 }
 

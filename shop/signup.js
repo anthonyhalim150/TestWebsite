@@ -40,7 +40,7 @@ if (sign_up_form) {
             if (response.ok && result.success) {
                 alert(`Account created successfully for ${username}!`);
                 sign_up_form.reset(); // Reset the form
-                window.location.href = sanitizeURL("/shop/login.html"); // Redirect securely
+                window.location.href = sanitizeURL("/login.html"); // Redirect securely
             } else {
                 document.getElementById("signup_message").innerText =
                     `Sign-Up Failed: ${sanitizeInput(result.error || "Unknown error.")}`;

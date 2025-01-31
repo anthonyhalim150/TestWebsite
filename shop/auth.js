@@ -63,7 +63,7 @@ async function getUserID() {
 }
 
 // Function to ensure user is authenticated
-async function getCookie(path ="/shop/login.html") {
+async function getCookie(path ="/login.html") {
     const userID = await getUserID();
     const currentPath = window.location.pathname;
     if (!userID && !currentPath.endsWith("login.html")) {

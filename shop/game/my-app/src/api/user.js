@@ -13,7 +13,7 @@ export const getUserStats = async (userId) => {
         if (response.data.success) {
             return {
                 wallet: sanitizeInput(parseFloat(response.data.wallet)),
-                miningPower: sanitizeInput(parseInt(response.data.miningPower, 10)) || 1,
+                miningPower: sanitizeInput(parseInt(response.data.miningPower, 10)) || 0,
                 miningEfficiency: sanitizeInput(parseFloat(response.data.miningEfficiency)) || 0,
                 level: sanitizeInput(parseInt(response.data.level, 10)) || 1,
                 xp: sanitizeInput(parseInt(response.data.xp, 10)) || 0,

@@ -46,7 +46,7 @@ async function get_balance() {
 
 // Redirect to the dashboard for wallet recharge
 function redirectToDashboard() {
-    window.location.href = sanitizeURL('/shop/Dashboard/wallet.html');
+    window.location.href = sanitizeURL('/Dashboard/wallet.html');
 }
 
 // Confirm the payment
@@ -59,7 +59,7 @@ async function confirmPayment() {
     }
 
     if (paymentMethod.value === 'csp') {
-        window.location.href = sanitizeURL('/shop/Crypto/crypto_pay.html');
+        window.location.href = sanitizeURL('/Crypto/crypto_pay.html');
         return;
     }
 
@@ -95,7 +95,7 @@ async function confirmPayment() {
         if (result.success) {
             localStorage.setItem('Payment', 'wallet');
             alert('Payment successful!');
-            window.location.href = sanitizeURL('/shop/cart.html');
+            window.location.href = sanitizeURL('/cart.html');
         } else {
             alert(sanitizeInput(result.message || 'Payment failed.'));
         }
@@ -108,7 +108,7 @@ async function confirmPayment() {
 // Handle the back button
 function handleBack() {
     alert('Transaction canceled. Redirecting to cart...');
-    window.location.href = sanitizeURL('/shop/cart.html');
+    window.location.href = sanitizeURL('/cart.html');
 }
 
 // Load the wallet balance on page load
