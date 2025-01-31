@@ -1,9 +1,9 @@
 [[redirects]]
-  from = "/"
-  to = "/shop/index.html"
+  from = "/*"
+  to = "/index"
   status = 200
 
 [[redirects]]
   from = "/game/*"
-  to = "/game/my-app/build/index.html"
+  to = "/index.html"
   status = 200
