@@ -10,7 +10,7 @@ import { sanitizeInput } from "./utils/auth";
 function App() {
   const [tokens, setTokens] = useState(0);
   const [tokensToSync, setTokensToSync] = useState(0);
-  const [miningPower, setMiningPower] = useState(1);
+  const [miningPower, setMiningPower] = useState(0);
   const [miningEfficiency, setMiningEfficiency] = useState(0.0);
   const [autoMiningRate, setAutoMiningRate] = useState(0); 
   const [level, setLevel] = useState(1);
@@ -41,7 +41,7 @@ function App() {
 
  
   const mineTokens = () => {
-    const earnedTokens = miningPower * (1+ parseFloat(miningEfficiency));
+    const earnedTokens =(1+ parseFloat(miningPower)) * (1+ parseFloat(miningEfficiency));
 
     if (isNaN(earnedTokens) || isNaN(tokens)) {
       console.error("NaN detected in tokens calculation!", { miningPower, miningEfficiency, earnedTokens });
@@ -90,7 +90,6 @@ function App() {
     return () => clearInterval(autoMinerInterval);
   }, [autoMiningRate]);
 
-  // ✅ Sync Tokens and XP Every 5 Seconds (Existing)
   useEffect(() => {
     const interval = setInterval(() => {
       if (tokensToSync > 0) {

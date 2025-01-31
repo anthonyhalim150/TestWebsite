@@ -11,7 +11,7 @@ exports.getUserStats = async (userId) => {
     const query = `
         SELECT u.level, u.xp, u.wallet, 
                COALESCE(SUM(up.mining_power_increase), 0) AS totalUpgradePower,
-               COALESCE(SUM(up.mining_efficiency_increase), 1.0) AS totalUpgradeEfficiency,
+               COALESCE(SUM(up.mining_efficiency_increase), 0.0) AS totalUpgradeEfficiency,
                COALESCE(SUM(up.rateIncrease), 0) AS totalAutoMiningRate, -- Calculate auto-mining dynamically
                COALESCE(lp.mining_power_boost, 0) AS levelPowerBoost,
                COALESCE(lp.mining_efficiency_boost, 0.0) AS levelEfficiencyBoost
