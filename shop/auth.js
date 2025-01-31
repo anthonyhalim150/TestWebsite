@@ -63,10 +63,10 @@ async function getUserID() {
 }
 
 // Function to ensure user is authenticated
-async function getCookie(path ="/login.html") {
+async function getCookie(path ="/login") {
     const userID = await getUserID();
     const currentPath = window.location.pathname;
-    if (!userID && !currentPath.endsWith("login.html")) {
+    if (!userID && !currentPath.endsWith("login")) {
         window.location.href = sanitizeURL(path); // Redirect safely
         alert("Login Expired. Redirecting to login....");
     }

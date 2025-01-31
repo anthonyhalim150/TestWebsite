@@ -19,7 +19,6 @@ function App() {
   const [currentSection, setSection] = useState("miner");
   const userId = 1;
 
-  // ✅ Fetch all user stats on load
   useEffect(() => {
     const fetchStats = async () => {
       try {

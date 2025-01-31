@@ -64,16 +64,32 @@ function createSidebar() {
     open_drop_down();
 }
 
-function clear_login() {
+async function clear_login() {
     const login = document.getElementById('logout_nav');
-    login.addEventListener('click', () => {
-        // Clear user info and refresh the page
-        localStorage.clear();
-        alert('You have logged out.');
-        window.location.href = sanitizeURL('/index.html');
-    });
-}
+    if (login){
+        login.addEventListener('click', async () => {
+            try {
+                // Make a POST request to the logout endpoint
+                const response = await fetch(`${API_URL}/logout`, {
+                    method: 'POST',
+                    credentials: 'include', // Include cookies in the request
+                });
 
+                if (response.ok) {
+                    alert('You have logged out.');
+                    window.location.href = sanitizeURL("/login.html");
+                } else {
+                    const data = await response.json();
+                    console.error('Logout failed:', data.message);
+                    alert('Failed to log out. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+                alert('An error occurred while logging out.');
+            }
+        });
+    }
+}
 function open_drop_down() {
     // Select all dropdown toggles
     const drop_down_toggles = document.querySelectorAll('.dropdown-toggle');

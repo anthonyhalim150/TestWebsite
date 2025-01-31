@@ -1,7 +1,7 @@
 async function crawler_check(){
     const userRole = await get_user_role(); 
     if (window.location.pathname.includes('/Dashboard') && userRole !== 'user') {
-        window.location.href = sanitizeURL('/login.html');  // Redirect to non-admins to homepage
+        window.location.href = sanitizeURL('/login');  // Redirect to non-admins to homepage
     }
 }
 
@@ -21,15 +21,15 @@ function createSidebar() {
         </div>
         <nav class="sidebar-nav">
             <ul>
-                <li><a href="/Dashboard/wallet.html" class="nav-item">Wallet</a></li>
+                <li><a href="/Dashboard/wallet" class="nav-item">Wallet</a></li>
                 <li class="dropdown">
                     <a href="#" class="nav-item dropdown-toggle">
                         Products <span class="arrow">▼</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="/Dashboard/add_new_product.html" class="nav-item">Add Product</a></li>
-                        <li><a href="/Dashboard/product_list.html" class="nav-item">Product List</a></li>
-                        <li><a href="/Dashboard/transaction_list.html" class="nav-item">Sold List</a></li>
+                        <li><a href="/Dashboard/add_new_product" class="nav-item">Add Product</a></li>
+                        <li><a href="/Dashboard/product_list" class="nav-item">Product List</a></li>
+                        <li><a href="/Dashboard/transaction_list" class="nav-item">Sold List</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
@@ -37,15 +37,15 @@ function createSidebar() {
                         Auctions <span class="arrow">▼</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="/Dashboard/add_new_auction.html" class="nav-item">Add Auction</a></li>
-                        <li><a href="/Dashboard/expired_auction_list.html" class="nav-item">Expired Auction List</a></li>
-                        <li><a href="/Dashboard/ongoing_auction_list.html" class="nav-item">Ongoing Auction List</a></li>
-                        <li><a href="/Dashboard/upcoming_auction_list.html" class="nav-item">Upcoming Auction List</a></li>
+                        <li><a href="/Dashboard/add_new_auction" class="nav-item">Add Auction</a></li>
+                        <li><a href="/Dashboard/expired_auction_list" class="nav-item">Expired Auction List</a></li>
+                        <li><a href="/Dashboard/ongoing_auction_list" class="nav-item">Ongoing Auction List</a></li>
+                        <li><a href="/Dashboard/upcoming_auction_list" class="nav-item">Upcoming Auction List</a></li>
                     </ul>
                 </li>
-                <li><a href="/Dashboard/transaction_history.html" class="nav-item">Transaction History</a></li>
-                <li><a href="/Dashboard/metrics.html" class="nav-item">Metrics</a></li>
-                <li><a href="/index.html" class="nav-item">Home</a></li>
+                <li><a href="/Dashboard/transaction_history" class="nav-item">Transaction History</a></li>
+                <li><a href="/Dashboard/metrics" class="nav-item">Metrics</a></li>
+                <li><a href="/index" class="nav-item">Home</a></li>
             </ul>
         </nav>
     `;

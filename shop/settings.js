@@ -4,7 +4,7 @@ async function applyInitialSettings() {
     const userID = await getCookie(); // Use the shared getCookie function
     if (!userID) {
         alert('User not logged in.');
-        window.location.href = sanitizeURL("/login.html");
+        window.location.href = sanitizeURL("/login");
         return;
     }
 
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const back_btn = document.getElementById("back-btn");
     if (back_btn){
     back_btn.addEventListener("click", () => {
-        window.location.href = sanitizeURL("/index.html");
+        window.location.href = sanitizeURL("/index");
     });
 }
 });

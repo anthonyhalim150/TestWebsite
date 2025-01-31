@@ -50,7 +50,7 @@ async function fetch_products(sorted_items = null) {
                     <td>${product.duration}</td>
                     <td>${formattedStartingTime}</td>
                     <td>
-                        <a href="/admin/bid_history.html?product_id=${product.id}" class="picture-link">
+                        <a href="/admin/bid_history?product_id=${product.id}" class="picture-link">
                             <img src="../Icons/bid-history.png" alt="View Bid History" class="button-image">
                         </a>
                     </td>

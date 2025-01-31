@@ -250,7 +250,7 @@ function closeItemOverview() {
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchLikedItems(); //To show whats liked and whats not
     await fetchItems(); // Fetch items when page loads
-    if (window.location.pathname.includes('like.html')) {
+    if (window.location.pathname.includes('like')) {
         await renderItems(likedItems);
     }
     else{
@@ -274,7 +274,7 @@ function setup_search_like(){
         likesNav.addEventListener('click', (event) => {
             event.preventDefault(); 
             renderItems(likedItems);
-            window.location.href = sanitizeURL("/like.html");
+            window.location.href = sanitizeURL("/like");
         });
     }
 }
