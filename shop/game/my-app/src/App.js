@@ -11,7 +11,7 @@ function App() {
   const [tokens, setTokens] = useState(0);
   const [tokensToSync, setTokensToSync] = useState(0);
   const [miningPower, setMiningPower] = useState(1);
-  const [miningEfficiency, setMiningEfficiency] = useState(1.0);
+  const [miningEfficiency, setMiningEfficiency] = useState(0.0);
   const [autoMiningRate, setAutoMiningRate] = useState(0); 
   const [level, setLevel] = useState(1);
   const [xp, setXp] = useState(0);
