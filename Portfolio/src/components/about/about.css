@@ -1,3 +1,4 @@
+/* About Container */
 .about-container {
     display: flex;
     flex-direction: column;
@@ -7,6 +8,7 @@
     animation: fadeIn 1s ease-in-out;
 }
 
+/* Cards Layout */
 .about-cards {
     display: flex;
     justify-content: center;
@@ -15,6 +17,7 @@
     max-width: 800px;
 }
 
+/* Individual Card */
 .about-card {
     background: var(--color-bg-variant);
     border: 1px solid transparent;
@@ -33,21 +36,53 @@
     transform: scale(1.05);
 }
 
+/* Icon Styling */
 .about-icon {
     font-size: 2rem;
     color: var(--color-primary);
     margin-bottom: 0.8rem;
 }
 
+/* Description Section */
 .about-description {
-    max-width: 700px;
-    margin-top: 2rem;
-    color: var(--color-light);
     font-size: 1rem;
+    color: var(--color-light);
     line-height: 1.6;
+    margin-top: 0.5rem;
+    text-align: center;
 }
 
-/* Responsive Design */
+/* List Formatting */
+.about-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.about-list li {
+    font-size: 0.95rem;
+    color: var(--color-white);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 5px;
+    margin: 5px 0;
+}
+
+
+.about-summary {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 8px;
+    color: #1fc3e4;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 500;
+    max-width: 80%;
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Responsive Adjustments */
 @media screen and (max-width: 1024px) {
     .about-cards {
         flex-direction: column;
@@ -58,15 +93,5 @@
 @media screen and (max-width: 600px) {
     .about-cards {
         width: 100%;
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
     }
 }

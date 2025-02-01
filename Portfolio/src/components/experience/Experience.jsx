@@ -59,7 +59,7 @@ const Experience = () => {
             <div className="experience-content">
               {skills.map(({ name, level }, idx) => (
                 <article key={idx} className="experience-details">
-                  <FaCheckCircle className="check-icon" /> {/* Green checkmark */}
+                  <FaCheckCircle className="check-icon" /> 
                   <div>
                     <h4>{name}</h4>
                     <small className="text-muted">{level}</small>

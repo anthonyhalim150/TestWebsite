@@ -7,8 +7,7 @@ const aboutData = [
     id: 1,
     icon: <FaGraduationCap className="about-icon" />,
     title: 'Double Degree',
-    description: 'Big Data and Cybersecurity',
-    institution: 'SIM Global Education',
+    description: ['Big Data', 'Cybersecurity'],
   },
   {
     id: 2,
@@ -20,7 +19,7 @@ const aboutData = [
     id: 3,
     icon: <FaLaptopCode className="about-icon" />, // Changed icon for Hobby
     title: 'Hobby',
-    description: 'Building scalable and efficient web applications',
+    description: ['Coding', 'Jogging', 'Chess'],
   },
 ];
 
@@ -31,35 +30,33 @@ const About = () => {
 
       <div className="container about-container">
         <div className="about-cards">
-          {aboutData.map(({ id, icon, title, description, institution }) => (
+          {aboutData.map(({ id, icon, title, description}) => (
             <article key={id} className="about-card">
               {icon}
               <h5>{title}</h5>
-              <small>
+              <div className="about-description">
                 {Array.isArray(description) ? (
-                  <ul>
+                  <ul className="about-list">
                     {description.map((item, idx) => (
                       <li key={idx}>{item}</li>
                     ))}
                   </ul>
                 ) : (
-                  description
+                  <p>{description}</p>
                 )}
-                {institution && <br />}
-                <i>{institution}</i>
-              </small>
+              </div>
             </article>
           ))}
         </div>
 
-        <p className="about-description">
-          I’m a <b>Computer Science Undergraduate</b> at SIM Singapore, I am passionate about
-          developing scalable web applications and innovative solutions. I enjoy solving real-world problems through programming and 
-          I can't wait to work with you!
+        <p className="about-summary">
+          Hey there 😊 I'm in my final year of Computer Science at SIM Singapore. Passionate about Big Data and Cybersecurity, I enjoy learning, coding, and solving complex problems. Let's connect! 💻🚀
         </p>
       </div>
     </section>
   );
 };
+
+
 
 export default About;
