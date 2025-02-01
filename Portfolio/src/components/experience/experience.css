@@ -1,0 +1,97 @@
+.experience-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    padding: 2rem 0;
+    animation: fadeInUp 0.8s ease-in-out;
+}
+
+.experience-container > div {
+    background: var(--color-bg-variant);
+    padding: 2.5rem 4rem;
+    border-radius: 1.8rem;
+    border: 1px solid transparent;
+    transition: all 0.4s ease-in-out;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.experience-container > div:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-primary);
+    transform: translateY(-5px);
+}
+
+.experience-container > div h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--color-primary);
+}
+
+.experience-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.experience-details {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease-in-out;
+}
+
+.experience-details:hover {
+    transform: scale(1.05);
+}
+
+.experience-details-icon {
+    color: var(--color-primary);
+    font-size: 1.4rem;
+}
+.check-icon {
+    color: #4CAF50; /* Green color for checkmark */
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+
+/* Responsive Design */
+
+@media screen and (max-width: 1024px) {
+    .experience-container {
+        grid-template-columns: 1fr;
+    }
+
+    .experience-container > div {
+        width: 90%;
+        padding: 2rem;
+        margin: 0 auto;
+    }
+
+    .experience-content {
+        padding: 1rem;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .experience-container {
+        gap: 1.2rem;
+    }
+
+    .experience-container > div {
+        width: 100%;
+        padding: 1.8rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

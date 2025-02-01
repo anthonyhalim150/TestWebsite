@@ -1,0 +1,89 @@
+/* Default Navigation Bar */
+nav {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9));
+    width: max-content;
+    display: flex;
+    padding: 1rem 2rem;
+    z-index: 100;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 2.5rem;
+    gap: 1.5rem;
+    border-radius: 3rem;
+    backdrop-filter: blur(15px);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease-in-out;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hidden Nav (When Footer is Visible) */
+.hidden-nav {
+    opacity: 0.2; /* Lower visibility */
+    pointer-events: none; /* Disable interaction */
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Nav Links */
+nav a {
+    background: transparent;
+    padding: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    font-size: 1.5rem;
+    transition: all 0.3s ease-in-out;
+    width: 50px;
+    height: 50px;
+    border: 2px solid transparent;
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+/* Hover Effect */
+nav a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.2);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: 0px 0px 10px var(--color-primary);
+}
+
+/* Active Navigation Link */
+nav a.active {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    box-shadow: 0 0 15px var(--color-primary);
+    transform: scale(1.2);
+}
+
+/* Responsive Design for Tablets */
+@media screen and (max-width: 768px) {
+    nav {
+        padding: 0.8rem 1.5rem;
+        bottom: 1.5rem;
+        gap: 1rem;
+    }
+
+    nav a {
+        font-size: 1.3rem;
+        width: 45px;
+        height: 45px;
+    }
+}
+
+/* Responsive Design for Small Devices (Mobiles) */
+@media screen and (max-width: 480px) {
+    nav {
+        bottom: 1rem;
+        padding: 0.6rem 1rem;
+        gap: 0.8rem;
+    }
+
+    nav a {
+        font-size: 1.2rem;
+        width: 40px;
+        height: 40px;
+    }
+}
