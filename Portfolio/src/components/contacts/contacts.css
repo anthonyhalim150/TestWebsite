@@ -64,22 +64,80 @@ form {
     animation: slideUp 1s ease-in-out;
 }
 
+.contact-container {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+    padding: 2rem 0;
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Contact Email Section */
+.contact-options {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.contact-option {
+    background: var(--color-bg-variant);
+    padding: 1.5rem;
+    border-radius: 1.2rem;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+}
+
+.contact-option:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+.contact-icon {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+    color: var(--color-primary);
+}
+
+.contact-option a {
+    margin-top: 0.7rem;
+    display: inline-block;
+    font-size: 0.9rem;
+    color: var(--color-primary);
+    transition: color 0.3s ease-in-out;
+}
+
+.contact-option a:hover {
+    color: var(--color-white);
+}
+
+/* Form Styling */
 input, textarea {
     width: 100%;
     padding: 1.2rem;
     border-radius: 0.5rem;
-    background: transparent;
-    border: 2px solid var(--color-primary-variant);
-    resize: none;
+    background: var(--color-bg-variant); /* Same as contact-options */
+    border: 1px solid transparent;
     color: var(--color-white);
+    resize: none;
     transition: all 0.3s ease-in-out;
 }
 
+/* On Focus (to highlight active field) */
 input:focus, textarea:focus {
     border-color: var(--color-primary);
     outline: none;
     transform: scale(1.02);
 }
+
 
 /* Centering the Send Button */
 .btn-highlight {

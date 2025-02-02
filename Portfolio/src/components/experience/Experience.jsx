@@ -50,7 +50,7 @@ const skills = [
 const Experience = () => {
   return (
     <section id="experience">
-      <h2>My Skills</h2>
+      <h1>My Skills</h1>
 
       <div className="container experience-container">
         {skills.map(({ category, icon, skills }, index) => (

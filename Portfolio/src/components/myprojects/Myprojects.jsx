@@ -45,7 +45,7 @@ const MyProjects = () => {
 
   return (
     <section id="projects">
-      <h2>Projects</h2>
+      <h1>Projects</h1>
   
       <div className="container projects-container">
         {projects.map(({ id, image, title, techStack, description, github, website }) => (

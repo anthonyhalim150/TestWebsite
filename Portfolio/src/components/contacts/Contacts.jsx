@@ -68,8 +68,7 @@ const Contacts = () => {
 
   return (
     <section id="contact">
-      <h2>Contact Me</h2>
-
+      <h1>Contact Me</h1>
       <div className="container contact-container">
         <div className="contact-options">
           <article className="contact-option">
@@ -79,7 +78,7 @@ const Contacts = () => {
             <a href="mailto:anthonyhalim153@gmail.com">Send a message</a>
           </article>
         </div>
-
+        <h5>You can also send a message to me here!</h5>
         <form ref={formRef} onSubmit={handleSubmit}>
           <input
             type="text"
@@ -106,8 +105,8 @@ const Contacts = () => {
             onChange={handleChange}
           ></textarea>
           
-          {error && <p className="error">{error}</p>} {/* Display errors */}
-          {success && <p className="success">{success}</p>} {/* Display success message */}
+          {error && <h3 className="error">{error}</h3>} 
+          {success && <h3 className="success">{success}</h3>}
 
           <button type="submit" className="btn btn-highlight">Send</button>
         </form>

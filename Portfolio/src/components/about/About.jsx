@@ -7,7 +7,7 @@ const aboutData = [
     id: 1,
     icon: <FaGraduationCap className="about-icon" />,
     title: 'Double Degree',
-    description: ['Big Data', 'Cybersecurity'],
+    description: ['Big Data', 'Cybersecurity', 'WAM: 84/100'],
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const aboutData = [
 const About = () => {
   return (
     <section id="about">
-      <h2>About Me</h2>
+      <h1>About Me</h1>
 
       <div className="container about-container">
         <div className="about-cards">
@@ -50,7 +50,7 @@ const About = () => {
         </div>
 
         <p className="about-summary">
-          Hey there 😊 I'm in my final year of Computer Science at SIM Singapore. Passionate about Big Data and Cybersecurity, I enjoy learning, coding, and solving complex problems. Let's connect! 💻🚀
+          Hey there 😊 I'm in my final year of Computer Science at SIM Singapore. Passionate about Big Data and Cybersecurity, I enjoy learning, coding, and solving complex problems! 💻🚀
         </p>
       </div>
     </section>
