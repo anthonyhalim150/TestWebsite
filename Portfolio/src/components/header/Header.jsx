@@ -1,6 +1,6 @@
 import React from 'react';
 import './header.css';
-import { BsLinkedin, BsGithub, BsWhatsapp, BsFileEarmarkArrowDown } from 'react-icons/bs';
+import { BsLinkedin, BsGithub, BsTelegram, BsFileEarmarkArrowDown } from 'react-icons/bs';
 import profilePic from '../../assets/profile-pic.png';
 import Resume from '../../assets/Resume.pdf';
 
@@ -23,8 +23,8 @@ const Header = () => {
             <a href="https://github.com/anthonyhalim150" target="_blank" rel="noreferrer">
               <BsGithub />
             </a>
-            <a href="https://wa.me/+6581883757" target="_blank" rel="noreferrer">
-              <BsWhatsapp />
+            <a href="https://t.me/AnthonyHalim150" target="_blank" rel="noreferrer">
+              <BsTelegram />
             </a>
             <a href={Resume} download="Anthony_Halim_Résumé.pdf" target="_blank" rel="noreferrer">
               <BsFileEarmarkArrowDown />

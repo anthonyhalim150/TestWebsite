@@ -1,12 +1,12 @@
 import React from 'react';
 import './footer.css';
-import { BsLinkedin, BsGithub, BsWhatsapp } from 'react-icons/bs';
+import { BsLinkedin, BsGithub, BsTelegram } from 'react-icons/bs';
 
 const Footer = () => {
   const socialLinks = [
     { id: 1, href: 'https://www.linkedin.com/in/anthony-halim-492289284/', icon: <BsLinkedin /> },
     { id: 2, href: 'https://github.com/anthonyhalim150', icon: <BsGithub /> },
-    { id: 3, href: 'https://wa.me/+6581883757', icon: <BsWhatsapp /> },
+    { id: 3, href: 'https://t.me/AnthonyHalim150', icon: <BsTelegram /> },
   ];
 
   return (
