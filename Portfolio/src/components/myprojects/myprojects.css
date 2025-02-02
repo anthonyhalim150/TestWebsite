@@ -6,6 +6,16 @@
     animation: fadeIn 0.8s ease-in-out;
 }
 
+
+.project-description {
+    font-size: 0.9rem;
+    color: var(--color-light);
+    margin: 0.5rem 0 1rem;
+    text-align: center;
+    line-height: 1.4;
+}
+
+
 .project-item {
     background: var(--color-bg-variant);
     padding: 1.5rem;
@@ -24,6 +34,7 @@
     background: rgba(255, 255, 255, 0.05);
     transform: translateY(-5px);
 }
+
 
 .project-item-image {
     border-radius: 1.5rem;
@@ -55,7 +66,7 @@
     transform: scale(1.05);
 }
 
-/* Responsive Design */
+
 @media screen and (max-width: 1024px) {
     .projects-container {
         grid-template-columns: 1fr 1fr;
@@ -70,7 +81,16 @@
     }
 }
 
-/* Animations */
+@media screen and (max-width: 768px) {
+    .project-item {
+        padding: 1rem;
+    }
+
+    .project-description {
+        font-size: 0.85rem;
+    }
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

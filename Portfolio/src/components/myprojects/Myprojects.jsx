@@ -11,22 +11,25 @@ const MyProjects = () => {
       image: Project1,
       title: 'CyberMall',
       techStack: 'HTML | CSS | JS | Node.js | Crypto | Google Cloud | MySQL',
+      description: 'An innovative C2C e-commerce platform with decentralized architecture, with auction capabilities and cryptocurrency payment.',
       github: 'https://github.com/anthonyhalim150',
-      liveDemo: 'https://cybermall.netlify.app/',
+      website: 'https://cybermall.netlify.app/',
     },
     {
       id: 2,
       image: Project2,
       title: 'CyberMine',
       techStack: 'REACT | MySQL | Node.js | Express | Flask | AI | Google Cloud',
+      description: 'A cloud-based mining simulator leveraging REACT and A.I technologies.',
       github: 'https://github.com/anthonyhalim150',
-      liveDemo: 'https://cybermine.netlify.app/',
+      website: 'https://cybermine.netlify.app/',
     },
     {
       id: 3,
       image: Project3,
       title: 'Portfolio',
       techStack: 'REACT',
+      description: 'A personal portfolio showcasing my projects, skills, and achievements.',
       github: 'https://github.com/anthonyhalim150',
     },
     {
@@ -34,29 +37,32 @@ const MyProjects = () => {
       image: Project4,
       title: 'PENDING',
       techStack: 'PENDING',
+      description: 'This project is currently under development!',
       github: 'https://github.com/anthonyhalim150',
     },
   ];
+  
 
   return (
     <section id="projects">
       <h2>Projects</h2>
-
+  
       <div className="container projects-container">
-        {projects.map(({ id, image, title, techStack, github, liveDemo }) => (
+        {projects.map(({ id, image, title, techStack, description, github, website }) => (
           <article key={id} className="project-item">
             <div className="project-item-image">
               <img src={image} alt={title} />
             </div>
             <h3>{title}</h3>
+            <p className="project-description">{description}</p>
             <small className="project-tech-stack">{techStack}</small>
             <div className="project-cta">
               <a href={github} target="_blank" rel="noreferrer" className="btn">
                 GitHub
               </a>
-              {liveDemo && (
-                <a href={liveDemo} target="_blank" rel="noreferrer" className="btn">
-                  Live Demo
+              {website && (
+                <a href={website} target="_blank" rel="noreferrer" className="btn">
+                  Website
                 </a>
               )}
             </div>
@@ -64,7 +70,7 @@ const MyProjects = () => {
         ))}
       </div>
     </section>
-  );
+  );  
 };
 
 export default MyProjects;
