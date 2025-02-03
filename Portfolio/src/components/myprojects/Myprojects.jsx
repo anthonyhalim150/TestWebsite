@@ -93,9 +93,7 @@ const MyProjects = () => {
       }
   
       projects.forEach(project => {
-        if (project.title !== 'Portfolio') {
           newStatuses[project.id] = 'online';
-        }
       });
   
       setStatuses(newStatuses);
@@ -121,7 +119,7 @@ const MyProjects = () => {
             <small className="project-tech-stack">{techStack}</small>
 
             <div className="project-status">
-              <span className="status-text">Status:</span> 
+              <span className="status-text">Database Status:</span> 
               <span className={`status-dot ${statuses[id]}`}>
                 {statuses[id] === 'online' ? 'Online 🟢' : 'Offline 🔴'}
               </span>
