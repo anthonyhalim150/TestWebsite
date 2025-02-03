@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 import './nav.css';
 import { FaHome, FaUserAlt, FaLaptopCode, FaFolderOpen, FaEnvelope } from 'react-icons/fa';
 
@@ -10,7 +10,7 @@ const Nav = () => {
     setActiveNav(href); // Update active link
     setIsNavHidden(true); // Temporarily hide navbar
 
-    // Reappear after 1.5 seconds
+
     setTimeout(() => {
       setIsNavHidden(false);
     }, 1000);
