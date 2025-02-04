@@ -106,6 +106,16 @@ CREATE TABLE GAME_ITEMS (
     FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE
 );
 
+CREATE TABLE PLAYER_INVENTORY (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    item_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1, -- Number of the item owned
+    obtained_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES GAME_ITEMS(id) ON DELETE CASCADE,
+    UNIQUE (user_id, item_id) -- Ensures only one entry per user-item combination
+);
 CREATE TABLE EQUIPMENT (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -117,16 +127,6 @@ CREATE TABLE EQUIPMENT (
     UNIQUE (user_id, slot) -- Ensures only one item per slot per user
 );
 
-CREATE TABLE PLAYER_INVENTORY (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    item_id INT NOT NULL,
-    quantity INT NOT NULL DEFAULT 1, -- Number of the item owned
-    obtained_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
-    FOREIGN KEY (item_id) REFERENCES GAME_ITEMS(id) ON DELETE CASCADE,
-    UNIQUE (user_id, item_id) -- Ensures only one entry per user-item combination
-);
 
 CREATE TABLE USERS(
     id INT AUTO_INCREMENT PRIMARY KEY,

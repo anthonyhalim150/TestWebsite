@@ -67,7 +67,6 @@ function Equipment({ userId, setMiningPower, setMiningEfficiency, setAutoMiningR
   const handleEquip = async () => {
     if (!selectedItem) return;
     const slotToEquip = selectedItem.category;
-    console.log(selectedItem);
     if (!equipmentSlots.includes(slotToEquip)) {
       alert("Invalid slot detected from backend.");
       return;
