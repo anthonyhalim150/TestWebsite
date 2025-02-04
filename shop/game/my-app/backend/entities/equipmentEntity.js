@@ -8,8 +8,7 @@ exports.getUserInventory = async (userId) => {
         SELECT gi.*, pi.quantity 
         FROM PLAYER_INVENTORY pi
         JOIN GAME_ITEMS gi ON pi.item_id = gi.id
-        LEFT JOIN EQUIPMENT eq ON pi.user_id = eq.user_id AND pi.item_id = eq.item_id
-        WHERE pi.user_id = ? AND eq.item_id IS NULL`;
+        WHERE pi.user_id = ?`;
 
     const capacityQuery = `SELECT capacity FROM USERS WHERE id = ? LIMIT 1`;
 
@@ -165,7 +164,7 @@ exports.unequipItem = async (userId, slot) => {
 
 
 
-exports.sellItem = async (userId, itemId, price) => {
+exports.sellItem = async (userId, itemId, price, sellQuantity) => {
     const connection = await db.getConnection();
 
     try {
@@ -183,30 +182,35 @@ exports.sellItem = async (userId, itemId, price) => {
 
         const currentQuantity = inventory[0].quantity;
 
-        if (currentQuantity > 1) {
-            // If user owns more than 1, reduce the quantity by 1
+        if (currentQuantity >= sellQuantity) {
+            // Reduce quantity or delete item if quantity reaches 0
+            if (currentQuantity > sellQuantity) {
+                await connection.execute(
+                    `UPDATE PLAYER_INVENTORY SET quantity = quantity - ? WHERE user_id = ? AND item_id = ?`,
+                    [sellQuantity, userId, itemId]
+                );
+            } else {
+                await connection.execute(
+                    `DELETE FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ?`,
+                    [userId, itemId]
+                );
+            }
+
+            // Add sale amount to user's wallet
             await connection.execute(
-                `UPDATE PLAYER_INVENTORY SET quantity = quantity - 1 WHERE user_id = ? AND item_id = ?`,
-                [userId, itemId]
+                `UPDATE USERS SET wallet = wallet + ? WHERE id = ?`,
+                [price, userId]
             );
+
+            await connection.commit();
+            return { success: true, message: "Items sold successfully.", newBalance: price };
         } else {
-            // If only 1 item left, remove it from inventory
-            await connection.execute(
-                `DELETE FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ? LIMIT 1`,
-                [userId, itemId]
-            );
+            throw new Error("Not enough items to sell.");
         }
 
-        // Add item's price to user's wallet
-        await connection.execute(
-            `UPDATE USERS SET wallet = wallet + ? WHERE id = ?`,
-            [price, userId]
-        );
-
-        await connection.commit();
-        return { success: true, message: "Item sold successfully.", newBalance: price };
     } catch (error) {
         await connection.rollback();
+        console.error("Error selling item:", error);
         throw error;
     } finally {
         connection.release();

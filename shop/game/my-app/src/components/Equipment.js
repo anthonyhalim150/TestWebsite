@@ -73,17 +73,24 @@ function Equipment({ userId, setMiningPower, setMiningEfficiency, setAutoMiningR
     }
 
     try {
-      await equipItem(userId, selectedItem.id, slotToEquip);
+      const response = await equipItem(userId, selectedItem.id, slotToEquip);
+      if (!response.success) {
+        alert(response.message || "Failed to equip item.");
+        return;
+      }
+
       setModalOpen(false);
+      
       setInventory((prev) => {
         return prev
           .map((item) =>
-            item.item_id === selectedItem.id
+            item.id === selectedItem.id
               ? { ...item, quantity: item.quantity - 1 }
               : item
           )
           .filter((item) => item.quantity > 0); // Remove if quantity reaches 0
       });
+
       setEquippedItems((prev) => ({ ...prev, [slotToEquip]: selectedItem }));
 
       // Fetch updated stats from backend
@@ -91,15 +98,32 @@ function Equipment({ userId, setMiningPower, setMiningEfficiency, setAutoMiningR
     } catch (error) {
       console.error("Error equipping item:", error);
     }
-  };
+};
+
 
   const handleUnequip = async () => {
     if (!selectedItem) return;
 
     try {
-      await unequipItem(userId, selectedItem.category);
+      const response = await unequipItem(userId, selectedItem.category);
+      if (!response.success) {
+        alert(response.message || "Failed to unequip item.");
+        return;
+      }
+
       setModalOpen(false);
-      setInventory((prev) => [...prev, { ...selectedItem, quantity: 1 }]); // Add item back with quantity 1
+      
+      setInventory((prev) => {
+        const itemExists = prev.some((item) => item.id === selectedItem.id);
+        if (itemExists) {
+          return prev.map((item) =>
+            item.id === selectedItem.id ? { ...item, quantity: item.quantity + 1 } : item
+          );
+        } else {
+          return [...prev, { ...selectedItem, quantity: 1 }];
+        }
+      });
+
       setEquippedItems((prev) => {
         const updated = { ...prev };
         delete updated[selectedItem.category];
@@ -113,36 +137,38 @@ function Equipment({ userId, setMiningPower, setMiningEfficiency, setAutoMiningR
     }
   };
 
+
   const handleSell = async () => {
     if (!selectedItem || sellQuantity < 1) return;
 
     try {
-      const price = parseFloat(selectedItem.price) * sellQuantity;
+        const price = sanitizeInput(parseFloat(selectedItem.price) * sellQuantity);
 
-      // Call backend to sell the item
-      const response = await sellItem(userId, selectedItem.id, price, sellQuantity);
+        // Call backend to sell multiple quantities
+        const response = await sellItem(userId, selectedItem.id, price, sellQuantity);
 
-      if (response.success) {
-        setTokens((prevTokens) => prevTokens + price); // Update user balance
-        setModalOpen(false);
+        if (response.success) {
+            setTokens((prevTokens) => prevTokens + price); // Update user balance
+            setModalOpen(false);
 
-        // Update inventory locally
-        setInventory((prev) =>
-          prev
-            .map((item) =>
-              item.item_id === selectedItem.id
-                ? { ...item, quantity: item.quantity - sellQuantity }
-                : item
-            )
-            .filter((item) => item.quantity > 0) // Remove items with 0 quantity
-        );
-      } else {
-        alert(response.message || "Failed to sell item.");
-      }
+            // Update inventory locally
+            setInventory((prev) =>
+                prev
+                    .map((item) =>
+                        item.id === selectedItem.id
+                            ? { ...item, quantity: item.quantity - sellQuantity }
+                            : item
+                    )
+                    .filter((item) => item.quantity > 0) // Remove items with 0 quantity
+            );
+        } else {
+            alert(response.message || "Failed to sell item.");
+        }
     } catch (error) {
-      console.error("Error selling item:", error);
+        console.error("Error selling item:", error);
     }
-  };
+};
+
 
   return (
     <div className="equipment-container">

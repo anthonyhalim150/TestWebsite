@@ -61,14 +61,14 @@ exports.unequipItem = async (req, res) => {
 };
 
 exports.sellItem = async (req, res) => {
-    const { userId, itemId, price } = req.body;
+    const { userId, itemId, price, sellQuantity } = req.body;
 
-    if (!userId || !itemId || !price) {
-        return res.status(400).json({ success: false, message: "User ID, Item ID, and price are required." });
+    if (!userId || !itemId || !price || !sellQuantity) {
+        return res.status(400).json({ success: false, message: "User ID, Item ID, price, and quantity are required." });
     }
 
     try {
-        const result = await EquipmentEntity.sellItem(userId, itemId, price);
+        const result = await EquipmentEntity.sellItem(userId, itemId, price, sellQuantity);
         res.json(result);
     } catch (error) {
         console.error("Error selling item:", error);

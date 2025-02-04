@@ -61,17 +61,18 @@ export const unequipItem = async (userId, slot) => {
     throw error;
   }
 };
-export const sellItem = async (userId, itemId, price) => {
+export const sellItem = async (userId, itemId, price, sellQuantity) => {
   try {
-    const response = await axios.post(`${BASE_URL}/sell-item`, {
-      userId: sanitizeInput(userId),
-      itemId: sanitizeInput(itemId),
-      price: sanitizeInput(price),
-    });
+      const response = await axios.post(`${BASE_URL}/sell-item`, {
+          userId: sanitizeInput(userId),
+          itemId: sanitizeInput(itemId),
+          price: sanitizeInput(price),
+          sellQuantity: sanitizeInput(sellQuantity),
+      });
 
-    return response.data;
+      return response.data;
   } catch (error) {
-    console.error("Error selling item:", error);
-    throw error;
+      console.error("Error selling item:", error);
+      throw error;
   }
 };
