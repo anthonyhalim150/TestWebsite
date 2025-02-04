@@ -177,20 +177,21 @@ function Equipment({ userId, setMiningPower, setMiningEfficiency, setAutoMiningR
       <div className="equipment-grid">
         {equipmentSlots.map((slot) => (
           <div
-            key={slot}
-            className={`equipment-slot ${slot.toLowerCase()}`}
-            onClick={() => equippedItems[slot] && handleItemClick(equippedItems[slot])}
+          key={slot}
+          className={`equipment-slot ${slot.toLowerCase()} rarity-${equippedItems[slot]?.rarity?.toLowerCase() || 'common'}`}
+          onClick={() => equippedItems[slot] && handleItemClick(equippedItems[slot])}
           >
-            {equippedItems[slot] ? (
-              <img
-                src={sanitizeInput(equippedItems[slot].image)}
-                alt={sanitizeInput(equippedItems[slot].name)}
-                className="equipped-item"
-              />
-            ) : (
-              <div className="empty-slot"></div>
-            )}
-          </div>
+          {equippedItems[slot] ? (
+            <img
+              src={sanitizeInput(equippedItems[slot].image)}
+              alt={sanitizeInput(equippedItems[slot].name)}
+              className="equipped-item"
+            />
+          ) : (
+            <div className="empty-slot"></div>
+          )}
+        </div>
+        
         ))}
       </div>
 
@@ -199,64 +200,86 @@ function Equipment({ userId, setMiningPower, setMiningEfficiency, setAutoMiningR
         {Array.from({ length: maxCapacity }).map((_, index) => {
           const item = inventory[index];
           return (
-            <div key={index} className="inventory-slot" onClick={() => item && handleItemClick(item)}>
-              {item ? (
-                <>
-                  <img
-                    src={sanitizeInput(item.image)}
-                    alt={sanitizeInput(item.name)}
-                    className="item-image"
-                  />
-                  <span className="item-quantity">x{item.quantity}</span>
-                </>
-              ) : (
-                <div className="empty-slot"></div>
-              )}
-            </div>
+            <div
+            key={index}
+            className={`inventory-slot rarity-${item?.rarity?.toLowerCase() || 'common'}`}
+            onClick={() => item && handleItemClick(item)}
+            >
+            {item ? (
+              <>
+                <img
+                  src={sanitizeInput(item.image)}
+                  alt={sanitizeInput(item.name)}
+                  className="item-image"
+                />
+                <span className="item-quantity">x{item.quantity}</span>
+              </>
+            ) : (
+              <div className="empty-slot"></div>
+            )}
+          </div>
+
           );
         })}
       </div>
 
       {modalOpen && selectedItem && (
-        <div className="item-modal">
-          <div className="modal-content">
-            <h3>{sanitizeInput(selectedItem.name)}</h3>
-            <img
-              src={sanitizeInput(selectedItem.image)}
-              alt={sanitizeInput(selectedItem.name)}
-              className="modal-image"
-            />
-            <p><strong>Description:</strong> {sanitizeInput(selectedItem.description)}</p>
-            <p><strong>Mining Power:</strong> {selectedItem.mining_power}</p>
-            <p><strong>Mining Efficiency:</strong> {selectedItem.mining_efficiency}</p>
-            <p><strong>Auto Mining Rate:</strong> {selectedItem.auto_mining_rate || 0}</p>
-            <p><strong>Quantity:</strong> {selectedItem.quantity}</p>
+  <div className="item-modal">
+    <div className="modal-content">
+      <h3>{sanitizeInput(selectedItem.name)}</h3>
+      <img
+        src={sanitizeInput(selectedItem.image)}
+        alt={sanitizeInput(selectedItem.name)}
+        className="modal-image"
+      />
+      <p><strong>📜 Description:</strong> {sanitizeInput(selectedItem.description)}</p>
+      <p><strong>⚡ Mining Power:</strong> {selectedItem.mining_power}</p>
+      <p><strong>⛏️ Mining Efficiency:</strong> {selectedItem.mining_efficiency}</p>
+      <p><strong>🤖 Auto Mining Rate:</strong> {selectedItem.auto_mining_rate || 0}</p>
+      <p><strong>💰 Price:</strong> {selectedItem.price} Tokens</p>
 
-            {equippedItems[selectedItem.category] ? (
-              <button className="unequip-button" onClick={handleUnequip}>
-                Unequip
-              </button>
-            ) : (
-              <button className="equip-button" onClick={handleEquip}>
-                Equip
-              </button>
-            )}
-            <input
-              type="number"
-              min="1"
-              max={selectedItem.quantity}
-              value={sellQuantity}
-              onChange={(e) => setSellQuantity(Number(e.target.value))}
-            />
-            <button className="sell-button" onClick={handleSell}>
-              Sell for {selectedItem.price * sellQuantity} Tokens
-            </button>
-            <button className="close-button" onClick={() => setModalOpen(false)}>
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+
+      {/* Quantity Input Below Price */}
+      <div className="quantity-container">
+        <label htmlFor="sell-quantity"><strong>Quantity:</strong></label>
+        <input
+          id="sell-quantity"
+          type="number"
+          min="1"
+          max={selectedItem.quantity}
+          value={sellQuantity}
+          onChange={(e) => setSellQuantity(Number(e.target.value))}
+          className="quantity-input"
+        />
+      </div>
+
+      {/* Sell Button - Positioned Above */}
+      <button className="sell-button" onClick={handleSell}>
+        Sell for {selectedItem.price * sellQuantity} Tokens
+      </button>
+
+      {/* Equip/Unequip and Close Buttons - Side by Side */}
+      <div className="action-buttons">
+        {equippedItems[selectedItem.category] ? (
+          <button className="unequip-button" onClick={handleUnequip}>
+            Unequip
+          </button>
+        ) : (
+          <button className="equip-button" onClick={handleEquip}>
+            Equip
+          </button>
+        )}
+        <button className="close-button" onClick={() => setModalOpen(false)}>
+          Close
+        </button>
+      </div>
+
+
+        
+      </div>
+    </div>
+    )}
+
     </div>
   );
 }

@@ -1,106 +1,313 @@
+/* Equipment Container */
 .equipment-container {
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-    max-width: 600px;
-    width: 90%;
-    margin: 20px auto;
-    animation: pop-in 0.4s ease-out;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 90%;
+  margin: 20px auto;
+  animation: pop-in 0.4s ease-out;
+}
+
+.equipment-container h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* Equipment Slots & Inventory Grid */
+.equipment-grid,
+.inventory-grid {
+  display: grid;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.equipment-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.inventory-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* Equipment and Inventory Slots */
+.equipment-slot,
+.inventory-slot {
+  width: 80px;
+  height: 80px;
+  background-color: #e8e8e8;
+  border: 2px solid #d1d1d1;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.equipment-slot:hover,
+.inventory-slot:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.equipped-item,
+.item-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.empty-slot {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Modal Popup */
+.item-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  width: 320px;
+  text-align: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translate(-50%, -55%);
   }
-  
-  .equipment-container h2 {
-    font-size: 24px;
-    color: #333;
-    margin-bottom: 15px;
+  to {
+      opacity: 1;
+      transform: translate(-50%, -50%);
   }
-  
+}
+
+.modal-content h3 {
+  margin: 10px 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin: 10px 0;
+}
+
+/* Center the quantity container */
+.quantity-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.quantity-container label {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #444;
+}
+
+/* Style for Quantity Input */
+.quantity-input {
+  width: 80px;
+  padding: 6px;
+  font-size: 16px;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.quantity-input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+/* Sell Button Positioned Above Equip/Unequip + Close Buttons */
+.sell-button {
+  background-color: #ff6f61;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-bottom: 15px;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.sell-button:hover {
+  background-color: #ff4c39;
+  transform: scale(1.05);
+}
+
+.sell-button:active {
+  transform: scale(0.95);
+}
+
+/* Flexbox to Align Equip/Unequip and Close Buttons Side by Side */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+  gap: 10px;
+  align-items: center;
+}
+
+
+.equip-button,
+.unequip-button,
+.close-button {
+  padding: 12px 15px;
+  font-size: 16px;
+  font-weight: bold ;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  flex:1;
+}
+
+
+/* Equip Button */
+.equip-button {
+  background-color: #27ae60;
+  color: white;
+}
+
+.equip-button:hover {
+  background-color: #219150;
+  transform: scale(1.05);
+}
+
+/* Unequip Button */
+.unequip-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.unequip-button:hover {
+  background-color: #c0392b;
+  transform: scale(1.05);
+}
+
+/* Close Button */
+.close-button {
+  background-color: #555;
+  color: white;
+}
+
+.close-button:hover {
+  background-color: #333;
+  transform: scale(1.05);
+}
+/* Rarity Colors */
+.rarity-common {
+  background-color: #bfbfbf; /* Grey */
+  border-color: #a0a0a0;
+}
+
+.rarity-uncommon {
+  background-color: #4caf50; /* Green */
+  border-color: #388e3c;
+}
+
+.rarity-rare {
+  background-color: #2196f3; /* Blue */
+  border-color: #1976d2;
+}
+
+.rarity-epic {
+  background-color: #9c27b0; /* Purple */
+  border-color: #7b1fa2;
+}
+
+.rarity-legendary {
+  background-color: #ffeb3b; /* Yellow */
+  border-color: #fbc02d;
+  color: black;
+}
+
+.rarity-mythic {
+  background-color: #e53935; /* Red */
+  border-color: #c62828;
+}
+
+.rarity-custom {
+  background-color: #ff69b4; /* Pink */
+  border-color: #d81b60;
+}
+
+/* Add hover effects */
+.inventory-slot:hover,
+.equipment-slot:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .equipment-container {
+      max-width: 500px;
+  }
+
   .equipment-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    justify-content: center;
-    margin: 20px auto;
+      grid-template-columns: repeat(2, 1fr);
   }
-  
-  .equipment-slot,
-  .inventory-slot {
-    width: 80px;
-    height: 80px;
-    background-color: #e8e8e8;
-    border: 2px solid #d1d1d1;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  
-  .equipped-item,
-  .item-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-  
+
   .inventory-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
-    justify-content: center;
-    margin: 20px auto;
+      grid-template-columns: repeat(4, 1fr);
   }
-  
-  .empty-slot {
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.5);
-  }
-  
-  /* Modal Popup */
+
   .item-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-    width: 300px;
-    text-align: center;
-    z-index: 1000;
+      width: 90%;
   }
-  
-  .modal-content h3 {
-    margin: 10px 0;
+}
+
+
+@media (max-width: 480px) {
+  .equipment-container {
+      max-width: 400px;
   }
-  
-  .modal-image {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    margin: 10px 0;
+
+  .equipment-grid {
+      grid-template-columns: repeat(2, 1fr);
   }
-  
+
+  .inventory-grid {
+      grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sell-button,
   .equip-button,
   .unequip-button,
   .close-button {
-    background-color: #3498db;
-    color: white;
-    padding: 8px 12px;
-    margin: 5px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
+      font-size: 14px;
+      padding: 10px;
   }
-  
-  .unequip-button {
-    background-color: #e74c3c;
+
+  .item-modal {
+      width: 95%;
   }
-  
-  .close-button {
-    background-color: #555;
-  }
-  
+}
