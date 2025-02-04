@@ -9,33 +9,57 @@ exports.updateWallet = async (userId, tokensToSync) => {
 
 exports.getUserStats = async (userId) => {
     const query = `
-        SELECT u.level, u.xp, u.wallet, 
-               COALESCE(SUM(up.mining_power_increase), 0) AS totalUpgradePower,
-               COALESCE(SUM(up.mining_efficiency_increase), 0.0) AS totalUpgradeEfficiency,
-               COALESCE(SUM(up.rateIncrease), 0) AS totalAutoMiningRate, -- Calculate auto-mining dynamically
-               COALESCE(lp.mining_power_boost, 0) AS levelPowerBoost,
-               COALESCE(lp.mining_efficiency_boost, 0.0) AS levelEfficiencyBoost
+        SELECT 
+            u.level, u.xp, u.wallet, 
+            -- Sum mining power and efficiency from upgrades
+            COALESCE(SUM(up.mining_power_increase), 0) AS totalUpgradePower,
+            COALESCE(SUM(up.mining_efficiency_increase), 0.0) AS totalUpgradeEfficiency,
+            COALESCE(SUM(up.rateIncrease), 0) AS totalAutoMiningRate, 
+
+            -- Include level perks
+            COALESCE(lp.mining_power_boost, 0) AS levelPowerBoost,
+            COALESCE(lp.mining_efficiency_boost, 0.0) AS levelEfficiencyBoost,
+
+            -- Sum mining power and efficiency from equipped items
+            COALESCE(SUM(gi.mining_power), 0) AS equippedMiningPower,
+            COALESCE(SUM(gi.mining_efficiency), 0.0) AS equippedMiningEfficiency
+
         FROM USERS u
         LEFT JOIN USER_UPGRADES uu ON u.id = uu.user_id
         LEFT JOIN UPGRADES up ON uu.upgrade_id = up.id
         LEFT JOIN LEVEL_PERKS lp ON u.level = lp.level
+        LEFT JOIN EQUIPMENT e ON u.id = e.user_id 
+        LEFT JOIN GAME_ITEMS gi ON e.item_id = gi.id -- Join to get equipped item stats
+
         WHERE u.id = ?
         GROUP BY u.id;
     `;
-  
+
     const [rows] = await db.execute(query, [sanitizeInput(userId)]);
-  
+
     if (!rows.length) throw new Error("User not found");
-  
+
     return {
         level: sanitizeInput(Number(rows[0].level)),
         xp: sanitizeInput(Number(rows[0].xp)),
         wallet: sanitizeInput(Number(rows[0].wallet)),
-        miningPower: sanitizeInput(Number(rows[0].totalUpgradePower) + Number(rows[0].levelPowerBoost)),
-        miningEfficiency: sanitizeInput(Number(rows[0].totalUpgradeEfficiency) + Number(rows[0].levelEfficiencyBoost)),
-        autoMiningRate: sanitizeInput(Number(rows[0].totalAutoMiningRate)), // New calculated field
+
+        miningPower: sanitizeInput(
+            Number(rows[0].totalUpgradePower) +
+            Number(rows[0].levelPowerBoost) +
+            Number(rows[0].equippedMiningPower)
+        ),
+        
+        miningEfficiency: sanitizeInput(
+            Number(rows[0].totalUpgradeEfficiency) +
+            Number(rows[0].levelEfficiencyBoost) +
+            Number(rows[0].equippedMiningEfficiency)
+        ),
+
+        autoMiningRate: sanitizeInput(Number(rows[0].totalAutoMiningRate)), 
     };
-  };
+};
+
   
 
 

@@ -6,6 +6,7 @@ const { authenticateToken } = require("./middleware/authMiddleware");
 const errorHandler = require("./middleware/errorHandlerMiddleware");
 const userRoutes = require("./routes/userRoutes");
 const upgradeRoutes = require("./routes/upgradeRoutes");
+const equipmentRoutes = require("./routes/equipmentRoutes.js");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 app.use("/api", userRoutes); // Add authentication middleware if needed
 // app.use("/api", authenticateToken, userRoutes);
 app.use("/api", upgradeRoutes);
+app.use("/api", equipmentRoutes);
 
 // Error handling middleware (should come last)
 app.use(errorHandler);

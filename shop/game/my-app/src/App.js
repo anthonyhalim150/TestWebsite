@@ -4,6 +4,7 @@ import Miner from "./components/Miner";
 import Upgradable from "./components/Upgradable";
 import MyUpgrades from "./components/MyUpgrades";
 import Stats from "./components/Stats";
+import Equipment from "./components/Equipment";
 import { updateWallet, getUserStats, gainXp } from "./api/user";
 import { sanitizeInput } from "./utils/auth";
 
@@ -135,6 +136,7 @@ function App() {
       {currentSection === "stats" && (
         <Stats tokens={tokens} miningPower={miningPower} miningEfficiency={miningEfficiency} autoMiningRate={autoMiningRate} />
       )}
+      {currentSection === "equipment" && <Equipment userId={sanitizeInput(userId)} setMiningPower={setMiningPower} setMiningEfficiency={setMiningEfficiency} setAutoMiningRate={setAutoMiningRate} setTokens={setTokens} />}
     </div>
   );
 }
