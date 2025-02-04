@@ -19,6 +19,9 @@ function Header({ tokens, setSection }) {
         <button onClick={() => setSection("equipment")} className="nav-button">
           Equipment
         </button>
+        <button onClick={() => setSection("lucky-box")} className="nav-button">
+        Lucky Box
+        </button>
         <button onClick={() => setSection("stats")} className="nav-button">
           Stats
         </button>

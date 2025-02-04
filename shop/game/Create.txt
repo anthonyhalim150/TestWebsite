@@ -123,7 +123,7 @@ CREATE TABLE EQUIPMENT (
     slot ENUM('Helmet', 'Gloves', 'Exosuit', 'Boots', 'Tool', 'Back Attachment', 'Pet', 'Accessory') NOT NULL,
     equipped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
-    FOREIGN KEY (item_id) REFERENCES PLAYER_INVENTORY(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES GAME_ITEMS(id) ON DELETE CASCADE,
     UNIQUE (user_id, slot) -- Ensures only one item per slot per user
 );
 
