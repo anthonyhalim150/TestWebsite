@@ -30,6 +30,21 @@ exports.rollLuckyBox = async (userId, boxId) => {
             throw new Error("Not enough tokens.");
         }
 
+        // Check user inventory capacity
+        const [userCapacity] = await connection.execute(
+            "SELECT capacity FROM USERS WHERE id = ?",
+            [sanitizedUserId]
+        );
+
+        const [currentInventoryCount] = await connection.execute(
+            "SELECT COUNT(*) AS itemCount FROM PLAYER_INVENTORY WHERE user_id = ?",
+            [sanitizedUserId]
+        );
+
+        if (currentInventoryCount[0].itemCount >= userCapacity[0].capacity) {
+            throw new Error("Inventory is full. Cannot roll a lucky box.");
+        }
+
         // Deduct tokens
         await connection.execute(
             "UPDATE USERS SET wallet = wallet - ? WHERE id = ?",
@@ -82,6 +97,7 @@ exports.rollLuckyBox = async (userId, boxId) => {
         connection.release();
     }
 };
+
 
 
 

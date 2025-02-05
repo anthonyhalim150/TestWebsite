@@ -36,7 +36,7 @@ function LuckyBox({ userId, setTokens }) {
         setError(response.message);
       }
     } catch (error) {
-      setError("Failed to roll. Try again.");
+      setError("Failed to roll. Inventory full or insufficient tokens.");
     } finally {
       setRolling(false);
     }

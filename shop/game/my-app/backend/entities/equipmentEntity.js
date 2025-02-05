@@ -26,12 +26,11 @@ exports.getUserInventory = async (userId) => {
     }
 };
 
-
 exports.getEquippedItems = async (userId) => {
     const sanitizedUserId = sanitizeInput(userId);
 
     const query = `
-        SELECT eq.slot, gi.*  -- Select all columns from GAME_ITEMS
+        SELECT eq.slot, gi.*
         FROM EQUIPMENT eq 
         JOIN GAME_ITEMS gi ON eq.item_id = gi.id 
         WHERE eq.user_id = ?`;
@@ -51,7 +50,6 @@ exports.getEquippedItems = async (userId) => {
     }
 };
 
-
 exports.equipItem = async (userId, itemId, slot) => {
     const connection = await db.getConnection();
     try {
@@ -61,37 +59,66 @@ exports.equipItem = async (userId, itemId, slot) => {
         const sanitizedItemId = sanitizeInput(itemId);
         const sanitizedSlot = sanitizeInput(slot);
 
-        // Check if the user has enough quantity to equip
-        const checkInventoryQuery = "SELECT quantity FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ?";
-        const [inventory] = await connection.execute(checkInventoryQuery, [sanitizedUserId, sanitizedItemId]);
+        // Check if the user has the item in inventory
+        const [inventory] = await connection.execute(
+            "SELECT quantity FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ?",
+            [sanitizedUserId, sanitizedItemId]
+        );
 
         if (inventory.length === 0 || inventory[0].quantity < 1) {
             throw new Error("You do not own this item or it is out of stock.");
         }
 
-        // Check if the slot is already occupied
-        const checkSlotQuery = "SELECT id FROM EQUIPMENT WHERE user_id = ? AND slot = ?";
-        const [existingItem] = await connection.execute(checkSlotQuery, [sanitizedUserId, sanitizedSlot]);
+        // Check if the slot is occupied
+        const [existingItem] = await connection.execute(
+            "SELECT item_id FROM EQUIPMENT WHERE user_id = ? AND slot = ?",
+            [sanitizedUserId, sanitizedSlot]
+        );
 
         if (existingItem.length > 0) {
-            throw new Error("Slot already occupied. Unequip first.");
+            // If there is an item equipped, unequip it first
+            const oldItemId = existingItem[0].item_id;
+
+            // Return the old item to inventory
+            const [existingInventory] = await connection.execute(
+                "SELECT quantity FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ?",
+                [sanitizedUserId, oldItemId]
+            );
+
+            if (existingInventory.length > 0) {
+                await connection.execute(
+                    "UPDATE PLAYER_INVENTORY SET quantity = quantity + 1 WHERE user_id = ? AND item_id = ?",
+                    [sanitizedUserId, oldItemId]
+                );
+            } else {
+                await connection.execute(
+                    "INSERT INTO PLAYER_INVENTORY (user_id, item_id, quantity) VALUES (?, ?, 1)",
+                    [sanitizedUserId, oldItemId]
+                );
+            }
+
+            // Remove old item from equipment
+            await connection.execute(
+                "DELETE FROM EQUIPMENT WHERE user_id = ? AND slot = ?",
+                [sanitizedUserId, sanitizedSlot]
+            );
         }
 
-        // Insert new equipment
-        const insertEquipmentQuery = `
-            INSERT INTO EQUIPMENT (user_id, item_id, slot) 
-            VALUES (?, ?, ?)`;
-        await connection.execute(insertEquipmentQuery, [sanitizedUserId, sanitizedItemId, sanitizedSlot]);
-
-        // Reduce item quantity in inventory
+        // Equip new item
         await connection.execute(
-            `UPDATE PLAYER_INVENTORY SET quantity = quantity - 1 WHERE user_id = ? AND item_id = ?`,
+            "INSERT INTO EQUIPMENT (user_id, item_id, slot) VALUES (?, ?, ?)",
+            [sanitizedUserId, sanitizedItemId, sanitizedSlot]
+        );
+
+        // Reduce new item's inventory quantity
+        await connection.execute(
+            "UPDATE PLAYER_INVENTORY SET quantity = quantity - 1 WHERE user_id = ? AND item_id = ?",
             [sanitizedUserId, sanitizedItemId]
         );
 
-        // Remove item from inventory if quantity reaches 0
+        // Remove if quantity is 0
         await connection.execute(
-            `DELETE FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ? AND quantity <= 0`,
+            "DELETE FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ? AND quantity <= 0",
             [sanitizedUserId, sanitizedItemId]
         );
 
@@ -104,7 +131,6 @@ exports.equipItem = async (userId, itemId, slot) => {
         connection.release();
     }
 };
-
 
 exports.unequipItem = async (userId, slot) => {
     const connection = await db.getConnection();
@@ -126,26 +152,39 @@ exports.unequipItem = async (userId, slot) => {
 
         const itemId = equippedItem[0].item_id;
 
+        // Check user's inventory capacity
+        const [inventory] = await connection.execute(
+            "SELECT COUNT(*) AS itemCount FROM PLAYER_INVENTORY WHERE user_id = ?",
+            [sanitizedUserId]
+        );
+
+        const [userCapacity] = await connection.execute(
+            "SELECT capacity FROM USERS WHERE id = ?",
+            [sanitizedUserId]
+        );
+
+        if (inventory[0].itemCount >= userCapacity[0].capacity) {
+            throw new Error("Cannot unequip, inventory is full.");
+        }
+
         // Remove from EQUIPMENT table
         await connection.execute(
             "DELETE FROM EQUIPMENT WHERE user_id = ? AND slot = ?",
             [sanitizedUserId, sanitizedSlot]
         );
 
-        // Check if item already exists in PLAYER_INVENTORY
+        // Return item to inventory
         const [existingItem] = await connection.execute(
             "SELECT quantity FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ?",
             [sanitizedUserId, itemId]
         );
 
         if (existingItem.length > 0) {
-            // Increase quantity if it exists
             await connection.execute(
                 "UPDATE PLAYER_INVENTORY SET quantity = quantity + 1 WHERE user_id = ? AND item_id = ?",
                 [sanitizedUserId, itemId]
             );
         } else {
-            // Insert new row if it doesn’t exist
             await connection.execute(
                 "INSERT INTO PLAYER_INVENTORY (user_id, item_id, quantity) VALUES (?, ?, 1)",
                 [sanitizedUserId, itemId]
@@ -164,26 +203,24 @@ exports.unequipItem = async (userId, slot) => {
 
 
 
+
 exports.sellItem = async (userId, itemId, price, sellQuantity) => {
     const connection = await db.getConnection();
 
     try {
         await connection.beginTransaction();
 
-        // Ensure the user owns the item and check quantity
+        // Check if the item is in the inventory
         const [inventory] = await connection.execute(
             `SELECT quantity FROM PLAYER_INVENTORY WHERE user_id = ? AND item_id = ?`,
             [userId, itemId]
         );
 
-        if (inventory.length === 0) {
-            throw new Error("Item not found in inventory.");
-        }
+        let itemFoundInInventory = inventory.length > 0;
+        let currentQuantity = itemFoundInInventory ? inventory[0].quantity : 0;
 
-        const currentQuantity = inventory[0].quantity;
-
-        if (currentQuantity >= sellQuantity) {
-            // Reduce quantity or delete item if quantity reaches 0
+        if (itemFoundInInventory && currentQuantity >= sellQuantity) {
+            // Reduce quantity in inventory or remove it if reaching zero
             if (currentQuantity > sellQuantity) {
                 await connection.execute(
                     `UPDATE PLAYER_INVENTORY SET quantity = quantity - ? WHERE user_id = ? AND item_id = ?`,
@@ -195,18 +232,32 @@ exports.sellItem = async (userId, itemId, price, sellQuantity) => {
                     [userId, itemId]
                 );
             }
-
-            // Add sale amount to user's wallet
-            await connection.execute(
-                `UPDATE USERS SET wallet = wallet + ? WHERE id = ?`,
-                [price, userId]
+        } else {
+            // If item isn't in inventory, check if it's equipped
+            const [equipped] = await connection.execute(
+                `SELECT slot FROM EQUIPMENT WHERE user_id = ? AND item_id = ?`,
+                [userId, itemId]
             );
 
-            await connection.commit();
-            return { success: true, message: "Items sold successfully.", newBalance: price };
-        } else {
-            throw new Error("Not enough items to sell.");
+            if (equipped.length > 0) {
+                // Remove the equipped item from the EQUIPMENT table
+                await connection.execute(
+                    `DELETE FROM EQUIPMENT WHERE user_id = ? AND item_id = ?`,
+                    [userId, itemId]
+                );
+            } else {
+                throw new Error("Item not found in inventory or equipped.");
+            }
         }
+
+        // Add sale amount to user's wallet
+        await connection.execute(
+            `UPDATE USERS SET wallet = wallet + ? WHERE id = ?`,
+            [price, userId]
+        );
+
+        await connection.commit();
+        return { success: true, message: "Item sold successfully.", newBalance: price };
 
     } catch (error) {
         await connection.rollback();
