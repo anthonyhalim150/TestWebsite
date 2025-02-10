@@ -82,14 +82,14 @@ exports.loginUser = async (req, res) => {
         console.log(token);
 
         // Clear existing cookie and set new one
-        res.clearCookie("authToken", {
+        res.clearCookie("gameToken", {
             httpOnly: true,
             secure: true,
             sameSite: "None",
             path: "/",
         });
 
-        res.cookie("authToken", token, {
+        res.cookie("gameToken", token, {
             httpOnly: true,
             secure: false,
             sameSite: "lax",
@@ -111,6 +111,7 @@ exports.loginUser = async (req, res) => {
 };
 exports.getUserID = async (req, res) => {
     try {
+        console.log(req.user);
         if (!req.user) {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }

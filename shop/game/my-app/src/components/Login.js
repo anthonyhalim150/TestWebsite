@@ -13,7 +13,6 @@ function Login({ setUser }) {
 
     try {
       const response = await loginUser(username, password);
-      console.log(response);
       if (response.success) {
         setUser({
           id: response.userID, 

@@ -6,24 +6,23 @@ export async function getUser() {
     if (cachedUser) {
         return cachedUser;
     }
-
     try {
         const response = await axios.get(`${API_URL}/me`, {
             withCredentials: true,
-        })
+        });
 
-        if (response.ok) {
-            const data = await response.json();
-            return data.user;
+        if (response.status === 200) {
+            return response.data.user;
         } else {
             console.error("Failed to fetch user ID: User not authenticated");
-            return null; // No redirection, just return null
+            return null;
         }
     } catch (error) {
         console.error("Error fetching user ID:", error);
-        return null; // No redirection, just return null
+        return null;
     }
 }
+
 
 // Sanitize Input Function
 export const sanitizeInput = (input) => {

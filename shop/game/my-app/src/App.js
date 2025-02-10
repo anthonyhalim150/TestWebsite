@@ -126,9 +126,9 @@ function App() {
       const response = await getUser();
       if (response) {
         setUser({
-          id: response.userID, // ✅ Store userID correctly
-          username: response.username, // ✅ Store username
-          role: response.role, // ✅ Store role
+          id: response.id, 
+          username: response.username, 
+          role: response.role, 
         });
       } else {
         setUser(null);

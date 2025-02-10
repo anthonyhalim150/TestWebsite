@@ -91,8 +91,10 @@ export const loginUser = async (username, password) => {
         {
           username: sanitizeInput(username),
           password: sanitizeInput(password),
-        }
-      );
+        },
+        { 
+            withCredentials: true, 
+        });
   
       return response.data;
     } catch (error) {

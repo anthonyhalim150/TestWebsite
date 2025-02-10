@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 exports.authenticateToken = (req, res, next) => {
-  const token = req.cookies.authToken;
+  const token = req.cookies.gameToken;
   if (req.path === "/api/login") {
     console.log("Skipping token authentication for /signup, /login endpoint.");
     return next(); 
