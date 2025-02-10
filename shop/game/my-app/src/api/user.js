@@ -75,3 +75,20 @@ export const updateWallet = async (userId, tokensToSync) => {
         throw error;
     }
 };
+export const loginUser = async (username, password) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/login`,
+        {
+          username: sanitizeInput(username),
+          password: sanitizeInput(password),
+        },
+        { withCredentials: true } // Ensures cookies are set in requests
+      );
+  
+      return response.data;
+    } catch (error) {
+      console.error("Error logging in:", error);
+      throw error;
+    }
+  };

@@ -48,6 +48,7 @@ function LuckyBox({ userId, setTokens }) {
       <div className="lucky-box-list">
         {luckyBoxes.map((box) => (
           <div key={box.id} className="lucky-box-card">
+            <img src={sanitizeInput(box.image_url)} alt= {box.image_url} className="lucky-box-image"></img>
             <h3>{sanitizeInput(box.name)}</h3>
             <p>{sanitizeInput(box.description)}</p>
             <p>💰 Price: {box.price} Tokens</p>

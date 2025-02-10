@@ -59,6 +59,12 @@ USE ecommerce;
 -- Since id cannot be reused, 
 -- e.g. If itemID 5 is deleted, database will never go to itemID 5
 -- Hence, I removed itemID as a referential integrity constraint
+-- Users can sell custom items
+-- https://storage.googleapis.com/my-product-images-shop/Game/LuckyBox/mythic-lucky-box.jpg
+-- https://storage.googleapis.com/my-product-images-shop/Game/GameItems/ExoSuit_Mark_II.png
+
+
+
 CREATE TABLE ITEMS (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -78,6 +84,7 @@ CREATE TABLE CUSTOM_ITEMS (
     uniqueness_score DECIMAL(5,2) NOT NULL DEFAULT 0,
     game_relevance_score DECIMAL(5,2) NOT NULL DEFAULT 0,
     similarity_score DECIMAL(5,2) NOT NULL DEFAULT 1.0, 
+    created_by INT NOT NULL DEFAULT 1,
     FOREIGN KEY (created_by) REFERENCES GAME_ITEMS(id) ON DELETE CASCADE
     FOREIGN KEY (created_by) REFERENCES USERS(id) ON DELETE CASCADE
 );
@@ -89,7 +96,8 @@ CREATE TABLE LUCKY_BOX (
     price DECIMAL(10,2) NOT NULL DEFAULT 50, -- Token cost to roll
     allowed_rarities JSON NOT NULL, -- Rarity options (e.g., ["Rare", "Epic", "Legendary"])
     allowed_categories JSON NOT NULL, -- Category options (e.g., ["Helmet", "Gloves", "Tool"])
-    rarity_weights JSON NOT NULL -- Drop chances for each rarity (e.g., {"Common": 40, "Epic": 10})
+    rarity_weights JSON NOT NULL, -- Drop chances for each rarity (e.g., {"Common": 40, "Epic": 10})
+    image_url VARCHAR(255)
 );
 
 CREATE TABLE GAME_ITEMS (

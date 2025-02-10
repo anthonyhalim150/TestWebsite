@@ -6,10 +6,12 @@ import MyUpgrades from "./components/MyUpgrades";
 import Stats from "./components/Stats";
 import Equipment from "./components/Equipment";
 import LuckyBox from "./components/LuckyBox";
+import Login from "./components/Login";
 import { updateWallet, getUserStats, gainXp } from "./api/user";
 import { sanitizeInput } from "./utils/auth";
 
 function App() {
+  const [user, setUser] = useState(null); // Track logged-in user
   const [tokens, setTokens] = useState(0);
   const [tokensToSync, setTokensToSync] = useState(0);
   const [miningPower, setMiningPower] = useState(0);
@@ -22,22 +24,23 @@ function App() {
   const userId = 1;
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const sanitizedUserId = sanitizeInput(userId);
-        const { wallet, level, xp, miningPower, miningEfficiency, autoMiningRate } = await getUserStats(sanitizedUserId);
-        setTokens(Number(wallet));
-        setLevel(Number(level));
-        setXp(Number(xp));
-        setMiningPower(Number(miningPower));
-        setMiningEfficiency(Number(miningEfficiency));
-        setAutoMiningRate(Number(autoMiningRate)); 
-      } catch (error) {
-        console.error("Failed to fetch stats:", error);
-      }
-    };
-
-    fetchStats();
+    if (user){
+      const fetchStats = async () => {
+        try {
+          const sanitizedUserId = sanitizeInput(userId);
+          const { wallet, level, xp, miningPower, miningEfficiency, autoMiningRate } = await getUserStats(sanitizedUserId);
+          setTokens(Number(wallet));
+          setLevel(Number(level));
+          setXp(Number(xp));
+          setMiningPower(Number(miningPower));
+          setMiningEfficiency(Number(miningEfficiency));
+          setAutoMiningRate(Number(autoMiningRate)); 
+        } catch (error) {
+          console.error("Failed to fetch stats:", error);
+        }
+      };
+      fetchStats();
+    }
   }, [userId]);
 
  
@@ -118,6 +121,10 @@ function App() {
 
     return () => clearInterval(interval);
   }, [tokensToSync, xpToSync, userId]);
+
+  if (!user) {
+    return <Login setUser={setUser} />;
+  }
 
   return (
     <div className="app">

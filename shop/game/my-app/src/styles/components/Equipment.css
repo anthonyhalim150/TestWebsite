@@ -31,14 +31,13 @@
 }
 
 .inventory-grid {
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 /* Equipment and Inventory Slots */
-.equipment-slot,
-.inventory-slot {
-  width: 80px;
-  height: 80px;
+.equipment-slot {
+  width: 90px;
+  height: 90px;
   background-color: #e8e8e8;
   border: 2px solid #d1d1d1;
   border-radius: 5px;
@@ -47,6 +46,21 @@
   justify-content: center;
   cursor: pointer;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  overflow:hidden;
+}
+.inventory-slot {
+  position: relative; /* Allows absolute positioning inside */
+  width: 120px; /* Matches the updated slot size */
+  height: 120px; /* Matches the updated slot size */
+  background-color: #e8e8e8;
+  border: 3px solid #d1d1d1;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  overflow: hidden; /* Prevents any content from spilling out */
 }
 
 .equipment-slot:hover,
@@ -61,6 +75,20 @@
   max-height: 100%;
   object-fit: contain;
 }
+/* Position Item Quantity Properly */
+.item-quantity {
+  position: absolute; 
+  bottom: 5px; 
+  right: 5px; 
+  background: rgba(0, 0, 0, 0.7); 
+  color: white; 
+  font-size: 12px; 
+  font-weight: bold;
+  padding: 3px 6px; 
+  border-radius: 5px;
+  z-index: 2; 
+}
+
 
 .empty-slot {
   width: 100%;
@@ -103,8 +131,8 @@
 }
 
 .modal-image {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
   margin: 10px 0;
 }
