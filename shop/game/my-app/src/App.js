@@ -8,7 +8,7 @@ import Equipment from "./components/Equipment";
 import LuckyBox from "./components/LuckyBox";
 import Login from "./components/Login";
 import { updateWallet, getUserStats, gainXp } from "./api/user";
-import { sanitizeInput } from "./utils/auth";
+import { sanitizeInput, getUser } from "./utils/auth";
 
 function App() {
   const [user, setUser] = useState(null); // Track logged-in user
@@ -21,13 +21,12 @@ function App() {
   const [xp, setXp] = useState(0);
   const [xpToSync, setXpToSync] = useState(0);
   const [currentSection, setSection] = useState("miner");
-  const userId = 1;
 
   useEffect(() => {
     if (user){
       const fetchStats = async () => {
         try {
-          const sanitizedUserId = sanitizeInput(userId);
+          const sanitizedUserId = sanitizeInput(user?.id);
           const { wallet, level, xp, miningPower, miningEfficiency, autoMiningRate } = await getUserStats(sanitizedUserId);
           setTokens(Number(wallet));
           setLevel(Number(level));
@@ -41,7 +40,7 @@ function App() {
       };
       fetchStats();
     }
-  }, [userId]);
+  }, [user]);
 
  
   const mineTokens = () => {
@@ -97,11 +96,11 @@ function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (tokensToSync > 0) {
-        updateWallet(sanitizeInput(userId), sanitizeInput(tokensToSync));
+        updateWallet(sanitizeInput(user?.id), sanitizeInput(tokensToSync));
         setTokensToSync(0);
       }
       if (xpToSync > 0) {
-        gainXp(sanitizeInput(userId), sanitizeInput(xpToSync))
+        gainXp(sanitizeInput(user?.id), sanitizeInput(xpToSync))
           .then(async ({ level, xp, leveledUp, autoMiningRate }) => {
             setLevel(level);
             setXp(xp);
@@ -109,7 +108,7 @@ function App() {
 
             if (leveledUp) {
               console.log("User leveled up! Fetching updated mining stats...");
-              const { miningPower, miningEfficiency } = await getUserStats(sanitizeInput(userId));
+              const { miningPower, miningEfficiency } = await getUserStats(sanitizeInput(user?.id));
               setMiningPower(miningPower);
               setMiningEfficiency(miningEfficiency);
             }
@@ -120,8 +119,23 @@ function App() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [tokensToSync, xpToSync, userId]);
+  }, [tokensToSync, xpToSync, user?.id]);
 
+  useEffect(() => {
+    const authenticate = async () => {
+      const response = await getUser();
+      if (response) {
+        setUser({
+          id: response.userID, // ✅ Store userID correctly
+          username: response.username, // ✅ Store username
+          role: response.role, // ✅ Store role
+        });
+      } else {
+        setUser(null);
+      }
+    };
+    authenticate();
+  }, []);
   if (!user) {
     return <Login setUser={setUser} />;
   }
@@ -134,18 +148,18 @@ function App() {
         <Upgradable
           tokens={tokens}
           setTokens={setTokens}
-          userId={sanitizeInput(userId)}
+          userId={sanitizeInput(user?.id)}
           setMiningPower={setMiningPower}
           setMiningEfficiency={setMiningEfficiency}
           setAutoMiningRate={setAutoMiningRate} 
         />
       )}
-      {currentSection === "my-upgrades" && <MyUpgrades userId={sanitizeInput(userId)} />}
+      {currentSection === "my-upgrades" && <MyUpgrades userId={sanitizeInput(user?.id)} />}
       {currentSection === "stats" && (
         <Stats tokens={tokens} miningPower={miningPower} miningEfficiency={miningEfficiency} autoMiningRate={autoMiningRate} />
       )}
-      {currentSection === "equipment" && <Equipment userId={sanitizeInput(userId)} setMiningPower={setMiningPower} setMiningEfficiency={setMiningEfficiency} setAutoMiningRate={setAutoMiningRate} setTokens={setTokens} />}
-      {currentSection === "lucky-box" && <LuckyBox userId={sanitizeInput(userId)} setTokens={setTokens} />}
+      {currentSection === "equipment" && <Equipment userId={sanitizeInput(user?.id)} setMiningPower={setMiningPower} setMiningEfficiency={setMiningEfficiency} setAutoMiningRate={setAutoMiningRate} setTokens={setTokens} />}
+      {currentSection === "lucky-box" && <LuckyBox userId={sanitizeInput(user?.id)} setTokens={setTokens} />}
     </div>
   );
 }

@@ -1,8 +1,11 @@
 const jwt = require("jsonwebtoken");
 
 exports.authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = req.cookies.authToken;
+  if (req.path === "/api/login") {
+    console.log("Skipping token authentication for /signup, /login endpoint.");
+    return next(); 
+  }
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });

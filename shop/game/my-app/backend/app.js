@@ -8,14 +8,42 @@ const userRoutes = require("./routes/userRoutes");
 const upgradeRoutes = require("./routes/upgradeRoutes");
 const equipmentRoutes = require("./routes/equipmentRoutes.js");
 const luckyBoxRoutes = require("./routes/luckyBoxRoutes.js");
+const cookieParser = require("cookie-parser");
 
 const app = express();
-
+app.use(cookieParser());
 
 // Apply middleware
 app.use(bodyParser.json()); // Parse JSON requests
-app.use(cors({ origin: "http://localhost:3000" }));
 app.use(logger); // Log requests
+
+
+const allowedOrigins = [
+  "http://127.0.0.1:5500",
+  "https://cybermall.netlify.app",
+  "https://cybermine.netlify.app", 
+  "https://anthony-halim-portfolio.netlify.app",
+  "http://localhost:3000",
+];
+
+
+app.use(cors({
+  origin: (origin, callback) => {
+      if (!origin || allowedOrigins.some((allowed) => {
+          return typeof allowed === "string"
+              ? allowed === origin
+              : allowed.test(origin); // Check regex match
+      })) {
+          callback(null, true); // Allow the request
+      } else {
+          callback(new Error("Not allowed by CORS")); // Block the request
+      }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed HTTP methods
+  credentials: true, // Allow cookies and credentials
+}));
+
+app.use(authenticateToken);
 
 
 app.get("/", (req, res) => {

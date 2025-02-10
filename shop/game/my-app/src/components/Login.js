@@ -13,8 +13,13 @@ function Login({ setUser }) {
 
     try {
       const response = await loginUser(username, password);
+      console.log(response);
       if (response.success) {
-        setUser(response.user);
+        setUser({
+          id: response.userID, 
+          username: response.username, 
+          role: response.role, 
+        });
       } else {
         setError(response.message || "Login failed.");
       }

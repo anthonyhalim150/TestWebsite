@@ -7,6 +7,7 @@ export const fetchUserInventory = async (userId) => {
   try {
     const response = await axios.get(`${BASE_URL}/user-inventory`, {
       params: { userId: sanitizeInput(userId) },
+      withCredentials: true,
     });
 
     return {
@@ -23,6 +24,7 @@ export const fetchEquippedItems = async (userId) => {
   try {
     const response = await axios.get(`${BASE_URL}/equipped-items`, {
       params: { userId: sanitizeInput(userId) },
+      withCredentials: true,
     });
 
     return response.data.equipped || {};
@@ -32,14 +34,17 @@ export const fetchEquippedItems = async (userId) => {
   }
 };
 
-
 export const equipItem = async (userId, itemId, slot) => {
   try {
-    const response = await axios.post(`${BASE_URL}/equip-item`, {
-      userId: sanitizeInput(userId),
-      itemId: sanitizeInput(itemId),
-      slot: sanitizeInput(slot),
-    });
+    const response = await axios.post(
+      `${BASE_URL}/equip-item`,
+      {
+        userId: sanitizeInput(userId),
+        itemId: sanitizeInput(itemId),
+        slot: sanitizeInput(slot),
+      },
+      { withCredentials: true }
+    );
 
     return response.data;
   } catch (error) {
@@ -50,10 +55,14 @@ export const equipItem = async (userId, itemId, slot) => {
 
 export const unequipItem = async (userId, slot) => {
   try {
-    const response = await axios.post(`${BASE_URL}/unequip-item`, {
-      userId: sanitizeInput(userId),
-      slot: sanitizeInput(slot),
-    });
+    const response = await axios.post(
+      `${BASE_URL}/unequip-item`,
+      {
+        userId: sanitizeInput(userId),
+        slot: sanitizeInput(slot),
+      },
+      { withCredentials: true }
+    );
 
     return response.data;
   } catch (error) {
@@ -61,18 +70,23 @@ export const unequipItem = async (userId, slot) => {
     throw error;
   }
 };
+
 export const sellItem = async (userId, itemId, price, sellQuantity) => {
   try {
-      const response = await axios.post(`${BASE_URL}/sell-item`, {
-          userId: sanitizeInput(userId),
-          itemId: sanitizeInput(itemId),
-          price: sanitizeInput(price),
-          sellQuantity: sanitizeInput(sellQuantity),
-      });
+    const response = await axios.post(
+      `${BASE_URL}/sell-item`,
+      {
+        userId: sanitizeInput(userId),
+        itemId: sanitizeInput(itemId),
+        price: sanitizeInput(price),
+        sellQuantity: sanitizeInput(sellQuantity),
+      },
+      { withCredentials: true }
+    );
 
-      return response.data;
+    return response.data;
   } catch (error) {
-      console.error("Error selling item:", error);
-      throw error;
+    console.error("Error selling item:", error);
+    throw error;
   }
 };

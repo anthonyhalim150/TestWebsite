@@ -9,6 +9,7 @@ export const getUserStats = async (userId) => {
         const sanitizedUserId = sanitizeInput(userId);
         const response = await axios.get(`${BASE_URL}/get-stats-user`, {
             params: { userId: sanitizedUserId },
+            withCredentials: true,
         });
         if (response.data.success) {
             return {
@@ -35,7 +36,12 @@ export const gainXp = async (userId, xpGained) => {
         const response = await axios.post(`${BASE_URL}/gain-xp`, {
             userId: sanitizedUserId,
             xpGained: sanitizedXp,
-        });
+        }, 
+        {
+            withCredentials: true, 
+        }
+    
+        );
 
         if (response.data.success) {
             return {
@@ -63,6 +69,9 @@ export const updateWallet = async (userId, tokensToSync) => {
         const response = await axios.post(`${BASE_URL}/update-wallet`, {
             userId: sanitizedUserId,
             tokensToSync: sanitizedAmount,
+        },
+        {
+            withCredentials: true, 
         });
 
         if (response) {
@@ -82,8 +91,7 @@ export const loginUser = async (username, password) => {
         {
           username: sanitizeInput(username),
           password: sanitizeInput(password),
-        },
-        { withCredentials: true } // Ensures cookies are set in requests
+        }
       );
   
       return response.data;

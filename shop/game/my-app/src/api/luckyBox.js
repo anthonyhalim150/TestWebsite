@@ -3,9 +3,12 @@ import { sanitizeInput } from "../utils/auth";
 
 const BASE_URL = "http://localhost:8080/api";
 
+// Fetch available lucky boxes
 export const fetchLuckyBoxes = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/lucky-boxes`);
+    const response = await axios.get(`${BASE_URL}/lucky-boxes`, {
+      withCredentials: true, 
+    });
     return response.data.boxes || [];
   } catch (error) {
     console.error("Error fetching lucky boxes:", error);
@@ -13,12 +16,19 @@ export const fetchLuckyBoxes = async () => {
   }
 };
 
+// Roll a lucky box
 export const rollLuckyBox = async (userId, boxId) => {
   try {
-    const response = await axios.post(`${BASE_URL}/roll-lucky-box`, {
-      userId: sanitizeInput(userId),
-      boxId: sanitizeInput(boxId),
-    });
+    const response = await axios.post(
+      `${BASE_URL}/roll-lucky-box`,
+      {
+        userId: sanitizeInput(userId),
+        boxId: sanitizeInput(boxId),
+      },
+      {
+        withCredentials: true, 
+      }
+    );
 
     return response.data;
   } catch (error) {
