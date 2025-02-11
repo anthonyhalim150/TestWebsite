@@ -1,7 +1,9 @@
 import axios from "axios";
 import { sanitizeInput } from "../utils/auth";
 
-const BASE_URL = "http://localhost:8080/api"; // Adjust if necessary
+//const BASE_URL = "http://localhost:8080/api";
+
+const BASE_URL = "https://game-lu32dxaw4a-uc.a.run.app/api";
 
 // Fetch user stats (wallet, level, XP, mining power, efficiency)
 export const getUserStats = async (userId) => {

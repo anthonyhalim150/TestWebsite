@@ -1,7 +1,8 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api"; // Update if needed
+//const BASE_URL = "http://localhost:8080/api";
 
+const BASE_URL = "https://game-lu32dxaw4a-uc.a.run.app/api";
 // Fetch upgrades the user owns
 export const fetchUserUpgrades = async (userId) => {
     try {
