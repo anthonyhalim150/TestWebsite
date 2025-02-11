@@ -53,6 +53,9 @@ function Login({ setUser }) {
           </div>
           <button type="submit" className="login-button">Login</button>
         </form>
+        <p className="signup-link">
+          No account yet? <a href="https://cybermall.netlify.app/signup" target="_blank" rel="noopener noreferrer">Sign up here</a>
+        </p>
       </div>
     </div>
   );

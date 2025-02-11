@@ -121,3 +121,13 @@ exports.getUserID = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+exports.logoutUser = (req, res) => {
+    res.clearCookie("gameToken", {
+        httpOnly: true,
+        secure: true, // Required for HTTPS
+        sameSite: "None", // Required for cross-origin authentication
+        path: "/", // Ensure it matches the path where it was set
+    });
+
+    return res.status(200).json({ success: true, message: "Logged out successfully." });
+};

@@ -156,7 +156,7 @@ function App() {
       )}
       {currentSection === "my-upgrades" && <MyUpgrades userId={sanitizeInput(user?.id)} />}
       {currentSection === "stats" && (
-        <Stats tokens={tokens} miningPower={miningPower} miningEfficiency={miningEfficiency} autoMiningRate={autoMiningRate} />
+        <Stats tokens={tokens} miningPower={miningPower} miningEfficiency={miningEfficiency} autoMiningRate={autoMiningRate} setUser={setUser}/>
       )}
       {currentSection === "equipment" && <Equipment userId={sanitizeInput(user?.id)} setMiningPower={setMiningPower} setMiningEfficiency={setMiningEfficiency} setAutoMiningRate={setAutoMiningRate} setTokens={setTokens} />}
       {currentSection === "lucky-box" && <LuckyBox userId={sanitizeInput(user?.id)} setTokens={setTokens} />}

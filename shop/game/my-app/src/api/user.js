@@ -104,3 +104,11 @@ export const loginUser = async (username, password) => {
       throw error;
     }
   };
+
+  export async function logoutUser() {
+    try {
+        await axios.post(`${BASE_URL}/logout`, {}, { withCredentials: true });
+    } catch (error) {
+        console.error("Logout failed:", error);
+    }
+}
