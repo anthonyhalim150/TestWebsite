@@ -1,9 +1,9 @@
 import axios from "axios";
 import { sanitizeInput } from "../utils/auth";
 
-//const BASE_URL = "http://localhost:8080/api";
+const BASE_URL = "http://localhost:8080/api";
 
-const BASE_URL = "https://game-lu32dxaw4a-uc.a.run.app/api";
+//const BASE_URL = "https://game-lu32dxaw4a-uc.a.run.app/api";
 
 // Fetch available lucky boxes
 export const fetchLuckyBoxes = async () => {
