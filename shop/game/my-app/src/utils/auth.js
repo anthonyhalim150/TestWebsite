@@ -1,9 +1,9 @@
 import axios from "axios";
 let cachedUser = null;
 
-//const API_URL = "http://localhost:8080/api";
+const API_URL = "http://localhost:8080/api";
 
-const API_URL = "https://game-lu32dxaw4a-uc.a.run.app/api";
+//const API_URL = "https://game-lu32dxaw4a-uc.a.run.app/api";
 
 export async function getUser() {
     if (cachedUser) {
