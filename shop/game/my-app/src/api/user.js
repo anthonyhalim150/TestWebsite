@@ -88,18 +88,22 @@ export const updateWallet = async (userId, tokensToSync) => {
 };
 export const loginUser = async (username, password) => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/login`,
-        {
-          username: sanitizeInput(username),
-          password: sanitizeInput(password),
-        });
-  
-      return response.data;
+        const response = await axios.post(
+            `${BASE_URL}/login`,
+            {
+                username: sanitizeInput(username),
+                password: sanitizeInput(password),
+            },
+            {
+                withCredentials: true, 
+            }
+        );
+    
+        return response.data;
     } catch (error) {
-      console.error("Error logging in:", error);
-      throw error;
+        console.error("Login request failed:", error);
     }
+    
   };
 
   export async function logoutUser() {
