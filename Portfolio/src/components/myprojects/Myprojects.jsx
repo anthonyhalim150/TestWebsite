@@ -32,7 +32,7 @@ const MyProjects = () => {
       techStack: 'REACT',
       description: 'A personal portfolio showcasing my projects, skills, and achievements.',
       github: 'https://github.com/anthonyhalim150',
-      website: 'https://anthonyhalim.netlify.app/',
+      website: 'https://anthony-halim-portfolio.netlify.app/',
     },
     {
       id: 4,
