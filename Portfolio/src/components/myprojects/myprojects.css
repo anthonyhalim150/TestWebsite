@@ -85,12 +85,12 @@
 
 .online {
     margin-top:0.1rem;
-    color: #4CAF50; /* Green for Online */
+    color: #4CAF50; 
 }
 
 .offline {
     margin-top:0.1rem;
-    color: #FF4D4D; /* Red for Offline */
+    color: #FF4D4D; 
 }
 
 

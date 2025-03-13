@@ -4,7 +4,7 @@ import Project1 from '../../assets/project1.png';
 import Project2 from '../../assets/project2.png';
 import Project3 from '../../assets/project3.png';
 import Project4 from '../../assets/project4.png';
-
+import Project5 from '../../assets/project5.png';
 const MyProjects = () => {
   const projects = useMemo(() => [
     {
@@ -20,8 +20,8 @@ const MyProjects = () => {
       id: 2,
       image: Project2,
       title: 'CyberMine',
-      techStack: 'REACT | MySQL | Node.js | Express | Flask | AI | Google Cloud',
-      description: 'A cloud-based mining simulator leveraging REACT and A.I technologies.',
+      techStack: 'REACT | MySQL | Node.js | Express | Google Cloud',
+      description: 'A cloud-based mining simulator leveraging REACT and backend technologies.',
       github: 'https://github.com/anthonyhalim150',
       website: 'https://cybermine.netlify.app/',
     },
@@ -37,12 +37,28 @@ const MyProjects = () => {
     {
       id: 4,
       image: Project4,
+      title: 'AI-Powered Job Search Assistant',
+      techStack: 'REACT Native | Expo | FastAPI | JobsAPI',
+      description: 'A React Native + Expo app where users chat or upload resumes to find jobs, using FastAPI (OCR, PDF parsing) and RapidAPI job search.',
+      github: 'https://github.com/anthonyhalim150',
+    },
+    {
+      id: 5,
+      image: Project5,
       title: 'PENDING',
       techStack: 'PENDING',
       description: 'This project is currently under development!',
       github: 'https://github.com/anthonyhalim150',
     },
-  ], []); // Empty dependency array ensures this array does not change on re-renders
+    {
+      id: 6,
+      image: Project5,
+      title: 'PENDING',
+      techStack: 'PENDING',
+      description: 'This project is currently under development!',
+      github: 'https://github.com/anthonyhalim150',
+    },
+  ], []); 
 
 
 
@@ -57,7 +73,7 @@ const MyProjects = () => {
   
         if (!dbResponse.ok) {
           if (dbResponse.status === 404) {
-            // Handle 404 silently
+        
             console.warn('Database status endpoint not found (404). Assuming offline.');
           } else {
             throw new Error(`DB Request Failed: ${dbResponse.statusText}`);

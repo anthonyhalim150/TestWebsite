@@ -11,13 +11,13 @@ const aboutData = [
   },
   {
     id: 2,
-    icon: <FaTrophy className="about-icon" />, // Changed icon for Awards
+    icon: <FaTrophy className="about-icon" />, 
     title: 'Awards',
-    description: ['IRAS Silver Award', 'MapleTree Bronze Award'], // Stored as an array for line separation
+    description: ['IRAS Silver Award', 'MapleTree Bronze Award'], 
   },
   {
     id: 3,
-    icon: <FaLaptopCode className="about-icon" />, // Changed icon for Hobby
+    icon: <FaLaptopCode className="about-icon" />, 
     title: 'Hobby',
     description: ['Coding', 'Jogging', 'Chess'],
   },

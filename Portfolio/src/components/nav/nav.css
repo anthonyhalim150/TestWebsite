@@ -1,4 +1,4 @@
-/* Default Navigation Bar */
+
 nav {
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9));
     width: max-content;
@@ -17,14 +17,13 @@ nav {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Hidden Nav (When Footer is Visible) */
 .hidden-nav {
-    opacity: 0.2; /* Lower visibility */
-    pointer-events: none; /* Disable interaction */
+    opacity: 0.2;
+    pointer-events: none; 
     transition: opacity 0.3s ease-in-out;
 }
 
-/* Nav Links */
+
 nav a {
     background: transparent;
     padding: 1rem;
@@ -41,7 +40,7 @@ nav a {
     box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
 }
 
-/* Hover Effect */
+
 nav a:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: scale(1.2);
@@ -50,7 +49,7 @@ nav a:hover {
     box-shadow: 0px 0px 10px var(--color-primary);
 }
 
-/* Active Navigation Link */
+
 nav a.active {
     background: var(--color-primary);
     color: var(--color-bg);
@@ -58,7 +57,7 @@ nav a.active {
     transform: scale(1.2);
 }
 
-/* Responsive Design for Tablets */
+
 @media screen and (max-width: 768px) {
     nav {
         padding: 0.8rem 1.5rem;
@@ -66,13 +65,13 @@ nav a.active {
     }
 
     nav a {
-        font-size: 1.3rem;
-        width: 45px;
-        height: 45px;
+        font-size: 1.6rem;  
+        width: 50px; 
+        height: 50px;
     }
 }
 
-/* Responsive Design for Small Devices (Mobiles) */
+
 @media screen and (max-width: 480px) {
     nav {
         padding: 0.6rem 1rem;
@@ -80,8 +79,8 @@ nav a.active {
     }
 
     nav a {
-        font-size: 1.2rem;
-        width: 40px;
-        height: 40px;
+        font-size: 1.8rem;  
+        width: 52px; 
+        height: 52px;
     }
 }
