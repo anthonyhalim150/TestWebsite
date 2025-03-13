@@ -13,7 +13,7 @@ const MyProjects = () => {
       title: 'CyberMall',
       techStack: 'HTML | CSS | JS | Node.js | Crypto | Google Cloud | MySQL',
       description: 'An innovative C2C e-commerce platform with decentralized architecture, with auction capabilities and cryptocurrency payment.',
-      github: 'https://github.com/anthonyhalim150',
+      github: 'https://github.com/anthonyhalim150/TestWebsite',
       website: 'https://cybermall.netlify.app/',
     },
     {
@@ -22,7 +22,7 @@ const MyProjects = () => {
       title: 'CyberMine',
       techStack: 'REACT | MySQL | Node.js | Express | Google Cloud',
       description: 'A cloud-based mining simulator leveraging REACT and backend technologies.',
-      github: 'https://github.com/anthonyhalim150',
+      github: 'https://github.com/anthonyhalim150/TestWebsite',
       website: 'https://cybermine.netlify.app/',
     },
     {
@@ -31,7 +31,7 @@ const MyProjects = () => {
       title: 'Portfolio',
       techStack: 'REACT',
       description: 'A personal portfolio showcasing my projects, skills, and achievements.',
-      github: 'https://github.com/anthonyhalim150',
+      github: 'https://github.com/anthonyhalim150/TestWebsite',
       website: 'https://anthony-halim-portfolio.netlify.app/',
     },
     {
@@ -40,7 +40,7 @@ const MyProjects = () => {
       title: 'AI-Powered Job Search Assistant',
       techStack: 'REACT Native | Expo | FastAPI | JobsAPI',
       description: 'A React Native + Expo app where users chat or upload resumes to find jobs, using FastAPI (OCR, PDF parsing) and RapidAPI job search.',
-      github: 'https://github.com/anthonyhalim150',
+      github: 'https://github.com/anthonyhalim150/REACT-NATIVE',
     },
     {
       id: 5,
